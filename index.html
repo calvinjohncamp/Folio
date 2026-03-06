@@ -372,6 +372,7 @@ function restoreCursor(saved){
   const eds = pagesEl.querySelectorAll('.pg-ed');
   const ed  = eds[saved.page];
   if(!ed) return;
+
   // Walk text nodes and find position by character offset
   const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
   let node, off = 0, startNode = null, startOff = 0;
@@ -386,19 +387,23 @@ function restoreCursor(saved){
   }
   try {
     const r = document.createRange();
-    if(startNode){ r.setStart(startNode, startOff); }
-    else { r.selectNodeContents(ed); r.collapse(false); }
+    if(startNode){
+      r.setStart(startNode, startOff);
+    } else if(saved.offset === 0){
+      // No text nodes found but offset is 0 — place at very start of ed
+      r.setStart(ed, 0);
+    } else {
+      r.selectNodeContents(ed); r.collapse(false);
+    }
     r.collapse(true);
     const s = window.getSelection();
     s.removeAllRanges();
     s.addRange(r);
     ed.focus();
   } catch(e) {
-    // fallback: place cursor at end of page
     ed.focus();
     const r = document.createRange();
-    r.selectNodeContents(ed);
-    r.collapse(false);
+    r.selectNodeContents(ed); r.collapse(false);
     const s = window.getSelection();
     s.removeAllRanges();
     s.addRange(r);
@@ -505,12 +510,15 @@ function buildPage(idx){
 
     // Backspace at very start of page → merge all content back into previous page
     if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
-      // Use compareBoundaryPoints: cursor is at start if it equals the ed's start
-      const edStart = document.createRange();
-      edStart.setStart(ed, 0);
-      edStart.collapse(true);
-      const atStart = r.compareBoundaryPoints(Range.START_TO_START, edStart) === 0;
-      if(atStart){
+      // Measure char offset from start of this ed — if 0, cursor is at very start
+      // Also handles case where cursor is in ed directly (no text nodes, e.g. after reflow of empty lines)
+      const pre = document.createRange();
+      pre.selectNodeContents(ed);
+      pre.setEnd(r.startContainer, r.startOffset);
+      const charsBefore = pre.toString().length;
+      // Also check if startContainer is ed itself at position 0
+      const containerIsEdAtStart = (r.startContainer === ed && r.startOffset === 0);
+      if(charsBefore === 0 || containerIsEdAtStart){
         e.preventDefault();
         const prevEd = eds[mi - 1];
         const insertIdx = prevEd.childNodes.length;
