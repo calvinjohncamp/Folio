@@ -216,9 +216,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
     <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
   </select>
   <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
-    <option>7</option><option>8</option><option>9</option><option>10</option>
-    <option>11</option><option>12</option><option selected>14</option><option>16</option>
-    <option>18</option><option>20</option><option>22</option><option>24</option>
+    <option>10</option><option selected>12</option><option>14</option><option>18</option><option>24</option>
   </select>
   <select id="flh" class="sel" style="width:80px;margin-left:4px" onchange="setLineH(this.value)">
     <option value="1.25" selected>1-zeilig</option>
@@ -295,7 +293,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 
 <script>
 const STORE = 'folio_v5_r2';
-const PAGE_H = 963;   // A4(1123) - top-pad(76) - footer(76) - buffer(8)
+const PAGE_H = 895;   // A4(1123) - top-pad(76) - bottom-pad(76) - footer(76)
 const RULER_W = 642;  // A4w(794) - 2*margin(76)
 
 const ruler   = document.getElementById('ruler');
@@ -303,7 +301,7 @@ const pagesEl = document.getElementById('pages');
 const dtEl    = document.getElementById('dtitle');
 
 let curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-let curSize = '14';
+let curSize = '12';
 let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
@@ -406,32 +404,84 @@ function restoreCursor(saved){
 }
 
 
-// ── Full reflow after every edit ─────────────────────────────────
-function checkOverflow(){
-  if(rendering) return;
-  rendering = true;
-  const cur = saveCursor();
-  const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
-  const chunks  = paginate(allHTML || '');
-  const n       = chunks.length;
-  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
-  while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
-  pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
-    const ed = pg.querySelector('.pg-ed');
-    const h  = chunks[i] || '';
-    if(ed.innerHTML !== h) ed.innerHTML = h;
-    ed.style.fontFamily = curFont;
-    ed.style.fontSize   = curSize + 'pt';
-    ed.style.lineHeight = curLH;
-    const fn = pg.querySelector('.pg-fname');
-    if(fn) fn.textContent = dtEl.value || 'Unbenanntes Dokument';
-    const pn = pg.querySelector('.pg-num');
-    if(pn) pn.textContent = i + 1;
-  });
-  document.getElementById('pgc').textContent = n;
-  restoreCursor(cur);
-  stats();
-  rendering = false;
+// ── Overflow check — moves content between pages without full re-render ──
+function checkOverflow(ed, pageIdx){
+  syncRuler();
+  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
+
+  // Check if this page overflows → push last block to next page
+  ruler.innerHTML = ed.innerHTML;
+  const totalH = ruler.scrollHeight;
+  ruler.innerHTML = '';
+
+  if(totalH > PAGE_H){
+    // Find last top-level node that causes overflow
+    const nodes = Array.from(ed.childNodes);
+    let cutIdx = nodes.length - 1;
+    let accH = 0;
+    for(let i = 0; i < nodes.length; i++){
+      ruler.innerHTML = '';
+      ruler.appendChild(nodes[i].cloneNode(true));
+      accH += ruler.scrollHeight;
+      if(accH > PAGE_H){ cutIdx = i; break; }
+    }
+    ruler.innerHTML = '';
+
+    // Move overflowing nodes to next page
+    const overflow = nodes.slice(cutIdx);
+    overflow.forEach(n => ed.removeChild(n));
+
+    // Get or create next page
+    let nextEd;
+    if(eds[pageIdx + 1]){
+      nextEd = eds[pageIdx + 1];
+      // Prepend overflow to next page
+      const frag = document.createDocumentFragment();
+      overflow.forEach(n => frag.appendChild(n));
+      nextEd.insertBefore(frag, nextEd.firstChild);
+    } else {
+      const newPg = buildPage(pagesEl.children.length);
+      pagesEl.appendChild(newPg);
+      nextEd = newPg.querySelector('.pg-ed');
+      overflow.forEach(n => nextEd.appendChild(n));
+    }
+
+    // Move cursor to start of next page
+    nextEd.focus();
+    const r = document.createRange();
+    r.setStart(nextEd, 0);
+    r.collapse(true);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    activePage = pageIdx + 1;
+    document.getElementById('pgc').textContent = pagesEl.children.length;
+    stats();
+    return;
+  }
+
+  // Check if this page underflows → pull first block from next page
+  if(eds[pageIdx + 1]){
+    const nextEd = eds[pageIdx + 1];
+    const nextNodes = Array.from(nextEd.childNodes);
+    if(nextNodes.length){
+      ruler.innerHTML = ed.innerHTML;
+      const curH = ruler.scrollHeight;
+      ruler.innerHTML = '';
+      ruler.appendChild(nextNodes[0].cloneNode(true));
+      const firstH = ruler.scrollHeight;
+      ruler.innerHTML = '';
+      if(curH + firstH <= PAGE_H){
+        ed.appendChild(nextNodes[0]);
+        if(nextEd.childNodes.length === 0){
+          // Remove empty last page
+          nextEd.closest('.pg').remove();
+          document.getElementById('pgc').textContent = pagesEl.children.length;
+        }
+        stats();
+      }
+    }
+  }
 }
 
 // ── Render chunks into pages ─────────────────────────────────────
@@ -489,7 +539,35 @@ function buildPage(idx){
     if(rendering) return;
     autoSave(); stats();
     clearTimeout(ed._t);
-    ed._t = setTimeout(checkOverflow, 300);
+    ed._t = setTimeout(() => checkOverflow(ed, idx), 200);
+  });
+
+  // Arrow key navigation between pages
+  ed.addEventListener('keydown', e => {
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const r   = sel.getRangeAt(0);
+    const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
+    const mi  = eds.indexOf(ed);
+    if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){
+      const end = document.createRange();
+      end.selectNodeContents(ed); end.collapse(false);
+      if(r.compareBoundaryPoints(Range.START_TO_START, end) >= 0){
+        const next = eds[mi + 1];
+        if(next){ e.preventDefault(); next.focus();
+          const nr = document.createRange(); nr.setStart(next, 0); nr.collapse(true);
+          sel.removeAllRanges(); sel.addRange(nr); }
+      }
+    }
+    if(e.key === 'ArrowUp' || e.key === 'ArrowLeft'){
+      const start = document.createRange(); start.setStart(ed, 0); start.collapse(true);
+      if(r.compareBoundaryPoints(Range.START_TO_START, start) <= 0){
+        const prev = eds[mi - 1];
+        if(prev){ e.preventDefault(); prev.focus();
+          const pr = document.createRange(); pr.selectNodeContents(prev); pr.collapse(false);
+          sel.removeAllRanges(); sel.addRange(pr); }
+      }
+    }
   });
 
   body.appendChild(ed);
@@ -508,77 +586,7 @@ function buildPage(idx){
   return pg;
 }
 
-// ── Global cross-page keyboard handler (no stale closures) ───────
-document.addEventListener('keydown', e => {
-  // Find which pg-ed is currently focused
-  const ed = document.activeElement;
-  if(!ed || !ed.classList.contains('pg-ed')) return;
-
-  const sel = window.getSelection();
-  if(!sel || !sel.rangeCount) return;
-  const r   = sel.getRangeAt(0);
-  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
-  const mi  = eds.indexOf(ed);
-  if(mi < 0) return;
-
-  // Backspace at very start of page → merge into previous page
-  if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
-    const pre = document.createRange();
-    pre.selectNodeContents(ed);
-    pre.setEnd(r.startContainer, r.startOffset);
-    const charsBefore = pre.toString().length;
-    const atEdStart   = (r.startContainer === ed && r.startOffset === 0);
-    if(charsBefore === 0 || atEdStart){
-      e.preventDefault();
-      e.stopPropagation();
-      const prevEd     = eds[mi - 1];
-      const insertIdx  = prevEd.childNodes.length;
-      const frag       = document.createDocumentFragment();
-      while(ed.firstChild) frag.appendChild(ed.firstChild);
-      prevEd.appendChild(frag);
-      prevEd.focus();
-      activePage = mi - 1;
-      const target = prevEd.childNodes[insertIdx];
-      const cr = document.createRange();
-      if(target){ cr.setStart(target, 0); }
-      else { cr.selectNodeContents(prevEd); cr.collapse(false); }
-      cr.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(cr);
-      setTimeout(checkOverflow, 50);
-      return;
-    }
-  }
-
-  // Arrow navigation between pages
-  if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){
-    const end = document.createRange();
-    end.selectNodeContents(ed); end.collapse(false);
-    if(r.compareBoundaryPoints(Range.START_TO_START, end) >= 0){
-      const next = eds[mi + 1];
-      if(next){
-        e.preventDefault();
-        next.focus();
-        const nr = document.createRange(); nr.setStart(next, 0); nr.collapse(true);
-        sel.removeAllRanges(); sel.addRange(nr);
-      }
-    }
-  }
-  if(e.key === 'ArrowUp' || e.key === 'ArrowLeft'){
-    const start = document.createRange(); start.setStart(ed, 0); start.collapse(true);
-    if(r.compareBoundaryPoints(Range.START_TO_START, start) <= 0){
-      const prev = eds[mi - 1];
-      if(prev){
-        e.preventDefault();
-        prev.focus();
-        const pr = document.createRange(); pr.selectNodeContents(prev); pr.collapse(false);
-        sel.removeAllRanges(); sel.addRange(pr);
-      }
-    }
-  }
-});
-
-
+// ── Stats ────────────────────────────────────────────────────────
 function stats(){
   const t = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerText).join('');
   document.getElementById('wc').textContent = t.trim() ? t.trim().split(/\s+/).length : 0;
@@ -815,7 +823,7 @@ function newDoc(){
   activePage = 0;
   dtEl.value = 'Unbenanntes Dokument';
   curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-  curSize = '14'; curLH = '1.25';
+  curSize = '12'; curLH = '1.25';
   document.getElementById('fnt').value = curFont;
   document.getElementById('fsz').value = curSize;
   document.getElementById('flh').value = curLH;
@@ -865,12 +873,13 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const reader = new FileReader();
+  reader.onload = function(){
+    const a = document.createElement('a');
+    a.href = reader.result; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  reader.readAsDataURL(blob);
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
