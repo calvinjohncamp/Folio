@@ -503,19 +503,14 @@ function buildPage(idx){
     const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
     const mi  = eds.indexOf(ed);
 
-    // Backspace at very start of page: delete last char of previous page
+    // Backspace at very start of page → delete last char of previous page
     if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
-      const atStart = r.startOffset === 0 && r.startContainer === ed
-                   || (r.startContainer.nodeType === 3 && r.startOffset === 0
-                       && ed.firstChild && ed.firstChild.contains(r.startContainer));
-      // More reliable: check if nothing is before cursor in this ed
       const pre = document.createRange();
       pre.selectNodeContents(ed);
       pre.setEnd(r.startContainer, r.startOffset);
-      if(pre.toString().length === 0 && pre.cloneContents().textContent.length === 0){
+      if(pre.toString().length === 0 && pre.cloneContents().childNodes.length === 0){
         e.preventDefault();
         const prevEd = eds[mi - 1];
-        // Delete last character/node from previous page
         prevEd.focus();
         const pr = document.createRange();
         pr.selectNodeContents(prevEd);
@@ -853,13 +848,12 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
-  const reader = new FileReader();
-  reader.onload = function(){
-    const a = document.createElement('a');
-    a.href = reader.result; a.download = name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  };
-  reader.readAsDataURL(blob);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
