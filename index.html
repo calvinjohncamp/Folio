@@ -503,22 +503,43 @@ function buildPage(idx){
     const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
     const mi  = eds.indexOf(ed);
 
-    // Backspace at very start of page → delete last char of previous page
+    // Backspace at very start of page → merge back into previous page
     if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
+      // Check if cursor is truly at the start: no text/nodes before it
       const pre = document.createRange();
       pre.selectNodeContents(ed);
       pre.setEnd(r.startContainer, r.startOffset);
-      if(pre.toString().length === 0 && pre.cloneContents().childNodes.length === 0){
+      const textBefore = pre.cloneContents().textContent;
+      if(textBefore.length === 0){
         e.preventDefault();
         const prevEd = eds[mi - 1];
+        // Move ALL content from this page to end of previous page
+        const frag = document.createDocumentFragment();
+        while(ed.firstChild) frag.appendChild(ed.firstChild);
+        const insertPos = prevEd.childNodes.length;
+        prevEd.appendChild(frag);
+        // Place cursor at the join point (start of moved content)
         prevEd.focus();
-        const pr = document.createRange();
-        pr.selectNodeContents(prevEd);
-        pr.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(pr);
         activePage = mi - 1;
-        document.execCommand('delete', false, null);
+        try {
+          const target = prevEd.childNodes[insertPos] || prevEd.lastChild;
+          const cr = document.createRange();
+          if(target){
+            cr.setStart(target, 0);
+          } else {
+            cr.selectNodeContents(prevEd);
+            cr.collapse(false);
+          }
+          cr.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(cr);
+        } catch(err){
+          const cr = document.createRange();
+          cr.selectNodeContents(prevEd);
+          cr.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(cr);
+        }
         setTimeout(checkOverflow, 50);
         return;
       }
