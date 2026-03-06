@@ -503,43 +503,31 @@ function buildPage(idx){
     const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
     const mi  = eds.indexOf(ed);
 
-    // Backspace at very start of page → merge back into previous page
+    // Backspace at very start of page → merge all content back into previous page
     if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
-      // Check if cursor is truly at the start: no text/nodes before it
-      const pre = document.createRange();
-      pre.selectNodeContents(ed);
-      pre.setEnd(r.startContainer, r.startOffset);
-      const textBefore = pre.cloneContents().textContent;
-      if(textBefore.length === 0){
+      // Use compareBoundaryPoints: cursor is at start if it equals the ed's start
+      const edStart = document.createRange();
+      edStart.setStart(ed, 0);
+      edStart.collapse(true);
+      const atStart = r.compareBoundaryPoints(Range.START_TO_START, edStart) === 0;
+      if(atStart){
         e.preventDefault();
         const prevEd = eds[mi - 1];
-        // Move ALL content from this page to end of previous page
+        const insertIdx = prevEd.childNodes.length;
+        // Move ALL nodes from this page to end of previous page
         const frag = document.createDocumentFragment();
         while(ed.firstChild) frag.appendChild(ed.firstChild);
-        const insertPos = prevEd.childNodes.length;
         prevEd.appendChild(frag);
-        // Place cursor at the join point (start of moved content)
+        // Focus previous page, cursor at the join point
         prevEd.focus();
         activePage = mi - 1;
-        try {
-          const target = prevEd.childNodes[insertPos] || prevEd.lastChild;
-          const cr = document.createRange();
-          if(target){
-            cr.setStart(target, 0);
-          } else {
-            cr.selectNodeContents(prevEd);
-            cr.collapse(false);
-          }
-          cr.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(cr);
-        } catch(err){
-          const cr = document.createRange();
-          cr.selectNodeContents(prevEd);
-          cr.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(cr);
-        }
+        const target = prevEd.childNodes[insertIdx];
+        const cr = document.createRange();
+        if(target){ cr.setStart(target, 0); }
+        else { cr.selectNodeContents(prevEd); cr.collapse(false); }
+        cr.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(cr);
         setTimeout(checkOverflow, 50);
         return;
       }
@@ -556,8 +544,8 @@ function buildPage(idx){
       }
     }
     if(e.key === 'ArrowUp' || e.key === 'ArrowLeft'){
-      const start = document.createRange(); start.setStart(ed, 0); start.collapse(true);
-      if(r.compareBoundaryPoints(Range.START_TO_START, start) <= 0){
+      const edStart = document.createRange(); edStart.setStart(ed, 0); edStart.collapse(true);
+      if(r.compareBoundaryPoints(Range.START_TO_START, edStart) <= 0){
         const prev = eds[mi - 1];
         if(prev){ e.preventDefault(); prev.focus();
           const pr = document.createRange(); pr.selectNodeContents(prev); pr.collapse(false);
