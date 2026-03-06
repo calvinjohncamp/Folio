@@ -216,7 +216,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
     <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
   </select>
   <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
-    <option>10</option><option selected>12</option><option>14</option><option>18</option><option>24</option>
+    <option>7</option><option>8</option><option>9</option><option>10</option>
+    <option>11</option><option>12</option><option selected>14</option><option>16</option>
+    <option>18</option><option>20</option><option>22</option><option>24</option>
   </select>
   <select id="flh" class="sel" style="width:80px;margin-left:4px" onchange="setLineH(this.value)">
     <option value="1.25" selected>1-zeilig</option>
@@ -301,7 +303,7 @@ const pagesEl = document.getElementById('pages');
 const dtEl    = document.getElementById('dtitle');
 
 let curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-let curSize = '12';
+let curSize = '14';
 let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
@@ -619,26 +621,27 @@ function setFont(v){
 function setSize(v){
   curSize = v; syncRuler();
   const sel = window.getSelection();
-  if(sel && !sel.isCollapsed){
-    // Apply to selection: wrap in span with font-size
-    document.execCommand('styleWithCSS', false, true);
-    document.execCommand('fontSize', false, '7'); // dummy to create font tag
-    // Replace all font tags with spans
-    const ed = activeEd();
-    if(ed){
-      ed.querySelectorAll('font[size]').forEach(f => {
-        const span = document.createElement('span');
-        span.style.fontSize = v + 'pt';
-        span.innerHTML = f.innerHTML;
-        f.replaceWith(span);
-      });
-      // Also fix spans created by styleWithCSS
-      ed.querySelectorAll('span[style*="font-size"]').forEach(s => {
-        s.style.fontSize = v + 'pt';
-      });
+  if(sel && !sel.isCollapsed && sel.rangeCount){
+    // Wrap selection in a span with explicit font-size
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = v + 'pt';
+    try {
+      range.surroundContents(span);
+    } catch(e) {
+      // surroundContents fails if selection crosses block boundaries — extract+wrap instead
+      const frag = range.extractContents();
+      span.appendChild(frag);
+      range.insertNode(span);
     }
+    // Collapse selection to end of inserted span
+    const newRange = document.createRange();
+    newRange.setStartAfter(span);
+    newRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
   } else {
-    // No selection: change default for new text via CSS on editors
+    // No selection: change whole-editor default
     pagesEl.querySelectorAll('.pg-ed').forEach(e => e.style.fontSize = v + 'pt');
   }
   syncRuler();
@@ -823,7 +826,7 @@ function newDoc(){
   activePage = 0;
   dtEl.value = 'Unbenanntes Dokument';
   curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-  curSize = '12'; curLH = '1.25';
+  curSize = '14'; curLH = '1.25';
   document.getElementById('fnt').value = curFont;
   document.getElementById('fsz').value = curSize;
   document.getElementById('flh').value = curLH;
