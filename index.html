@@ -295,7 +295,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 
 <script>
 const STORE = 'folio_v5_r2';
-const PAGE_H = 895;   // A4(1123) - top-pad(76) - bottom-pad(76) - footer(76)
+const PAGE_H = 963;   // A4(1123) - top-pad(76) - footer(76) - buffer(8)
 const RULER_W = 642;  // A4w(794) - 2*margin(76)
 
 const ruler   = document.getElementById('ruler');
@@ -406,84 +406,32 @@ function restoreCursor(saved){
 }
 
 
-// ── Overflow check — moves content between pages without full re-render ──
-function checkOverflow(ed, pageIdx){
-  syncRuler();
-  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
-
-  // Check if this page overflows → push last block to next page
-  ruler.innerHTML = ed.innerHTML;
-  const totalH = ruler.scrollHeight;
-  ruler.innerHTML = '';
-
-  if(totalH > PAGE_H){
-    // Find last top-level node that causes overflow
-    const nodes = Array.from(ed.childNodes);
-    let cutIdx = nodes.length - 1;
-    let accH = 0;
-    for(let i = 0; i < nodes.length; i++){
-      ruler.innerHTML = '';
-      ruler.appendChild(nodes[i].cloneNode(true));
-      accH += ruler.scrollHeight;
-      if(accH > PAGE_H){ cutIdx = i; break; }
-    }
-    ruler.innerHTML = '';
-
-    // Move overflowing nodes to next page
-    const overflow = nodes.slice(cutIdx);
-    overflow.forEach(n => ed.removeChild(n));
-
-    // Get or create next page
-    let nextEd;
-    if(eds[pageIdx + 1]){
-      nextEd = eds[pageIdx + 1];
-      // Prepend overflow to next page
-      const frag = document.createDocumentFragment();
-      overflow.forEach(n => frag.appendChild(n));
-      nextEd.insertBefore(frag, nextEd.firstChild);
-    } else {
-      const newPg = buildPage(pagesEl.children.length);
-      pagesEl.appendChild(newPg);
-      nextEd = newPg.querySelector('.pg-ed');
-      overflow.forEach(n => nextEd.appendChild(n));
-    }
-
-    // Move cursor to start of next page
-    nextEd.focus();
-    const r = document.createRange();
-    r.setStart(nextEd, 0);
-    r.collapse(true);
-    const s = window.getSelection();
-    s.removeAllRanges();
-    s.addRange(r);
-    activePage = pageIdx + 1;
-    document.getElementById('pgc').textContent = pagesEl.children.length;
-    stats();
-    return;
-  }
-
-  // Check if this page underflows → pull first block from next page
-  if(eds[pageIdx + 1]){
-    const nextEd = eds[pageIdx + 1];
-    const nextNodes = Array.from(nextEd.childNodes);
-    if(nextNodes.length){
-      ruler.innerHTML = ed.innerHTML;
-      const curH = ruler.scrollHeight;
-      ruler.innerHTML = '';
-      ruler.appendChild(nextNodes[0].cloneNode(true));
-      const firstH = ruler.scrollHeight;
-      ruler.innerHTML = '';
-      if(curH + firstH <= PAGE_H){
-        ed.appendChild(nextNodes[0]);
-        if(nextEd.childNodes.length === 0){
-          // Remove empty last page
-          nextEd.closest('.pg').remove();
-          document.getElementById('pgc').textContent = pagesEl.children.length;
-        }
-        stats();
-      }
-    }
-  }
+// ── Full reflow after every edit ─────────────────────────────────
+function checkOverflow(){
+  if(rendering) return;
+  rendering = true;
+  const cur = saveCursor();
+  const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
+  const chunks  = paginate(allHTML || '');
+  const n       = chunks.length;
+  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
+  while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
+  pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
+    const ed = pg.querySelector('.pg-ed');
+    const h  = chunks[i] || '';
+    if(ed.innerHTML !== h) ed.innerHTML = h;
+    ed.style.fontFamily = curFont;
+    ed.style.fontSize   = curSize + 'pt';
+    ed.style.lineHeight = curLH;
+    const fn = pg.querySelector('.pg-fname');
+    if(fn) fn.textContent = dtEl.value || 'Unbenanntes Dokument';
+    const pn = pg.querySelector('.pg-num');
+    if(pn) pn.textContent = i + 1;
+  });
+  document.getElementById('pgc').textContent = n;
+  restoreCursor(cur);
+  stats();
+  rendering = false;
 }
 
 // ── Render chunks into pages ─────────────────────────────────────
@@ -533,7 +481,10 @@ function buildPage(idx){
   ed.style.fontSize   = curSize + 'pt';
   ed.style.lineHeight = curLH;
 
-  ed.addEventListener('focus', () => { activePage = idx; syncTb(); });
+  ed.addEventListener('focus', () => {
+    activePage = Array.from(pagesEl.querySelectorAll('.pg-ed')).indexOf(ed);
+    syncTb();
+  });
   ed.addEventListener('keydown', e => { window._lastKey = e.key; }, true);
   ed.addEventListener('keyup',   syncTb);
   ed.addEventListener('mouseup', syncTb);
@@ -541,16 +492,43 @@ function buildPage(idx){
     if(rendering) return;
     autoSave(); stats();
     clearTimeout(ed._t);
-    ed._t = setTimeout(() => checkOverflow(ed, idx), 200);
+    ed._t = setTimeout(checkOverflow, 300);
   });
 
-  // Arrow key navigation between pages
+  // Cross-page keyboard navigation + Backspace merge
   ed.addEventListener('keydown', e => {
     const sel = window.getSelection();
     if(!sel || !sel.rangeCount) return;
     const r   = sel.getRangeAt(0);
     const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
     const mi  = eds.indexOf(ed);
+
+    // Backspace at very start of page: delete last char of previous page
+    if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
+      const atStart = r.startOffset === 0 && r.startContainer === ed
+                   || (r.startContainer.nodeType === 3 && r.startOffset === 0
+                       && ed.firstChild && ed.firstChild.contains(r.startContainer));
+      // More reliable: check if nothing is before cursor in this ed
+      const pre = document.createRange();
+      pre.selectNodeContents(ed);
+      pre.setEnd(r.startContainer, r.startOffset);
+      if(pre.toString().length === 0 && pre.cloneContents().textContent.length === 0){
+        e.preventDefault();
+        const prevEd = eds[mi - 1];
+        // Delete last character/node from previous page
+        prevEd.focus();
+        const pr = document.createRange();
+        pr.selectNodeContents(prevEd);
+        pr.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(pr);
+        activePage = mi - 1;
+        document.execCommand('delete', false, null);
+        setTimeout(checkOverflow, 50);
+        return;
+      }
+    }
+
     if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){
       const end = document.createRange();
       end.selectNodeContents(ed); end.collapse(false);
