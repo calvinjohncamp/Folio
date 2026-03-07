@@ -954,21 +954,13 @@ function loadFile(input){
     }
     const reader = new FileReader();
     reader.onload = function(e){
-      mammoth.convertToHtml({
-        arrayBuffer: e.target.result,
-        styleMap: [
-          "p[style-name='Normal'] => p:fresh",
-          "b => b",
-          "i => i",
-          "u => u"
-        ]
-      }).then(function(result){
+      mammoth.convertToHtml({ arrayBuffer: e.target.result })
+        .then(function(result){
+          alert(result.value.substring(0, 400));
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
-          // Normalize mammoth tags
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
-          // Convert block elements to divs
           tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
             const div = document.createElement('div');
             const text = el.innerText || el.textContent || '';
