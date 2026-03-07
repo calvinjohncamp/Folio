@@ -956,15 +956,14 @@ function loadFile(input){
     reader.onload = function(e){
       mammoth.convertToHtml({ arrayBuffer: e.target.result })
         .then(function(result){
-          alert(result.value.substring(0, 400));
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
           tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
             const div = document.createElement('div');
-            const text = el.innerText || el.textContent || '';
-            div.innerHTML = text.trim() === '' ? '<br>' : el.innerHTML;
+            const inner = el.innerHTML.replace(/<br\s*\/?>/gi, '').trim();
+            div.innerHTML = inner === '' ? '<br>' : el.innerHTML;
             el.replaceWith(div);
           });
           tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
