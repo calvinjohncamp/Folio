@@ -216,9 +216,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
     <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
   </select>
   <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
-    <option>7</option><option>8</option><option>9</option><option>10</option>
-    <option>11</option><option>12</option><option selected>14</option><option>16</option>
-    <option>18</option><option>20</option><option>22</option><option>24</option>
+    <option>10</option><option selected>12</option><option>14</option><option>18</option><option>24</option>
   </select>
   <select id="flh" class="sel" style="width:80px;margin-left:4px" onchange="setLineH(this.value)">
     <option value="1.25" selected>1-zeilig</option>
@@ -303,7 +301,7 @@ const pagesEl = document.getElementById('pages');
 const dtEl    = document.getElementById('dtitle');
 
 let curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-let curSize = '14';
+let curSize = '12';
 let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
@@ -331,7 +329,6 @@ function paginate(html){
   if(!nodes.length) return [''];
   const chunks = [];
   let bucket = [];
-
   function bucketH(){
     ruler.innerHTML = '';
     bucket.forEach(n => ruler.appendChild(n.cloneNode(true)));
@@ -339,7 +336,6 @@ function paginate(html){
     ruler.innerHTML = '';
     return h;
   }
-
   for(const node of nodes){
     bucket.push(node.cloneNode(true));
     if(bucketH() > PAGE_H && bucket.length > 1){
@@ -355,17 +351,35 @@ function paginate(html){
 }
 
 // ── Save / restore cursor ────────────────────────────────────────
+function getNodePath(root, node){
+  const path = [];
+  while(node && node !== root){
+    const parent = node.parentNode;
+    if(!parent) return null;
+    path.unshift(Array.from(parent.childNodes).indexOf(node));
+    node = parent;
+  }
+  return path;
+}
+
+function nodeFromPath(root, path){
+  let node = root;
+  for(const idx of path){
+    if(!node.childNodes[idx]) return null;
+    node = node.childNodes[idx];
+  }
+  return node;
+}
+
 function saveCursor(){
   const sel = window.getSelection();
   if(!sel || !sel.rangeCount) return null;
   const range = sel.getRangeAt(0);
   const eds = pagesEl.querySelectorAll('.pg-ed');
   for(let i = 0; i < eds.length; i++){
-    if(eds[i].contains(range.startContainer)){
-      const pre = document.createRange();
-      pre.selectNodeContents(eds[i]);
-      pre.setEnd(range.startContainer, range.startOffset);
-      return { page: i, offset: pre.toString().length };
+    if(eds[i].contains(range.startContainer) || eds[i] === range.startContainer){
+      const path = getNodePath(eds[i], range.startContainer);
+      return { page: i, path: path, offset: range.startOffset };
     }
   }
   return null;
@@ -376,29 +390,21 @@ function restoreCursor(saved){
   const eds = pagesEl.querySelectorAll('.pg-ed');
   const ed  = eds[saved.page];
   if(!ed) return;
-  // Walk text nodes and find position by character offset
-  const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
-  let node, off = 0, startNode = null, startOff = 0;
-  while((node = walker.nextNode())){
-    const len = node.length;
-    if(!startNode && off + len >= saved.offset){
-      startNode = node;
-      startOff  = saved.offset - off;
-      break;
-    }
-    off += len;
-  }
   try {
     const r = document.createRange();
-    if(startNode){ r.setStart(startNode, startOff); }
-    else { r.selectNodeContents(ed); r.collapse(false); }
+    const node = saved.path ? nodeFromPath(ed, saved.path) : null;
+    if(node){
+      r.setStart(node, Math.min(saved.offset, node.length !== undefined ? node.length : node.childNodes.length));
+    } else {
+      r.selectNodeContents(ed);
+      r.collapse(false);
+    }
     r.collapse(true);
     const s = window.getSelection();
     s.removeAllRanges();
     s.addRange(r);
     ed.focus();
   } catch(e) {
-    // fallback: place cursor at end of page
     ed.focus();
     const r = document.createRange();
     r.selectNodeContents(ed);
@@ -525,34 +531,26 @@ document.addEventListener('keydown', e => {
   const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
   const mi  = eds.indexOf(ed);
   if(mi < 0) return;
-
-  // Backspace at very start of page → merge into previous page
   if(e.key === 'Backspace' && sel.isCollapsed && mi > 0){
     const pre = document.createRange();
     pre.selectNodeContents(ed);
     pre.setEnd(r.startContainer, r.startOffset);
     if(pre.toString().length === 0){
-      e.preventDefault();
-      e.stopPropagation();
-      const prevEd    = eds[mi - 1];
+      e.preventDefault(); e.stopPropagation();
+      const prevEd = eds[mi - 1];
       const insertIdx = prevEd.childNodes.length;
-      const frag      = document.createDocumentFragment();
+      const frag = document.createDocumentFragment();
       while(ed.firstChild) frag.appendChild(ed.firstChild);
       prevEd.appendChild(frag);
-      prevEd.focus();
-      activePage = mi - 1;
+      prevEd.focus(); activePage = mi - 1;
       const target = prevEd.childNodes[insertIdx];
       const cr = document.createRange();
       if(target){ cr.setStart(target, 0); }
       else { cr.selectNodeContents(prevEd); cr.collapse(false); }
-      cr.collapse(true);
-      sel.removeAllRanges(); sel.addRange(cr);
-      setTimeout(checkOverflow, 50);
-      return;
+      cr.collapse(true); sel.removeAllRanges(); sel.addRange(cr);
+      setTimeout(checkOverflow, 50); return;
     }
   }
-
-  // Arrow navigation between pages
   if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){
     const end = document.createRange();
     end.selectNodeContents(ed); end.collapse(false);
@@ -812,7 +810,7 @@ function newDoc(){
   activePage = 0;
   dtEl.value = 'Unbenanntes Dokument';
   curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-  curSize = '14'; curLH = '1.25';
+  curSize = '12'; curLH = '1.25';
   document.getElementById('fnt').value = curFont;
   document.getElementById('fsz').value = curSize;
   document.getElementById('flh').value = curLH;
@@ -862,12 +860,13 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const reader = new FileReader();
+  reader.onload = function(){
+    const a = document.createElement('a');
+    a.href = reader.result; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  reader.readAsDataURL(blob);
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
