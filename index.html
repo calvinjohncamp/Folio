@@ -956,6 +956,7 @@ function loadFile(input){
     reader.onload = function(e){
       mammoth.convertToHtml({ arrayBuffer: e.target.result })
         .then(function(result){
+          console.log('MAMMOTH RAW:', result.value);
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
           // Normalize mammoth tags to folio-style
