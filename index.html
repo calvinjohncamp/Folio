@@ -974,7 +974,7 @@ function loadFile(input){
           });
           // Now re-inject empty lines by reading raw paragraph count from XML
           mammoth.extractRawText({ arrayBuffer: arrayBuf }).then(function(raw){
-            // Double \n = empty paragraph in Word
+            alert('RAW (erste 300 Zeichen):\n' + JSON.stringify(raw.value.substring(0, 300)));
             // Split on \n, then walk: empty string between two entries = empty line
             const rawLines = raw.value.split('\n');
             const htmlLines = divs;
