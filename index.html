@@ -954,53 +954,39 @@ function loadFile(input){
     }
     const reader = new FileReader();
     reader.onload = function(e){
-      // Use convertToHtml with includeDefaultStyleMap + raw XML fallback for empty paras
-      const arrayBuf = e.target.result;
-      mammoth.convertToHtml({ arrayBuffer: arrayBuf })
-        .then(function(result){
+      mammoth.convertToHtml({
+        arrayBuffer: e.target.result,
+        styleMap: [
+          "p[style-name='Normal'] => p:fresh",
+          "b => b",
+          "i => i",
+          "u => u"
+        ]
+      }).then(function(result){
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
-          // Normalize mammoth tags to folio-style
+          // Normalize mammoth tags
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
-          // Convert all block elements to divs
-          // mammoth drops empty <p> tags entirely — we need to count them via raw XML
-          const divs = [];
-          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6').forEach(el => {
+          // Convert block elements to divs
+          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
             const div = document.createElement('div');
             const text = el.innerText || el.textContent || '';
             div.innerHTML = text.trim() === '' ? '<br>' : el.innerHTML;
-            divs.push(div.outerHTML);
+            el.replaceWith(div);
           });
-          // Now re-inject empty lines by reading raw paragraph count from XML
-          mammoth.extractRawText({ arrayBuffer: arrayBuf }).then(function(raw){
-            const rawText = raw.value;
-            const htmlLines = divs;
-            const merged = [];
-            let hi = 0;
-            let pos = 0;
-            while(pos < rawText.length){
-              if(rawText[pos] === '\n' && rawText[pos+1] === '\n'){
-                // Double newline = empty paragraph in Word
-                merged.push('<div><br></div>');
-                pos += 2;
-              } else if(rawText[pos] === '\n'){
-                // Single newline = end of normal paragraph, consume next html line
-                if(hi < htmlLines.length) merged.push(htmlLines[hi++]);
-                pos += 1;
-              } else {
-                pos += 1;
-              }
-            }
-            while(hi < htmlLines.length) merged.push(htmlLines[hi++]);
-            const html = merged.join('') || '<div><br></div>';
-            dtEl.value = name.replace(/\.[^.]+$/, '');
-            currentDocId = 'folio_doc_' + Date.now();
-            pagesEl.innerHTML = '';
-            pagesEl.appendChild(buildPage(0));
-            render(html);
-            saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
+          tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
+            const div = document.createElement('div');
+            div.innerHTML = el.innerText || '<br>';
+            el.replaceWith(div);
           });
+          const html = tmp.innerHTML || '<div><br></div>';
+          dtEl.value = name.replace(/\.[^.]+$/, '');
+          currentDocId = 'folio_doc_' + Date.now();
+          pagesEl.innerHTML = '';
+          pagesEl.appendChild(buildPage(0));
+          render(html);
+          saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
         })
         .catch(function(err){ alert('Word-Fehler: ' + err.message); });
       input.value = '';
