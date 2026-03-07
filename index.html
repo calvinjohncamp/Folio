@@ -956,19 +956,26 @@ function loadFile(input){
     reader.onload = function(e){
       mammoth.convertToHtml({ arrayBuffer: e.target.result })
         .then(function(result){
-          // Clean up mammoth output and convert to folio-style divs
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
-          // Convert all block elements to divs
+          // Normalize mammoth tags to folio-style
+          tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
+          tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
+          // Convert all block elements to divs, preserving empty lines
           tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
             const div = document.createElement('div');
-            div.innerHTML = el.innerHTML || '<br>';
+            const text = el.innerText || el.textContent || '';
+            if(text.trim() === ''){
+              div.innerHTML = '<br>';
+            } else {
+              div.innerHTML = el.innerHTML;
+            }
             el.replaceWith(div);
           });
-          // Remove unsupported tags but keep content
+          // Remove unsupported tags but keep text content
           tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
             const div = document.createElement('div');
-            div.innerHTML = el.innerText || '';
+            div.innerHTML = el.innerText || '<br>';
             el.replaceWith(div);
           });
           const html = tmp.innerHTML || '<div><br></div>';
