@@ -954,38 +954,48 @@ function loadFile(input){
     }
     const reader = new FileReader();
     reader.onload = function(e){
-      mammoth.convertToHtml({ arrayBuffer: e.target.result })
+      // Use convertToHtml with includeDefaultStyleMap + raw XML fallback for empty paras
+      const arrayBuf = e.target.result;
+      mammoth.convertToHtml({ arrayBuffer: arrayBuf })
         .then(function(result){
-          console.log('MAMMOTH RAW:', result.value);
           const tmp = document.createElement('div');
           tmp.innerHTML = result.value;
           // Normalize mammoth tags to folio-style
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
-          // Convert all block elements to divs, preserving empty lines
-          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
+          // Convert all block elements to divs
+          // mammoth drops empty <p> tags entirely — we need to count them via raw XML
+          const divs = [];
+          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6').forEach(el => {
             const div = document.createElement('div');
             const text = el.innerText || el.textContent || '';
-            if(text.trim() === ''){
-              div.innerHTML = '<br>';
-            } else {
-              div.innerHTML = el.innerHTML;
+            div.innerHTML = text.trim() === '' ? '<br>' : el.innerHTML;
+            divs.push(div.outerHTML);
+          });
+          // Now re-inject empty lines by reading raw paragraph count from XML
+          mammoth.extractRawText({ arrayBuffer: arrayBuf }).then(function(raw){
+            // raw.value has all text with \n per paragraph — use it to find empty line positions
+            const rawLines = raw.value.split('\n');
+            const htmlLines = divs;
+            const merged = [];
+            let hi = 0;
+            for(let ri = 0; ri < rawLines.length; ri++){
+              if(rawLines[ri].trim() === ''){
+                merged.push('<div><br></div>');
+              } else {
+                if(hi < htmlLines.length) merged.push(htmlLines[hi++]);
+              }
             }
-            el.replaceWith(div);
+            // Append any remaining html lines
+            while(hi < htmlLines.length) merged.push(htmlLines[hi++]);
+            const html = merged.join('') || '<div><br></div>';
+            dtEl.value = name.replace(/\.[^.]+$/, '');
+            currentDocId = 'folio_doc_' + Date.now();
+            pagesEl.innerHTML = '';
+            pagesEl.appendChild(buildPage(0));
+            render(html);
+            saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
           });
-          // Remove unsupported tags but keep text content
-          tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
-            const div = document.createElement('div');
-            div.innerHTML = el.innerText || '<br>';
-            el.replaceWith(div);
-          });
-          const html = tmp.innerHTML || '<div><br></div>';
-          dtEl.value = name.replace(/\.[^.]+$/, '');
-          currentDocId = 'folio_doc_' + Date.now();
-          pagesEl.innerHTML = '';
-          pagesEl.appendChild(buildPage(0));
-          render(html);
-          saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
         })
         .catch(function(err){ alert('Word-Fehler: ' + err.message); });
       input.value = '';
