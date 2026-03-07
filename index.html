@@ -953,25 +953,56 @@ function loadFile(input){
       input.value = ''; return;
     }
     const reader = new FileReader();
-    reader.onload = function(e){
-      mammoth.convertToHtml({ arrayBuffer: e.target.result })
-        .then(function(result){
+    reader.onload = async function(e){
+      const arrayBuf = e.target.result;
+
+      Promise.all([
+        mammoth.convertToHtml({ arrayBuffer: arrayBuf }),
+        mammoth.extractRawText({ arrayBuffer: arrayBuf })
+      ]).then(function([htmlResult, rawResult]){
+          // Build paragraph list from HTML
           const tmp = document.createElement('div');
-          tmp.innerHTML = result.value;
+          tmp.innerHTML = htmlResult.value;
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
-          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
-            const div = document.createElement('div');
-            const inner = el.innerHTML.replace(/<br\s*\/?>/gi, '').trim();
-            div.innerHTML = inner === '' ? '<br>' : el.innerHTML;
-            el.replaceWith(div);
+
+          const htmlParas = [];
+          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6').forEach(el => {
+            htmlParas.push(el.innerHTML.trim());
+            el.remove();
           });
+
+          // Build paragraph list from raw text — each \n is one paragraph
+          // Empty string between \n\n = empty paragraph
+          const rawParas = rawResult.value.split('\n');
+          // Remove trailing empty entry from final \n
+          while(rawParas.length && rawParas[rawParas.length-1] === '') rawParas.pop();
+
+          // Merge: rawParas tells us which are empty, htmlParas has the formatted content
+          const divs = [];
+          let hi = 0;
+          for(let ri = 0; ri < rawParas.length; ri++){
+            if(rawParas[ri] === ''){
+              divs.push('<div><br></div>');
+            } else {
+              if(hi < htmlParas.length){
+                const content = htmlParas[hi++];
+                divs.push(content ? `<div>${content}</div>` : '<div><br></div>');
+              }
+            }
+          }
+          while(hi < htmlParas.length){
+            const content = htmlParas[hi++];
+            divs.push(content ? `<div>${content}</div>` : '<div><br></div>');
+          }
+
           tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
             const div = document.createElement('div');
             div.innerHTML = el.innerText || '<br>';
             el.replaceWith(div);
           });
-          const html = tmp.innerHTML || '<div><br></div>';
+
+          const html = divs.join('') || '<div><br></div>';
           dtEl.value = name.replace(/\.[^.]+$/, '');
           currentDocId = 'folio_doc_' + Date.now();
           pagesEl.innerHTML = '';
