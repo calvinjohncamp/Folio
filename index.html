@@ -956,58 +956,107 @@ function loadFile(input){
     reader.onload = async function(e){
       const arrayBuf = e.target.result;
 
-      Promise.all([
-        mammoth.convertToHtml({ arrayBuffer: arrayBuf }),
-        mammoth.extractRawText({ arrayBuffer: arrayBuf })
-      ]).then(function([htmlResult, rawResult]){
-          // Build paragraph list from HTML
+      // Step 1: Read word/document.xml directly from the docx zip
+      // to build a reliable empty/non-empty paragraph map
+      let paraMap = null; // null = fallback to html-only
+      try {
+        // docx is a zip — find word/document.xml by scanning for its local file header
+        const bytes = new Uint8Array(arrayBuf);
+        const target = 'word/document.xml';
+        // Find the target filename in the zip local file headers
+        const enc = new TextEncoder();
+        const targetBytes = enc.encode(target);
+        let xmlStart = -1;
+        for(let i = 0; i < bytes.length - targetBytes.length - 30; i++){
+          if(bytes[i] === 0x50 && bytes[i+1] === 0x4B && bytes[i+2] === 0x03 && bytes[i+3] === 0x04){
+            const fnLen = bytes[i+26] | (bytes[i+27] << 8);
+            const extraLen = bytes[i+28] | (bytes[i+29] << 8);
+            const fnBytes = bytes.slice(i+30, i+30+fnLen);
+            const fn = new TextDecoder().decode(fnBytes);
+            if(fn === target){
+              xmlStart = i + 30 + fnLen + extraLen;
+              break;
+            }
+          }
+        }
+        if(xmlStart > 0){
+          // The content may be deflate-compressed — use DecompressionStream if available
+          const compMethod = bytes[8] | (bytes[9] << 8); // at offset from local header start
+          // Re-find compression method
+          for(let i = 0; i < bytes.length - 30; i++){
+            if(bytes[i] === 0x50 && bytes[i+1] === 0x4B && bytes[i+2] === 0x03 && bytes[i+3] === 0x04){
+              const fnLen = bytes[i+26] | (bytes[i+27] << 8);
+              const extraLen = bytes[i+28] | (bytes[i+29] << 8);
+              const fn = new TextDecoder().decode(bytes.slice(i+30, i+30+fnLen));
+              if(fn === target){
+                const comp = bytes[i+8] | (bytes[i+9] << 8);
+                const compSize = bytes[i+18] | (bytes[i+19] << 8) | (bytes[i+20] << 16) | (bytes[i+21] << 24);
+                const dataStart = i + 30 + fnLen + extraLen;
+                const compData = bytes.slice(dataStart, dataStart + compSize);
+                let xmlText = '';
+                if(comp === 0){
+                  xmlText = new TextDecoder().decode(compData);
+                } else if(comp === 8 && typeof DecompressionStream !== 'undefined'){
+                  const ds = new DecompressionStream('deflate-raw');
+                  const writer = ds.writable.getWriter();
+                  writer.write(compData); writer.close();
+                  const chunks = [];
+                  const reader2 = ds.readable.getReader();
+                  while(true){ const {done, value} = await reader2.read(); if(done) break; chunks.push(value); }
+                  const total = chunks.reduce((a,c) => a+c.length, 0);
+                  const merged = new Uint8Array(total);
+                  let off = 0; chunks.forEach(c => { merged.set(c, off); off += c.length; });
+                  xmlText = new TextDecoder().decode(merged);
+                }
+                if(xmlText){
+                  // Parse paragraphs: each <w:p...> is a paragraph, empty if no <w:t> inside
+                  const pMatches = xmlText.match(/<w:p[ >].*?<\/w:p>|<w:p\/>/g) || [];
+                  paraMap = pMatches.map(p => /<w:t[ >]/.test(p));
+                }
+                break;
+              }
+            }
+          }
+        }
+      } catch(xmlErr){ paraMap = null; }
+
+      mammoth.convertToHtml({ arrayBuffer: arrayBuf })
+        .then(function(result){
           const tmp = document.createElement('div');
-          tmp.innerHTML = htmlResult.value;
+          tmp.innerHTML = result.value;
           tmp.querySelectorAll('strong').forEach(el => { const b = document.createElement('b'); b.innerHTML = el.innerHTML; el.replaceWith(b); });
           tmp.querySelectorAll('em').forEach(el => { const i = document.createElement('i'); i.innerHTML = el.innerHTML; el.replaceWith(i); });
 
           const htmlParas = [];
           tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6').forEach(el => {
             htmlParas.push(el.innerHTML.trim());
-            el.remove();
           });
 
-          // Build paragraph list from raw text — each \n is one paragraph
-          // Empty string between \n\n = empty paragraph
-          const rawParas = rawResult.value.split('\n');
-          // Remove trailing empty entry from final \n
-          while(rawParas.length && rawParas[rawParas.length-1] === '') rawParas.pop();
-
-          // Merge: rawParas tells us which are empty, htmlParas has the formatted content
-          const divs = [];
-          let hi = 0;
-          for(let ri = 0; ri < rawParas.length; ri++){
-            if(rawParas[ri] === ''){
-              divs.push('<div><br></div>');
-            } else {
-              if(hi < htmlParas.length){
-                const content = htmlParas[hi++];
+          let html;
+          if(paraMap){
+            // Use XML-based paragraph map for reliable empty line detection
+            const divs = [];
+            let hi = 0;
+            for(let i = 0; i < paraMap.length; i++){
+              if(paraMap[i]){
+                // Non-empty paragraph
+                const content = hi < htmlParas.length ? htmlParas[hi++] : '';
                 divs.push(content ? `<div>${content}</div>` : '<div><br></div>');
+              } else {
+                divs.push('<div><br></div>');
               }
             }
-          }
-          while(hi < htmlParas.length){
-            const content = htmlParas[hi++];
-            divs.push(content ? `<div>${content}</div>` : '<div><br></div>');
+            html = divs.join('');
+          } else {
+            // Fallback: just use html paragraphs without empty line detection
+            html = htmlParas.map(p => p ? `<div>${p}</div>` : '<div><br></div>').join('');
           }
 
-          tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
-            const div = document.createElement('div');
-            div.innerHTML = el.innerText || '<br>';
-            el.replaceWith(div);
-          });
-
-          const html = divs.join('') || '<div><br></div>';
           dtEl.value = name.replace(/\.[^.]+$/, '');
           currentDocId = 'folio_doc_' + Date.now();
           pagesEl.innerHTML = '';
           pagesEl.appendChild(buildPage(0));
-          render(html);
+          render(html || '<div><br></div>');
           saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
         })
         .catch(function(err){ alert('Word-Fehler: ' + err.message); });
