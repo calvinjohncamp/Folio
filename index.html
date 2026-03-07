@@ -27,6 +27,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 .logo{font-family:'DM Serif Display',serif;font-size:42px;color:#faf9f6;letter-spacing:-1px;line-height:1;flex-shrink:0}
 .logo em{color:var(--accent);font-style:normal}
 #dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:13px;opacity:.6;outline:none;width:220px;padding:2px 4px;transition:.2s;position:absolute;left:208px;bottom:10px}
+#dtitle::placeholder{color:#faf9f6;opacity:.5}
 #dtitle:focus{opacity:1;border-bottom-color:var(--accent);outline:none}
 .hbtns{display:flex;gap:6px;margin-left:auto}
 .hbtn{background:transparent;border:1px solid rgba(255,255,255,.25);color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 12px;border-radius:4px;cursor:pointer}
@@ -192,12 +193,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   @page{size:A4;margin:0}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
-<input type="file" id="fileInput" accept=".folio" style="display:none" onchange="loadFile(this)">
+<input type="file" id="fileInput" accept=".folio,.txt,.docx,.doc" style="display:none" onchange="loadFile(this)">
 <div id="hdr">
   <div class="logo">Folio<em>.</em></div>
-  <input id="dtitle" type="text" value="Unbenanntes Dokument" spellcheck="false">
+  <input id="dtitle" type="text" placeholder="Unbenanntes Dokument" spellcheck="false">
   <button id="aabtn" onclick="openRename()" style="display:none;background:transparent;border:1px solid rgba(250,249,246,.3);color:#faf9f6;border-radius:6px;padding:4px 9px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-right:8px">Aa</button>
   <div class="hbtns">
     <button class="hbtn" onclick="openFile()">Öffnen</button>
@@ -718,7 +720,7 @@ const TEMPLATES = [
 
 function newFromTemplate(tpl){
   const hasContent = collect().replace(/<[^>]*>/g,'').trim().length > 0;
-  const hasTitle = dtEl.value && dtEl.value !== 'Unbenanntes Dokument';
+  const hasTitle = dtEl.value.trim();
   if(hasContent || hasTitle) saveCurrentDoc();
   else localStorage.removeItem(currentDocId);
 
@@ -804,11 +806,11 @@ function switchDoc(key){
 function newDoc(){
   // Only save current if it has content or a real title
   const hasContent = collect().replace(/<[^>]*>/g,'').trim().length > 0;
-  const hasTitle = dtEl.value && dtEl.value !== 'Unbenanntes Dokument';
+  const hasTitle = dtEl.value.trim();
   if(hasContent || hasTitle) saveCurrentDoc();
   currentDocId = 'folio_doc_' + Date.now();
   activePage = 0;
-  dtEl.value = 'Unbenanntes Dokument';
+  dtEl.value = '';
   curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   curSize = '12'; curLH = '1.25';
   document.getElementById('fnt').value = curFont;
@@ -897,33 +899,95 @@ function buildHTML(title){
 }
 function doPDF(){ window.print(); }
 
-// ── Open .folio file ──────────────────────────────────────────────
+// ── Open file (.folio / .txt / .docx / .doc) ─────────────────────
 function openFile(){ document.getElementById('fileInput').click(); }
 function loadFile(input){
   const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      const s = JSON.parse(e.target.result);
-      if(s.title){
-        dtEl.value = s.title;
-        currentDocId = currentDocId || 'folio_doc_' + Date.now();
-      }
-      if(s.font){ curFont = s.font; document.getElementById('fnt').value = s.font; }
-      if(s.size){ curSize = s.size; document.getElementById('fsz').value = s.size; }
-      if(s.lh)  { curLH   = s.lh;  document.getElementById('flh').value = s.lh; }
-      syncRuler();
+  if(!file){ return; }
+  const name = file.name || '';
+  const ext  = name.split('.').pop().toLowerCase();
+
+  if(ext === 'folio'){
+    // ── .folio JSON ──
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const s = JSON.parse(e.target.result);
+        if(s.title){ dtEl.value = s.title; currentDocId = currentDocId || 'folio_doc_' + Date.now(); }
+        if(s.font){ curFont = s.font; document.getElementById('fnt').value = s.font; }
+        if(s.size){ curSize = s.size; document.getElementById('fsz').value = s.size; }
+        if(s.lh)  { curLH   = s.lh;  document.getElementById('flh').value = s.lh; }
+        syncRuler();
+        pagesEl.innerHTML = '';
+        pagesEl.appendChild(buildPage(0));
+        render(s.content || '');
+        saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
+      } catch(err){ alert('Fehler beim Laden: ' + err.message); }
+      input.value = '';
+    };
+    reader.readAsText(file);
+
+  } else if(ext === 'txt'){
+    // ── .txt plain text ──
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const text = e.target.result || '';
+      // Convert line breaks to divs
+      const html = text.split(/\r?\n/).map(line =>
+        `<div>${line.trim() ? line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<br>'}</div>`
+      ).join('');
+      dtEl.value = name.replace(/\.[^.]+$/, '');
+      currentDocId = 'folio_doc_' + Date.now();
       pagesEl.innerHTML = '';
       pagesEl.appendChild(buildPage(0));
-      render(s.content || '');
-      saveCurrentDoc();
-      renderSidebar();
-      showSaved('Geladen');
-    } catch(err){ alert('Fehler beim Laden: ' + err.message); }
+      render(html);
+      saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
+      input.value = '';
+    };
+    reader.readAsText(file);
+
+  } else if(ext === 'docx' || ext === 'doc'){
+    // ── .docx / .doc via mammoth.js ──
+    if(typeof mammoth === 'undefined'){
+      alert('Word-Import wird geladen, bitte kurz warten und nochmal versuchen.');
+      input.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e){
+      mammoth.convertToHtml({ arrayBuffer: e.target.result })
+        .then(function(result){
+          // Clean up mammoth output and convert to folio-style divs
+          const tmp = document.createElement('div');
+          tmp.innerHTML = result.value;
+          // Convert all block elements to divs
+          tmp.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li').forEach(el => {
+            const div = document.createElement('div');
+            div.innerHTML = el.innerHTML || '<br>';
+            el.replaceWith(div);
+          });
+          // Remove unsupported tags but keep content
+          tmp.querySelectorAll('table,ul,ol,figure,img').forEach(el => {
+            const div = document.createElement('div');
+            div.innerHTML = el.innerText || '';
+            el.replaceWith(div);
+          });
+          const html = tmp.innerHTML || '<div><br></div>';
+          dtEl.value = name.replace(/\.[^.]+$/, '');
+          currentDocId = 'folio_doc_' + Date.now();
+          pagesEl.innerHTML = '';
+          pagesEl.appendChild(buildPage(0));
+          render(html);
+          saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
+        })
+        .catch(function(err){ alert('Word-Fehler: ' + err.message); });
+      input.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+
+  } else {
+    alert('Nicht unterstütztes Format. Bitte .folio, .txt oder .docx verwenden.');
     input.value = '';
-  };
-  reader.readAsText(file);
+  }
 }
 
 // ── Title sync ────────────────────────────────────────────────────
@@ -978,9 +1042,23 @@ function clearAll(){
 }
 function clearAllConfirm(){
   document.getElementById('clear-modal').style.display = 'none';
-  pagesEl.innerHTML = '';
-  pagesEl.appendChild(buildPage(0));
-  activeEd().focus();
+  // Collect all content into first page so browser undo stack captures it
+  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
+  if(eds.length > 1){
+    for(let i = 1; i < eds.length; i++){
+      while(eds[i].firstChild) eds[0].appendChild(eds[i].firstChild);
+    }
+    while(pagesEl.children.length > 1) pagesEl.removeChild(pagesEl.lastChild);
+  }
+  const ed = pagesEl.querySelector('.pg-ed');
+  ed.focus();
+  document.execCommand('selectAll', false, null);
+  document.execCommand('delete', false, null);
+  curFont = 'Helvetica Neue'; curSize = '12'; curLH = '1.25';
+  document.getElementById('ff').value  = 'Helvetica Neue';
+  document.getElementById('fsz').value = '12';
+  document.getElementById('flh').value = '1.25';
+  syncRuler();
   saveCurrentDoc();
   showSaved('Geleert');
 }
