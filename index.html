@@ -974,20 +974,22 @@ function loadFile(input){
           });
           // Now re-inject empty lines by reading raw paragraph count from XML
           mammoth.extractRawText({ arrayBuffer: arrayBuf }).then(function(raw){
-            alert('RAW (erste 300 Zeichen):\n' + JSON.stringify(raw.value.substring(0, 300)));
-            // Split on \n, then walk: empty string between two entries = empty line
-            const rawLines = raw.value.split('\n');
+            const rawText = raw.value;
             const htmlLines = divs;
             const merged = [];
             let hi = 0;
-            for(let ri = 0; ri < rawLines.length - 1; ri++){
-              if(rawLines[ri].trim() === ''){
-                // Only insert empty line if previous line was not also empty (avoid doubles)
-                if(merged.length === 0 || merged[merged.length-1] !== '<div><br></div>'){
-                  merged.push('<div><br></div>');
-                }
-              } else {
+            let pos = 0;
+            while(pos < rawText.length){
+              if(rawText[pos] === '\n' && rawText[pos+1] === '\n'){
+                // Double newline = empty paragraph in Word
+                merged.push('<div><br></div>');
+                pos += 2;
+              } else if(rawText[pos] === '\n'){
+                // Single newline = end of normal paragraph, consume next html line
                 if(hi < htmlLines.length) merged.push(htmlLines[hi++]);
+                pos += 1;
+              } else {
+                pos += 1;
               }
             }
             while(hi < htmlLines.length) merged.push(htmlLines[hi++]);
