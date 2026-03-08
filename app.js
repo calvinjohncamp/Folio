@@ -400,7 +400,7 @@ const TEMPLATES = [
     title: 'Brief',
     html: () => {
       const today = getTodayDE();
-      return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
+      return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000;margin-top:-76px">
 
 <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:19px;box-sizing:border-box">
   <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
