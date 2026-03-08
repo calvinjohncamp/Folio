@@ -189,7 +189,6 @@ function buildPage(idx){
 
   const body = document.createElement('div');
   body.className = 'pg-body';
-  body.style.paddingTop = '76px';
 
   const ed = document.createElement('div');
   ed.className     = 'pg-ed';
@@ -460,9 +459,6 @@ function newFromTemplate(tpl){
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
-  // Templates manage their own top spacing
-  const pgBody = pagesEl.querySelector('.pg-body');
-  if(pgBody) pgBody.style.paddingTop = '0';
   const ed = activeEd();
   ed.innerHTML = tpl.html();
   dtEl.value = tpl.title;
@@ -526,6 +522,7 @@ function switchDoc(key){
     activePage=0;
     pagesEl.innerHTML='';
     pagesEl.appendChild(buildPage(0));
+    pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
     render(s.content||'');
     renderSidebar();
   } catch(e){}
@@ -547,6 +544,7 @@ function newDoc(){
   syncRuler();
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
+  pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
   activeEd().focus();
   stats();
   document.getElementById('pgc').textContent = 1;
@@ -823,6 +821,7 @@ function init(){
   });
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.appendChild(buildPage(0));
+  pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
   activeEd().focus();
   renderSidebar();
 }
