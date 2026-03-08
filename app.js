@@ -189,6 +189,7 @@ function buildPage(idx){
 
   const body = document.createElement('div');
   body.className = 'pg-body';
+  body.style.paddingTop = '76px';
 
   const ed = document.createElement('div');
   ed.className     = 'pg-ed';
@@ -400,7 +401,7 @@ const TEMPLATES = [
     title: 'Brief',
     html: () => {
       const today = getTodayDE();
-      return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000;margin-top:-76px">
+      return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
 <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:19px;box-sizing:border-box">
   <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
@@ -459,6 +460,9 @@ function newFromTemplate(tpl){
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
+  // Templates manage their own top spacing
+  const pgBody = pagesEl.querySelector('.pg-body');
+  if(pgBody) pgBody.style.paddingTop = '0';
   const ed = activeEd();
   ed.innerHTML = tpl.html();
   dtEl.value = tpl.title;
