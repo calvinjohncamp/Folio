@@ -407,7 +407,7 @@ const TEMPLATES = [
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
 
-<div style="height:14px"></div>
+<div style="height:33px"></div>
 
 <div style="font-size:12pt;line-height:1.5">[Empfänger]</div>
 <div style="font-size:12pt;line-height:1.5">[Straße]</div>
