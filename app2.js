@@ -402,8 +402,8 @@ const TEMPLATES = [
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:77px;box-sizing:border-box">
-  <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:87px;box-sizing:border-box">
+  <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
 
@@ -443,6 +443,16 @@ function newFromTemplate(tpl){
   const hasContent = collect().replace(/<[^>]*>/g,'').trim().length > 0;
   const hasTitle = dtEl.value.trim();
   if(hasContent || hasTitle) saveCurrentDoc();
+  else localStorage.removeItem(currentDocId);
+
+  // Remove all previously saved docs with this template title
+  for(const k of Object.keys(localStorage)){
+    if(!k.startsWith('folio_doc_')) continue;
+    try{
+      const d = JSON.parse(localStorage.getItem(k));
+      if(d && d.title === tpl.title) localStorage.removeItem(k);
+    }catch(e){}
+  }
 
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.innerHTML = '';
@@ -451,6 +461,11 @@ function newFromTemplate(tpl){
   ed.innerHTML = tpl.html();
   dtEl.value = tpl.title;
   document.getElementById('fsz').value = '12'; curSize = '12';
+  if(currentDocId){
+    const s = JSON.parse(localStorage.getItem(currentDocId)||'{}');
+    s.title = tpl.title;
+    localStorage.setItem(currentDocId, JSON.stringify(s));
+  }
   setTimeout(() => render(collect()), 200);
   renderSidebar();
   showSaved('Vorlage geladen');
@@ -584,7 +599,27 @@ function buildHTML(title){
     +`<style>body{font-family:${curFont};font-size:${curSize}pt;line-height:${curLH};color:#1a1814;margin:2cm}`
     +`div,p{margin:0}h1{font-size:24px}h2{font-size:18px}`
     +`ul,ol{margin:0 0 0 20px}table{border-collapse:collapse;width:100%}`
-    +`td,th{border:1px solid #e0dbd0;padding:4px 8px}</style></head><body>${collect()}</body></html>`;
+    +`td,th{border:1px solid #e0dbd0;padding:4px 8px}</style></head><body>${collect()}<div id="rename-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#8a8478;margin-bottom:8px">Dokumentname</div>
+    <input id="rename-input" type="text" spellcheck="false"
+      style="width:100%;box-sizing:border-box;border:1px solid #e0dbd0;border-radius:6px;padding:10px 12px;font-size:15px;font-family:'DM Sans',sans-serif;color:#1a1814;outline:none;margin-bottom:16px">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeRename()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
+      <button onclick="confirmRename()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">OK</button>
+    </div>
+  </div>
+</div>
+<div id="clear-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+    <div style="font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1814;margin-bottom:16px">Gesamten Inhalt löschen?</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="clearAllCancel()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
+      <button onclick="clearAllConfirm()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">Löschen</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
 }
 function doPDF(){ window.print(); }
 
@@ -910,7 +945,6 @@ async function pasteClipboard(){
     const text = await navigator.clipboard.readText();
     ed.focus();
     document.execCommand('insertText', false, text);
-    showSaved('Eingefügt');
   } catch(e){ showSaved('Bitte Cmd+V verwenden'); }
 }
 
