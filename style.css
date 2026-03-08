@@ -5,7 +5,7 @@ html,body{height:100%;overflow:hidden}
 :root{
   --ink:#1a1814;--cream:#f0ede4;--accent:#c8441a;--muted:#8a8478;
   --border:#e0dbd0;--shadow:0 4px 32px rgba(26,24,20,.13);
-  --a4w:794px;--mg:74px;--a4h:1123px;
+  --a4w:794px;--mg:72px;--a4h:1123px;
 }
 
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
