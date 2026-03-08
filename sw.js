@@ -1,4 +1,4 @@
-const CACHE = 'folio-v1';
+const CACHE = 'folio-v2';
 const ASSETS = [
   '/',
   '/index.html'
