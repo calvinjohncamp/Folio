@@ -65,6 +65,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   overflow:hidden;
   padding:0 var(--mg) 0;
 }
+.pg-body--normal{
+  padding-top:76px;
+}
 .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
 .betreff-line{
   font-size:15pt !important;
