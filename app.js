@@ -402,7 +402,7 @@ const TEMPLATES = [
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:19px;box-sizing:border-box">
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:57px;box-sizing:border-box">
   <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
@@ -428,10 +428,8 @@ const TEMPLATES = [
 
 <div><br></div>
 
-<div style="font-size:12pt;line-height:1.25;margin-bottom:60px">Freundliche Grüße</div>
+<div style="font-size:12pt;line-height:1.25">Freundliche Grüße</div>
 
-<div><br></div>
-<div><br></div>
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Jörn Kämper</div>
 
