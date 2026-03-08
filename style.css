@@ -115,7 +115,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 #ruler *{margin:0!important;padding:0!important;}
 #ruler{
   position:fixed;left:-9999px;top:0;visibility:hidden;
-  width:642px;
+  width:654px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
   font-size:11pt;line-height:1.25;
   color:var(--ink);word-wrap:break-word;

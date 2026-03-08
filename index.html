@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Folio</title>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
@@ -38,9 +38,8 @@
   <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
     <option>10</option><option selected>12</option><option>13</option><option>14</option><option>18</option><option>24</option>
   </select>
-  <select id="flh" class="sel" style="width:80px;margin-left:4px" onchange="setLineH(this.value)">
-    <option value="1.25" selected>1-zeilig</option>
-    <option value="1.25">1,25-zeilig</option>
+  <select id="flh" class="sel" style="width:90px;margin-left:4px" onchange="setLineH(this.value)">
+    <option value="1.25" selected>1,25-zeilig</option>
     <option value="1.5">1,5-zeilig</option>
     <option value="1.75">1,75-zeilig</option>
     <option value="2">2-zeilig</option>
@@ -112,7 +111,7 @@
   </div>
 </div>
 
-<script src="app2.js"></script>
+<!-- Rename modal -->
 <div id="rename-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
     <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#8a8478;margin-bottom:8px">Dokumentname</div>
@@ -124,6 +123,8 @@
     </div>
   </div>
 </div>
+
+<!-- Clear modal -->
 <div id="clear-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
     <div style="font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1814;margin-bottom:16px">Gesamten Inhalt löschen?</div>
@@ -133,5 +134,7 @@
     </div>
   </div>
 </div>
+
+<script src="app2.js"></script>
 </body>
 </html>
