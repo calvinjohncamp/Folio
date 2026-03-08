@@ -402,7 +402,7 @@ const TEMPLATES = [
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:-15px;box-sizing:border-box">
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:-72px;box-sizing:border-box">
   <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
@@ -411,10 +411,11 @@ const TEMPLATES = [
 
 <div style="font-size:12pt;line-height:1.5">[Empfänger]</div>
 <div style="font-size:12pt;line-height:1.5">[Straße]</div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;line-height:1.5"><span style="font-size:12pt">[PLZ Ort]</span><span style="font-size:12pt"><strong>${today}</strong></span></div>
+<div style="font-size:12pt;line-height:1.5">[PLZ Ort]</div>
 
 <div style="height:70px"></div>
 
+<div style="font-size:12pt;line-height:1.5;margin-bottom:4px"><strong>${today}</strong></div>
 <div class="betreff-line" style="margin-bottom:8px">[Betreff]</div>
 
 <div><br></div>
