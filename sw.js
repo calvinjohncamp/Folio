@@ -1,4 +1,4 @@
-const CACHE = 'folio-v20';
+const CACHE = 'folio-v21';
 const ASSETS = [
   '/',
   '/index.html',
@@ -24,16 +24,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Network-first: always try network, fall back to cache
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if(cached) return cached;
-      return fetch(e.request).then(resp => {
-        if(resp && resp.status === 200 && resp.type === 'basic'){
-          const clone = resp.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return resp;
-      }).catch(() => caches.match('/'));
-    })
+    fetch(e.request).then(resp => {
+      if(resp && resp.status === 200 && resp.type === 'basic'){
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return resp;
+    }).catch(() => caches.match(e.request).then(c => c || caches.match('/')))
   );
 });
