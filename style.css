@@ -106,7 +106,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   padding:6px var(--mg) 0;
   display:flex;align-items:flex-start;justify-content:space-between;
   border-top:1px solid var(--border);
-  font-size:9px;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:9px;color:var(--ink);font-family:'DM Sans',sans-serif;
 }
 .pg-fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pg-num{flex-shrink:0;padding-left:16px}
