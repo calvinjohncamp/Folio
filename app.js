@@ -522,7 +522,7 @@ function switchDoc(key){
     activePage=0;
     pagesEl.innerHTML='';
     pagesEl.appendChild(buildPage(0));
-    pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
+    pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
     render(s.content||'');
     renderSidebar();
   } catch(e){}
@@ -544,7 +544,7 @@ function newDoc(){
   syncRuler();
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
-  pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
+  pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
   activeEd().focus();
   stats();
   document.getElementById('pgc').textContent = 1;
@@ -821,7 +821,7 @@ function init(){
   });
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.appendChild(buildPage(0));
-  pagesEl.querySelector('.pg-body').style.paddingTop = '76px';
+  pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
   activeEd().focus();
   renderSidebar();
 }
