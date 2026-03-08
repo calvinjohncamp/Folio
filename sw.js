@@ -1,7 +1,10 @@
-const CACHE = 'folio-v4';
+const CACHE = 'folio-v5';
 const ASSETS = [
   '/',
-  '/index.html'
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  '/sw.js'
 ];
 
 self.addEventListener('install', e => {

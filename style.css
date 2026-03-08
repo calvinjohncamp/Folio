@@ -63,7 +63,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 .pg-body{
   flex:1;
   overflow:hidden;
-  padding:19px var(--mg) 0;
+  padding:38px var(--mg) 0;
 }
 .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
 .betreff-line{
