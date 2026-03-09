@@ -1,6 +1,6 @@
 
 const STORE = 'folio_v5_r2';
-const PAGE_H = 993;   // A4(1123) - top-pad(72) - footer(38) - bottom-gap(20)
+const PAGE_H = 973;   // A4(1123) - top-pad(72) - footer(38) - bottom-gap(40)
 const RULER_W = 654;  // A4w(794) - 2*margin(70)
 
 const ruler   = document.getElementById('ruler');
@@ -13,6 +13,7 @@ let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
 let rendering  = false;
+let isNormalDoc = true;  // false for letter templates that manage their own top margin
 
 // ── Sync ruler font ──────────────────────────────────────────────
 function syncRuler(){
@@ -131,7 +132,7 @@ function checkOverflow(){
   const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
   const chunks  = paginate(allHTML || '');
   const n       = chunks.length;
-  const isNormal = pagesEl.children.length > 0 && pagesEl.children[0].querySelector('.pg-body--normal') !== null;
+  const isNormal = isNormalDoc;
   while(pagesEl.children.length < n) {
     const newPg = buildPage(pagesEl.children.length);
     if(isNormal) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
@@ -164,7 +165,7 @@ function render(rawHTML, presavedCursor){
   const n      = chunks.length;
   document.getElementById('pgc').textContent = n;
 
-  const isNormalRender = pagesEl.children.length > 0 && pagesEl.children[0].querySelector('.pg-body--normal') !== null;
+  const isNormalRender = isNormalDoc;
   while(pagesEl.children.length < n) {
     const newPg = buildPage(pagesEl.children.length);
     if(isNormalRender) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
@@ -476,6 +477,7 @@ function newFromTemplate(tpl){
     s.title = tpl.title;
     localStorage.setItem(currentDocId, JSON.stringify(s));
   }
+  isNormalDoc = false;
   setTimeout(() => render(collect()), 200);
   renderSidebar();
   showSaved('Vorlage geladen');
@@ -531,6 +533,7 @@ function switchDoc(key){
     pagesEl.innerHTML='';
     pagesEl.appendChild(buildPage(0));
     pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
+    isNormalDoc = true;
     render(s.content||'');
     renderSidebar();
   } catch(e){}
@@ -553,10 +556,8 @@ function newDoc(){
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
+  isNormalDoc = true;
   activeEd().focus();
-  stats();
-  document.getElementById('pgc').textContent = 1;
-  renderSidebar();
 }
 
 // ── Save / Load ───────────────────────────────────────────────────
@@ -830,6 +831,7 @@ function init(){
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
+  isNormalDoc = true;
   activeEd().focus();
   renderSidebar();
 }
