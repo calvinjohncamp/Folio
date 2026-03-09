@@ -1,6 +1,6 @@
 
 const STORE = 'folio_v5_r2';
-const PAGE_H = 1013;  // A4(1123) - top-pad(72) - footer(38)
+const PAGE_H = 993;   // A4(1123) - top-pad(72) - footer(38) - bottom-gap(20)
 const RULER_W = 654;  // A4w(794) - 2*margin(70)
 
 const ruler   = document.getElementById('ruler');
@@ -131,7 +131,12 @@ function checkOverflow(){
   const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
   const chunks  = paginate(allHTML || '');
   const n       = chunks.length;
-  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
+  const isNormal = pagesEl.children.length > 0 && pagesEl.children[0].querySelector('.pg-body--normal') !== null;
+  while(pagesEl.children.length < n) {
+    const newPg = buildPage(pagesEl.children.length);
+    if(isNormal) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
+    pagesEl.appendChild(newPg);
+  }
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
     const ed = pg.querySelector('.pg-ed');
@@ -159,7 +164,12 @@ function render(rawHTML, presavedCursor){
   const n      = chunks.length;
   document.getElementById('pgc').textContent = n;
 
-  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
+  const isNormalRender = pagesEl.children.length > 0 && pagesEl.children[0].querySelector('.pg-body--normal') !== null;
+  while(pagesEl.children.length < n) {
+    const newPg = buildPage(pagesEl.children.length);
+    if(isNormalRender) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
+    pagesEl.appendChild(newPg);
+  }
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
 
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
