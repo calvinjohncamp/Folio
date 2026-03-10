@@ -199,8 +199,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   #pages{gap:0}
   .pg{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
   .pg:last-child{page-break-after:avoid!important;break-after:avoid!important}
-  .pg-body{padding:13mm 25mm 0;overflow:visible}
-  .pg-body--normal{padding-top:13mm!important}
+  .pg-body{padding:20mm 20mm 0;overflow:visible}
+  .pg-body--normal{padding-top:20mm!important}
   .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
   .pg-ed{overflow:visible;height:auto}
   @page{size:A4;margin:0}
