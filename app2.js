@@ -638,11 +638,14 @@ function doPDF(){
   const prev = titleEl ? titleEl.textContent : 'Folio';
   if(titleEl) titleEl.textContent = name;
   document.title = name;
-  window.print();
+  // Small delay to let iOS register the new title before print dialog opens
   setTimeout(() => {
-    if(titleEl) titleEl.textContent = prev;
-    document.title = prev;
-  }, 2000);
+    window.print();
+    setTimeout(() => {
+      if(titleEl) titleEl.textContent = prev;
+      document.title = prev;
+    }, 3000);
+  }, 100);
 }
 
 // ── Open file (.folio / .txt / .docx / .doc) ─────────────────────
