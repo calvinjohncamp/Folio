@@ -14,7 +14,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 #hdr{background:#1a1814;color:#faf9f6;display:flex;align-items:center;padding:0 16px;height:62px;flex-shrink:0;position:relative}
 .logo{font-family:'DM Serif Display',serif;font-size:42px;color:#faf9f6;letter-spacing:-1px;line-height:1;flex-shrink:0}
 .logo em{color:var(--accent);font-style:normal}
-#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:13px;opacity:.6;outline:none;width:220px;padding:2px 4px;transition:.2s;margin-right:8px;align-self:flex-end;margin-bottom:10px}
+#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:13px;opacity:.6;outline:none;width:220px;padding:2px 4px;transition:.2s;position:absolute;left:208px;bottom:10px}
 #dtitle::placeholder{color:#faf9f6;opacity:.5}
 #dtitle:focus{opacity:1;border-bottom-color:var(--accent);outline:none}
 .hbtns{display:flex;gap:6px;margin-left:auto}
@@ -167,14 +167,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
     position:relative;
   }
   .logo{ font-size:28px; flex-shrink:0; margin-right:0 }
-  #dtitle{
-    width:100px !important;
-    margin-right:4px !important;
-    margin-bottom:0 !important;
-    align-self:center !important;
-    font-size:11px;
-    opacity:.8;
-  }
+  #dtitle{ display:block !important; font-size:11px; width:120px; flex-shrink:0; margin-left:auto; margin-right:4px; position:static !important; left:auto !important; bottom:auto !important; border-bottom:1px solid rgba(250,249,246,.3) !important; padding:2px 4px !important; opacity:.8; text-align:left; margin-bottom:0 !important }
   #dtitle:focus{ opacity:1; border-bottom-color:var(--accent) !important }
   #aabtn{ display:none !important }
   .hbtns{ display:flex; gap:4px; flex-shrink:0; align-items:center }
