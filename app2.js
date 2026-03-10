@@ -634,10 +634,15 @@ function buildHTML(title){
 }
 function doPDF(){
   const name = dtEl.value.trim() || 'Dokument';
-  const prev = document.title;
+  const titleEl = document.querySelector('title');
+  const prev = titleEl ? titleEl.textContent : 'Folio';
+  if(titleEl) titleEl.textContent = name;
   document.title = name;
   window.print();
-  setTimeout(() => { document.title = prev; }, 1000);
+  setTimeout(() => {
+    if(titleEl) titleEl.textContent = prev;
+    document.title = prev;
+  }, 2000);
 }
 
 // ── Open file (.folio / .txt / .docx / .doc) ─────────────────────

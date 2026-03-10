@@ -158,7 +158,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   #side{ display:none !important }
   #hdr{ padding:0 10px; height:52px; flex-wrap:nowrap; gap:6px }
   .logo{ font-size:28px; flex-shrink:0 }
-  #dtitle{ display:block; font-size:11px; width:auto; flex:1; min-width:0; position:static; border-bottom:1px solid rgba(250,249,246,.3); padding:2px 4px; opacity:.8 }
+  #dtitle{ display:block; font-size:11px; width:auto; flex:0.67; min-width:0; position:static; border-bottom:1px solid rgba(250,249,246,.3); padding:2px 4px; opacity:.8 }
   #dtitle:focus{ opacity:1; border-bottom-color:var(--accent) }
   #aabtn{ display:none !important }
   .hbtns{ display:flex; gap:4px; flex-shrink:0 }
