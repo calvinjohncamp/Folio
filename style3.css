@@ -198,8 +198,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   body,#main{overflow:visible;height:auto}
   #pages{gap:0}
   .pg{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
-  .pg-body{padding:5mm var(--mg) 0;overflow:visible}
-  .pg-body--normal{padding-top:5mm!important}
+  .pg:last-child{page-break-after:avoid!important;break-after:avoid!important}
+  .pg-body{padding:10mm var(--mg) 0;overflow:visible}
+  .pg-body--normal{padding-top:10mm!important}
   .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
   .pg-ed{overflow:visible;height:auto}
   @page{size:A4;margin:0}
