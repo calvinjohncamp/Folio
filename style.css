@@ -155,11 +155,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 
 /* ── Mobile ── */
 @media (max-width: 600px){
-  #dtitle{ display:none }
   #side{ display:none !important }
-  #hdr{ padding:0 10px; height:52px }
-  .logo{ font-size:28px }
-  #dtitle{ font-size:11px; width:160px; bottom:8px }
+  #hdr{ padding:0 10px; height:52px; flex-wrap:nowrap; gap:6px }
+  .logo{ font-size:28px; flex-shrink:0 }
+  #dtitle{ display:block; font-size:11px; width:auto; flex:1; min-width:0; position:static; border-bottom:1px solid rgba(250,249,246,.3); padding:2px 4px; opacity:.8 }
+  #dtitle:focus{ opacity:1; border-bottom-color:var(--accent) }
+  #aabtn{ display:none !important }
+  .hbtns{ display:flex; gap:4px; flex-shrink:0 }
   .hbtn{ font-size:10px; padding:3px 7px }
   #tb{ padding:0 6px; height:38px }
   .sel{ font-size:11px; padding:1px 3px; height:24px }
@@ -167,9 +169,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   #cv{ padding:8px 0 60px }
   #pages{ width:100% }
   .pg{ width:100% !important; min-height:auto !important; height:auto !important; border-radius:0; box-shadow:none; border-bottom:1px solid var(--border) }
-  .pg-body{ padding:20px 16px 0 }
+  .pg-body{ padding:20px 16px 0; padding-bottom:24px }
   .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
-.pg-ed{ font-size:14px !important; line-height:1.6 !important }
+  .pg-ed{ font-size:14px !important; line-height:1.6 !important }
   .pg-ftr{ padding:6px 16px 0 }
   #sb{ font-size:10px; padding:3px 10px; gap:10px }
 }
@@ -187,9 +189,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   body,#main{overflow:visible;height:auto}
   #pages{gap:0}
   .pg{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
-  .pg-body{padding:0 var(--mg) 0;overflow:visible}
-  .pg-body--normal{padding-top:76px!important}
+  .pg-body{padding:5mm var(--mg) 0;overflow:visible}
+  .pg-body--normal{padding-top:5mm!important}
   .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
-.pg-ed{overflow:visible;height:auto}
+  .pg-ed{overflow:visible;height:auto}
   @page{size:A4;margin:0}
 }

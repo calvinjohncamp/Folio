@@ -632,7 +632,13 @@ function buildHTML(title){
 </div>
 </body></html>`;
 }
-function doPDF(){ window.print(); }
+function doPDF(){
+  const name = dtEl.value.trim() || 'Dokument';
+  const prev = document.title;
+  document.title = name;
+  window.print();
+  setTimeout(() => { document.title = prev; }, 1000);
+}
 
 // ── Open file (.folio / .txt / .docx / .doc) ─────────────────────
 function openFile(){ document.getElementById('fileInput').click(); }
