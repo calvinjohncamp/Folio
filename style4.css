@@ -66,7 +66,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   padding:0 var(--mg) 0;
 }
 .pg-body--normal{
-  padding-top:76px;
+  padding-top:68px;
 }
 .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
 .betreff-line{
@@ -199,8 +199,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
   #pages{gap:0}
   .pg{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
   .pg:last-child{page-break-after:avoid!important;break-after:avoid!important}
-  .pg-body{padding:25mm var(--mg) 0;overflow:visible}
-  .pg-body--normal{padding-top:25mm!important}
+  .pg-body{padding:18mm 25mm 0;overflow:visible}
+  .pg-body--normal{padding-top:18mm!important}
   .pg-ed *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;}
   .pg-ed{overflow:visible;height:auto}
   @page{size:A4;margin:0}
