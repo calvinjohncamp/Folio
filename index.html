@@ -17,9 +17,8 @@
 <input type="file" id="fileInput" accept=".folio,.txt,.docx,.doc" style="display:none" onchange="loadFile(this)">
 <div id="hdr">
   <div class="logo">Folio<em>.</em></div>
-  <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
-  <button id="aabtn" onclick="openRename()" style="display:none;background:transparent;border:1px solid rgba(250,249,246,.3);color:#faf9f6;border-radius:6px;padding:4px 9px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-right:8px">Aa</button>
   <div class="hbtns">
+    <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
     <button class="hbtn" onclick="openFile()">Öffnen</button>
     <button class="hbtn" onclick="openSaveAs()">Speichern unter</button>
     <button class="hbtn p" onclick="doPDF()">PDF</button>
