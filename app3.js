@@ -939,7 +939,6 @@ function selectAll(){
 }
 
 function copyAll(){
-  // Extract plain text from all pages
   const lines = [];
   pagesEl.querySelectorAll('.pg-ed').forEach(ed => {
     ed.childNodes.forEach(node => {
@@ -948,10 +947,8 @@ function copyAll(){
       } else if(node.nodeType === 1){
         const tag = node.tagName.toLowerCase();
         if(tag === 'br'){ lines.push(''); return; }
-        // Check for empty line: <div><br></div>
         const html = node.innerHTML;
         if(html === '<br>' || html === ''){ lines.push(''); return; }
-        // Extract text recursively, stripping all tags
         const tmp = document.createElement('div');
         tmp.innerHTML = html;
         lines.push(tmp.textContent || '');
@@ -960,14 +957,26 @@ function copyAll(){
   });
   let text = lines.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px;top:0';
-  document.body.appendChild(ta);
-  ta.select();
-  try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
-  catch(e){ showSaved('Kopieren fehlgeschlagen'); }
-  document.body.removeChild(ta);
+  // Force plain text via clipboard API
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(() => showSaved('Alles kopiert'))
+      .catch(() => {
+        fallbackCopy(text);
+      });
+  } else {
+    fallbackCopy(text);
+  }
+  function fallbackCopy(t){
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
+    catch(e){ showSaved('Kopieren fehlgeschlagen'); }
+    document.body.removeChild(ta);
+  }
 }
 function copySelection(){
   const sel = window.getSelection();
