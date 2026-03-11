@@ -672,7 +672,7 @@ function loadFile(input){
     const reader = new FileReader();
     reader.onload = function(e){
       const raw = (e.target.result || '').trim();
-      if(!raw){ alert('Die Datei ist leer.'); input.value = ''; return; }
+      if(!raw){ alert('Die Datei konnte nicht gelesen werden (0 Bytes).\n\nWenn die Datei in Dropbox liegt: Bitte zuerst in der Dropbox-App herunterladen, dann hier öffnen.'); input.value = ''; return; }
       try{
         const s = JSON.parse(raw);
         if(s.title){ dtEl.value = s.title; currentDocId = currentDocId || 'folio_doc_' + Date.now(); }
