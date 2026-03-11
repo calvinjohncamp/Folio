@@ -683,6 +683,7 @@ function loadFile(input){
         syncRuler();
         pagesEl.innerHTML = '';
         pagesEl.appendChild(buildPage(0));
+        if(isNormalDoc) pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
         render(s.content || '');
         saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
       } catch(err){ alert('Fehler beim Laden: ' + err.message + '\n\nDateigröße: ' + raw.length + ' Zeichen'); }
@@ -1056,8 +1057,15 @@ document.addEventListener('paste', function(e){
     Array.from(tmp.childNodes).forEach(c => walk(c, false, false, false));
     if(currentLine.length) flushLine();
 
+    // Remove consecutive empty lines (max 1)
+    const filteredLines = resultLines.filter((line, i) => {
+      if(line !== null) return true;
+      if(i === 0) return false; // no leading empty line
+      return resultLines[i-1] !== null; // only keep if prev was not also empty
+    });
+
     // Build final HTML - null = empty line
-    const finalHTML = resultLines.map(d => {
+    const finalHTML = filteredLines.map(d => {
       if(!d) return '<div><br></div>';
       return d.innerHTML.trim() ? d.outerHTML : '<div><br></div>';
     }).join('');
