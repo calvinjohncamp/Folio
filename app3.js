@@ -939,22 +939,21 @@ function selectAll(){
 }
 
 function copyAll(){
-  // Read visible text directly via innerText — preserves line breaks as rendered
+  // HARDCODE TEST: uncomment to test if clipboard itself works
+  // navigator.clipboard.writeText("[Verse 1]\r\nZeile 1\r\nZeile 2\r\n\r\n[Chorus]\r\nZeile A\r\nZeile B").then(()=>showSaved('TEST kopiert')); return;
+
+  // Read visible text directly via innerText
   const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
     .map(ed => ed.innerText || '');
-  let text = parts.join('
-');
-  // Normalize: max 1 consecutive blank line
-  text = text.replace(/
-{3,}/g, '
+  let text = parts.join('\n');
+  text = text.replace(/\n{3,}/g, '\n\n').trim();
+  const plain = text.replace(/\n/g, '\r\n');
 
-').trim();
-  // Convert to 
- for maximum compatibility (Word, etc.)
-  const plain = text.replace(/
-/g, '
-');
-  // Write both text/plain and text/html to clipboard
+  // DEBUG
+  console.log("COPYALL_TEXT_START");
+  console.log(JSON.stringify(plain.substring(0, 400)));
+  console.log("COPYALL_TEXT_END");
+
   if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
     const blob = new Blob([plain], {type: 'text/plain'});
     navigator.clipboard.write([new ClipboardItem({'text/plain': blob})])
