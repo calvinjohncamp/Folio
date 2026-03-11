@@ -675,6 +675,7 @@ function loadFile(input){
       if(!raw){ alert('Die Datei konnte nicht gelesen werden (0 Bytes).\n\nWenn die Datei in Dropbox liegt: Bitte zuerst in der Dropbox-App herunterladen, dann hier öffnen.'); input.value = ''; return; }
       try{
         const s = JSON.parse(raw);
+        isNormalDoc = (s.isNormalDoc !== false); // default true unless explicitly false
         if(s.title){ dtEl.value = s.title; currentDocId = currentDocId || 'folio_doc_' + Date.now(); }
         if(s.font){ curFont = s.font; document.getElementById('fnt').value = s.font; }
         if(s.size){ curSize = s.size; document.getElementById('fsz').value = s.size; }
@@ -951,8 +952,8 @@ function copyAll(){
           && node.firstChild.nodeType === 1
           && node.firstChild.tagName.toLowerCase() === 'br';
         if(isEmptyBlock){ lines.push(''); return; }
-        // Normal block: extract inner text
-        lines.push(node.innerText || node.textContent || '');
+        // Normal block: extract text content (innerText adds extra newlines)
+        lines.push(node.textContent || '');
       }
     });
     return lines.join('\n');
