@@ -939,6 +939,9 @@ function selectAll(){
 }
 
 function copyAll(){
+  // DEBUG: log raw HTML of first page
+  const firstEd = pagesEl.querySelector('.pg-ed');
+  if(firstEd) console.log('COPYALL HTML:', firstEd.innerHTML.substring(0, 500));
   // Extract plain text: each <div> = one line, <div><br></div> = empty line
   function nodeToText(node){
     if(node.nodeType === 3) return node.textContent;
