@@ -939,15 +939,31 @@ function selectAll(){
 }
 
 function copyAll(){
-  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
-    .map(ed => (ed.innerText || '').replace(/^\n+|\n+$/g, ''));
-  let text = parts.join('\n');
+  function edToText(ed){
+    const lines = [];
+    ed.childNodes.forEach(node => {
+      if(node.nodeType === 3){
+        const t = node.textContent;
+        if(t.trim()) lines.push(t);
+      } else if(node.nodeType === 1){
+        const tag = node.tagName.toLowerCase();
+        if(tag === 'br'){ lines.push(''); return; }
+        const inner = node.innerHTML;
+        if(inner === '<br>' || inner === ''){ lines.push(''); return; }
+        const tmp = document.createElement('div');
+        tmp.innerHTML = inner;
+        lines.push(tmp.textContent || '');
+      }
+    });
+    return lines;
+  }
+  const allLines = [];
+  pagesEl.querySelectorAll('.pg-ed').forEach((ed, i) => {
+    if(i > 0) allLines.push(''); // single blank line between pages
+    edToText(ed).forEach(l => allLines.push(l));
+  });
+  let text = allLines.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
-
-  // DEBUG: show full text around [Spoken]
-  const idx = text.indexOf('[Spoken]');
-  if(idx >= 0) console.log('SPOKEN CONTEXT:', JSON.stringify(text.substring(idx-50, idx+200)));
-
   const plain = text.replace(/\n/g, '\r\n');
   navigator.clipboard.writeText(plain)
     .then(() => showSaved('Alles kopiert'))
