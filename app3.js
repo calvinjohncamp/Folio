@@ -939,33 +939,33 @@ function selectAll(){
 }
 
 function copyAll(){
-  const lines = [];
-  pagesEl.querySelectorAll('.pg-ed').forEach(ed => {
-    ed.childNodes.forEach(node => {
-      if(node.nodeType === 3){
-        lines.push(node.textContent);
-      } else if(node.nodeType === 1){
-        const tag = node.tagName.toLowerCase();
-        if(tag === 'br'){ lines.push(''); return; }
-        const html = node.innerHTML;
-        if(html === '<br>' || html === ''){ lines.push(''); return; }
-        const tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        lines.push(tmp.textContent || '');
-      }
-    });
-  });
-  let text = lines.join('\n');
-  text = text.replace(/\n{3,}/g, '\n\n').trim();
-  // Force plain text via clipboard API
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text)
+  // Read visible text directly via innerText — preserves line breaks as rendered
+  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
+    .map(ed => ed.innerText || '');
+  let text = parts.join('
+');
+  // Normalize: max 1 consecutive blank line
+  text = text.replace(/
+{3,}/g, '
+
+').trim();
+  // Convert to 
+ for maximum compatibility (Word, etc.)
+  const plain = text.replace(/
+/g, '
+');
+  // Write both text/plain and text/html to clipboard
+  if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+    const blob = new Blob([plain], {type: 'text/plain'});
+    navigator.clipboard.write([new ClipboardItem({'text/plain': blob})])
       .then(() => showSaved('Alles kopiert'))
-      .catch(() => {
-        fallbackCopy(text);
-      });
+      .catch(() => fallbackCopy(plain));
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(plain)
+      .then(() => showSaved('Alles kopiert'))
+      .catch(() => fallbackCopy(plain));
   } else {
-    fallbackCopy(text);
+    fallbackCopy(plain);
   }
   function fallbackCopy(t){
     const ta = document.createElement('textarea');
