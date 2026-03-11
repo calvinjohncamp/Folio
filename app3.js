@@ -638,12 +638,22 @@ function doPDF(){
   const prev = titleEl ? titleEl.textContent : 'Folio';
   if(titleEl) titleEl.textContent = name;
   document.title = name;
-  // Small delay to let iOS register the new title before print dialog opens
+
+  // Remove trailing empty pages before print
+  const pages = Array.from(pagesEl.querySelectorAll('.pg'));
+  pages.forEach((pg, i) => {
+    if(i === 0) return; // never remove first page
+    const ed = pg.querySelector('.pg-ed');
+    if(ed && ed.innerText.trim() === '') pg.remove();
+  });
+
   setTimeout(() => {
     window.print();
     setTimeout(() => {
       if(titleEl) titleEl.textContent = prev;
       document.title = prev;
+      // Re-render to restore pages if needed
+      render(collect());
     }, 3000);
   }, 100);
 }
