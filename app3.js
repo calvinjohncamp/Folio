@@ -939,43 +939,24 @@ function selectAll(){
 }
 
 function copyAll(){
-  // HARDCODE TEST: uncomment to test if clipboard itself works
-  // navigator.clipboard.writeText("[Verse 1]\r\nZeile 1\r\nZeile 2\r\n\r\n[Chorus]\r\nZeile A\r\nZeile B").then(()=>showSaved('TEST kopiert')); return;
-
-  // Read visible text directly via innerText
   const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
     .map(ed => ed.innerText || '');
   let text = parts.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
   const plain = text.replace(/\n/g, '\r\n');
-
-  // DEBUG
-  console.log("COPYALL_TEXT_START");
-  console.log(JSON.stringify(plain.substring(0, 400)));
-  console.log("COPYALL_TEXT_END");
-
-  if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
-    const blob = new Blob([plain], {type: 'text/plain'});
-    navigator.clipboard.write([new ClipboardItem({'text/plain': blob})])
-      .then(() => showSaved('Alles kopiert'))
-      .catch(() => fallbackCopy(plain));
-  } else if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(plain)
-      .then(() => showSaved('Alles kopiert'))
-      .catch(() => fallbackCopy(plain));
-  } else {
-    fallbackCopy(plain);
-  }
-  function fallbackCopy(t){
-    const ta = document.createElement('textarea');
-    ta.value = t;
-    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
-    document.body.appendChild(ta);
-    ta.select();
-    try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
-    catch(e){ showSaved('Kopieren fehlgeschlagen'); }
-    document.body.removeChild(ta);
-  }
+  // Use writeText only — avoids ClipboardItem HTML contamination
+  navigator.clipboard.writeText(plain)
+    .then(() => showSaved('Alles kopiert'))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = plain;
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
+      catch(e){ showSaved('Kopieren fehlgeschlagen'); }
+      document.body.removeChild(ta);
+    });
 }
 function copySelection(){
   const sel = window.getSelection();
