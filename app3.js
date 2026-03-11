@@ -939,37 +939,21 @@ function selectAll(){
 }
 
 function copyAll(){
-  // DEBUG: log raw HTML of first page
-  const firstEd = pagesEl.querySelector('.pg-ed');
-  if(firstEd) console.log('COPYALL HTML:', firstEd.innerHTML.substring(0, 500));
-  // Extract plain text: each <div> = one line, <div><br></div> = empty line
-  function nodeToText(node){
-    if(node.nodeType === 3) return node.textContent;
-    if(node.nodeType !== 1) return '';
-    const tag = node.tagName.toLowerCase();
-    if(tag === 'br') return '';
-    return Array.from(node.childNodes).map(nodeToText).join('');
-  }
-  function edToText(ed){
-    const lines = [];
-    ed.childNodes.forEach(node => {
-      if(node.nodeType === 3){
-        lines.push(node.textContent);
-      } else if(node.nodeType === 1){
-        const tag = node.tagName.toLowerCase();
-        if(tag === 'br'){ lines.push(''); return; }
-        const isEmptyBlock = node.childNodes.length === 1
-          && node.firstChild.nodeType === 1
-          && node.firstChild.tagName.toLowerCase() === 'br';
-        if(isEmptyBlock){ lines.push(''); return; }
-        lines.push(nodeToText(node));
-      }
-    });
-    return lines.join('\n');
-  }
-  const NL = String.fromCharCode(10);
-  const text = Array.from(pagesEl.querySelectorAll('.pg-ed'))
-    .map(edToText).join(NL);
+  // Collect all pages, extract plain text preserving line breaks
+  const wrap = document.createElement('div');
+  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
+  eds.forEach((ed, i) => {
+    const clone = ed.cloneNode(true);
+    clone.querySelectorAll('br').forEach(br => br.replaceWith(document.createTextNode('\n')));
+    clone.querySelectorAll('div').forEach(div => div.appendChild(document.createTextNode('\n')));
+    wrap.appendChild(clone);
+  });
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:pre-wrap';
+  document.body.appendChild(wrap);
+  let text = wrap.innerText || wrap.textContent;
+  document.body.removeChild(wrap);
+  text = text.split('\n').map(l => l.trimEnd()).join('\n');
+  text = text.replace(/\n{3,}/g, '\n\n').trim();
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.style.cssText = 'position:fixed;left:-9999px;top:0';
@@ -979,7 +963,6 @@ function copyAll(){
   catch(e){ showSaved('Kopieren fehlgeschlagen'); }
   document.body.removeChild(ta);
 }
-
 function copySelection(){
   const sel = window.getSelection();
   if(!sel || sel.isCollapsed){ showSaved('Nichts markiert'); return; }
