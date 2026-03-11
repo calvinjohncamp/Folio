@@ -940,11 +940,10 @@ function selectAll(){
 
 function copyAll(){
   const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
-    .map(ed => ed.innerText || '');
+    .map(ed => (ed.innerText || '').replace(/^\n+|\n+$/g, ''));
   let text = parts.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
   const plain = text.replace(/\n/g, '\r\n');
-  // Use writeText only — avoids ClipboardItem HTML contamination
   navigator.clipboard.writeText(plain)
     .then(() => showSaved('Alles kopiert'))
     .catch(() => {
