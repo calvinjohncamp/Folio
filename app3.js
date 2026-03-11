@@ -939,32 +939,17 @@ function selectAll(){
 }
 
 function copyAll(){
-  function edToText(ed){
-    const lines = [];
-    ed.childNodes.forEach(node => {
-      if(node.nodeType === 3){
-        const t = node.textContent;
-        if(t.trim()) lines.push(t);
-      } else if(node.nodeType === 1){
-        const tag = node.tagName.toLowerCase();
-        if(tag === 'br'){ lines.push(''); return; }
-        // Clone, remove trailing <br>, get text
-        const clone = node.cloneNode(true);
-        const trailingBr = clone.lastChild;
-        if(trailingBr && trailingBr.nodeName === 'BR') clone.removeChild(trailingBr);
-        const text = clone.textContent;
-        if(text === ''){ lines.push(''); return; }
-        lines.push(text);
+  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(ed => {
+    const clone = ed.cloneNode(true);
+    // Remove trailing <br> inside each div (artifact of page-break rendering)
+    clone.querySelectorAll('div').forEach(div => {
+      if(div.lastChild && div.lastChild.nodeName === 'BR'){
+        div.removeChild(div.lastChild);
       }
     });
-    return lines;
-  }
-  const allLines = [];
-  pagesEl.querySelectorAll('.pg-ed').forEach((ed, i) => {
-    if(i > 0) allLines.push('');
-    edToText(ed).forEach(l => allLines.push(l));
+    return (clone.innerText || clone.textContent || '').replace(/^\n+|\n+$/g, '');
   });
-  let text = allLines.join('\n');
+  let text = parts.join('\n\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
   const plain = text.replace(/\n/g, '\r\n');
   navigator.clipboard.writeText(plain)
