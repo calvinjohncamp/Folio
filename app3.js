@@ -943,6 +943,11 @@ function copyAll(){
     .map(ed => (ed.innerText || '').replace(/^\n+|\n+$/g, ''));
   let text = parts.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
+
+  // DEBUG: show full text around [Spoken]
+  const idx = text.indexOf('[Spoken]');
+  if(idx >= 0) console.log('SPOKEN CONTEXT:', JSON.stringify(text.substring(idx-50, idx+200)));
+
   const plain = text.replace(/\n/g, '\r\n');
   navigator.clipboard.writeText(plain)
     .then(() => showSaved('Alles kopiert'))
