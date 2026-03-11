@@ -1048,14 +1048,16 @@ document.addEventListener('paste', function(e){
       return d.innerHTML.trim() ? d.outerHTML : '<div><br></div>';
     }).join('');
 
-    // Deduplicate: no more than 2 consecutive empty lines
-    const cleaned = finalHTML.replace(/(<div><br><\/div>){3,}/g, '<div><br></div><div><br></div>');
+    // Deduplicate: no more than 1 consecutive empty line
+    const cleaned = finalHTML.replace(/(<div><br><\/div>){2,}/g, '<div><br></div>');
     document.execCommand('insertHTML', false, cleaned);
   } else {
     // Fallback: plain text
     const lines = text.split('\n');
     const divs = lines.map(l => l.trim() ? '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' : '<div><br></div>').join('');
-    document.execCommand('insertHTML', false, divs);
+    // Deduplicate: no more than 1 consecutive empty line
+    const cleanedText = divs.replace(/(<div><br><\/div>){2,}/g, '<div><br></div>');
+    document.execCommand('insertHTML', false, cleanedText);
   }
 
   setTimeout(() => render(collect()), 100);
