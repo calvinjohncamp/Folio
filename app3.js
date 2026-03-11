@@ -939,20 +939,26 @@ function selectAll(){
 }
 
 function copyAll(){
-  // Collect all pages, extract plain text preserving line breaks
-  const wrap = document.createElement('div');
-  const eds = Array.from(pagesEl.querySelectorAll('.pg-ed'));
-  eds.forEach((ed, i) => {
-    const clone = ed.cloneNode(true);
-    clone.querySelectorAll('br').forEach(br => br.replaceWith(document.createTextNode('\n')));
-    clone.querySelectorAll('div').forEach(div => div.appendChild(document.createTextNode('\n')));
-    wrap.appendChild(clone);
+  // Extract plain text from all pages
+  const lines = [];
+  pagesEl.querySelectorAll('.pg-ed').forEach(ed => {
+    ed.childNodes.forEach(node => {
+      if(node.nodeType === 3){
+        lines.push(node.textContent);
+      } else if(node.nodeType === 1){
+        const tag = node.tagName.toLowerCase();
+        if(tag === 'br'){ lines.push(''); return; }
+        // Check for empty line: <div><br></div>
+        const html = node.innerHTML;
+        if(html === '<br>' || html === ''){ lines.push(''); return; }
+        // Extract text recursively, stripping all tags
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        lines.push(tmp.textContent || '');
+      }
+    });
   });
-  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:pre-wrap';
-  document.body.appendChild(wrap);
-  let text = wrap.innerText || wrap.textContent;
-  document.body.removeChild(wrap);
-  text = text.split('\n').map(l => l.trimEnd()).join('\n');
+  let text = lines.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
   const ta = document.createElement('textarea');
   ta.value = text;
