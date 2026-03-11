@@ -939,17 +939,9 @@ function selectAll(){
 }
 
 function copyAll(){
-  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(ed => {
-    const clone = ed.cloneNode(true);
-    // Remove trailing <br> inside each div (artifact of page-break rendering)
-    clone.querySelectorAll('div').forEach(div => {
-      if(div.lastChild && div.lastChild.nodeName === 'BR'){
-        div.removeChild(div.lastChild);
-      }
-    });
-    return (clone.innerText || clone.textContent || '').replace(/^\n+|\n+$/g, '');
-  });
-  let text = parts.join('\n\n');
+  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
+    .map(ed => (ed.innerText || '').replace(/^\n+|\n+$/g, ''));
+  let text = parts.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
   const plain = text.replace(/\n/g, '\r\n');
   navigator.clipboard.writeText(plain)
