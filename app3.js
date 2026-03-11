@@ -948,18 +948,20 @@ function copyAll(){
       } else if(node.nodeType === 1){
         const tag = node.tagName.toLowerCase();
         if(tag === 'br'){ lines.push(''); return; }
-        const inner = node.innerHTML;
-        if(inner === '<br>' || inner === ''){ lines.push(''); return; }
-        const tmp = document.createElement('div');
-        tmp.innerHTML = inner;
-        lines.push(tmp.textContent || '');
+        // Clone, remove trailing <br>, get text
+        const clone = node.cloneNode(true);
+        const trailingBr = clone.lastChild;
+        if(trailingBr && trailingBr.nodeName === 'BR') clone.removeChild(trailingBr);
+        const text = clone.textContent;
+        if(text === ''){ lines.push(''); return; }
+        lines.push(text);
       }
     });
     return lines;
   }
   const allLines = [];
   pagesEl.querySelectorAll('.pg-ed').forEach((ed, i) => {
-    if(i > 0) allLines.push(''); // single blank line between pages
+    if(i > 0) allLines.push('');
     edToText(ed).forEach(l => allLines.push(l));
   });
   let text = allLines.join('\n');
