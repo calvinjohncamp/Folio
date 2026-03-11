@@ -664,14 +664,17 @@ function loadFile(input){
   const file = input.files[0];
   if(!file){ return; }
   const name = file.name || '';
-  const ext  = name.split('.').pop().toLowerCase();
+  const cleanName = name.split('?')[0].split('#')[0]; // strip query strings
+  const ext  = cleanName.split('.').pop().toLowerCase();
 
   if(ext === 'folio'){
     // ── .folio JSON ──
     const reader = new FileReader();
     reader.onload = function(e){
+      const raw = (e.target.result || '').trim();
+      if(!raw){ alert('Die Datei ist leer.'); input.value = ''; return; }
       try{
-        const s = JSON.parse(e.target.result);
+        const s = JSON.parse(raw);
         if(s.title){ dtEl.value = s.title; currentDocId = currentDocId || 'folio_doc_' + Date.now(); }
         if(s.font){ curFont = s.font; document.getElementById('fnt').value = s.font; }
         if(s.size){ curSize = s.size; document.getElementById('fsz').value = s.size; }
@@ -681,10 +684,10 @@ function loadFile(input){
         pagesEl.appendChild(buildPage(0));
         render(s.content || '');
         saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
-      } catch(err){ alert('Fehler beim Laden: ' + err.message); }
+      } catch(err){ alert('Fehler beim Laden: ' + err.message + '\n\nDateigröße: ' + raw.length + ' Zeichen'); }
       input.value = '';
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
 
   } else if(ext === 'txt'){
     // ── .txt plain text ──
