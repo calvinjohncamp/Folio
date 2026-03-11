@@ -684,6 +684,7 @@ function loadFile(input){
         pagesEl.innerHTML = '';
         pagesEl.appendChild(buildPage(0));
         if(isNormalDoc) pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
+        console.log('LOAD: isNormalDoc=', isNormalDoc, 'pg-body classes=', pagesEl.querySelector('.pg-body').className);
         render(s.content || '');
         saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
       } catch(err){ alert('Fehler beim Laden: ' + err.message + '\n\nDateigröße: ' + raw.length + ' Zeichen'); }
@@ -939,22 +940,26 @@ function selectAll(){
 
 function copyAll(){
   // Extract plain text: each <div> = one line, <div><br></div> = empty line
+  function nodeToText(node){
+    if(node.nodeType === 3) return node.textContent;
+    if(node.nodeType !== 1) return '';
+    const tag = node.tagName.toLowerCase();
+    if(tag === 'br') return '';
+    return Array.from(node.childNodes).map(nodeToText).join('');
+  }
   function edToText(ed){
     const lines = [];
     ed.childNodes.forEach(node => {
       if(node.nodeType === 3){
-        // bare text node
         lines.push(node.textContent);
       } else if(node.nodeType === 1){
         const tag = node.tagName.toLowerCase();
         if(tag === 'br'){ lines.push(''); return; }
-        // Check if this is an empty block <div><br></div>
         const isEmptyBlock = node.childNodes.length === 1
           && node.firstChild.nodeType === 1
           && node.firstChild.tagName.toLowerCase() === 'br';
         if(isEmptyBlock){ lines.push(''); return; }
-        // Normal block: extract text content (innerText adds extra newlines)
-        lines.push(node.textContent || '');
+        lines.push(nodeToText(node));
       }
     });
     return lines.join('\n');
@@ -997,6 +1002,10 @@ document.addEventListener('paste', function(e){
 
   const html = (e.clipboardData || window.clipboardData).getData('text/html');
   const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+
+  // DEBUG: show what we received (remove after debugging)
+  console.log('PASTE html:', html ? html.substring(0,300) : '(none)');
+  console.log('PASTE text:', text ? text.substring(0,300) : '(none)');
 
   if(html){
     // Strip Word junk: comments, styles, meta
