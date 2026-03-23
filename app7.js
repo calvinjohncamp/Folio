@@ -262,8 +262,18 @@ function setA4Mode(on){
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
       const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
 
-      // flowStart: direkt nach Split-Node — Leerzeilen gehören zum Fließtext
-      const flowStart = splitIdx + 1;
+      // flowStart: Leerzeilen nach Anrede überspringen, aber genau eine behalten
+      let flowStart = splitIdx + 1;
+      while(flowStart < allNodes.length){
+        const n = allNodes[flowStart];
+        const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
+        const isEmpty = inner === '<br>' || inner === '' ||
+                        (n.nodeType === 3 && !(n.textContent || '').trim());
+        if(isEmpty) flowStart++;
+        else break;
+      }
+      // Eine Leerzeile vor dem Fließtext einfügen
+      const flowPrefix = '<div><br></div>';
 
       // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
@@ -310,7 +320,7 @@ function setA4Mode(on){
           }
         }
       });
-      const flowHTML = flowDivs.join('');
+      const flowHTML = flowPrefix + flowDivs.join('');
 
       // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
       // Verfügbare Höhe für Text auf Seite 1:
