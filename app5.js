@@ -69,6 +69,10 @@ function buildEndlessPage(){
   const body = document.createElement('div');
   body.className = 'pg-body' + (isNormalDoc ? ' pg-body--normal' : '');
 
+  // Invisible gutter overlay on the left margin for line selection
+  const gutter = document.createElement('div');
+  gutter.className = 'pg-gutter';
+
   const ed = document.createElement('div');
   ed.className = 'pg-ed';
   ed.contentEditable = 'true';
@@ -82,6 +86,7 @@ function buildEndlessPage(){
   ed.addEventListener('mouseup', syncTb);
   ed.addEventListener('input', () => { autoSave(); stats(); });
 
+  body.appendChild(gutter);
   body.appendChild(ed);
   pg.appendChild(body);
   return pg;
@@ -684,72 +689,78 @@ document.addEventListener('paste', function(e){
 },true);
 
 // ── Line selection gutter ────────────────────────────────────────
-// Clicking/dragging in the left margin (pg-body padding area) selects whole lines
 (function(){
   let gutterSelecting = false;
-  let gutterStartNode = null;
+  let anchorRange = null;
 
-  function getLineRangeAtPoint(ed, clientY){
-    // Use caretRangeFromPoint to find which node/offset is at this Y position
-    const range = document.caretRangeFromPoint(ed.getBoundingClientRect().left + 10, clientY);
-    if(!range) return null;
-    // Expand to full line by finding the block element
-    let node = range.startContainer;
-    if(node.nodeType === 3) node = node.parentNode;
-    // Walk up to direct child of ed
-    while(node.parentNode && node.parentNode !== ed) node = node.parentNode;
-    if(!node || node === ed) return null;
-    const lineRange = document.createRange();
-    lineRange.selectNodeContents(node);
-    return lineRange;
+  function getLineNodeAtY(ed, clientY){
+    // Find which direct child of ed is at this Y
+    const children = Array.from(ed.childNodes);
+    for(const child of children){
+      if(child.nodeType !== 1 && child.nodeType !== 3) continue;
+      const el = child.nodeType === 1 ? child : null;
+      if(!el) continue;
+      const rect = el.getBoundingClientRect();
+      if(clientY >= rect.top && clientY <= rect.bottom) return el;
+    }
+    // Fallback: closest child
+    let best = null, bestDist = Infinity;
+    for(const child of children){
+      if(child.nodeType !== 1) continue;
+      const rect = child.getBoundingClientRect();
+      const mid = (rect.top + rect.bottom) / 2;
+      const dist = Math.abs(clientY - mid);
+      if(dist < bestDist){ bestDist = dist; best = child; }
+    }
+    return best;
+  }
+
+  function rangeForNode(node){
+    const r = document.createRange();
+    r.selectNodeContents(node);
+    return r;
   }
 
   document.addEventListener('mousedown', function(e){
     if(isA4Mode) return;
-    const body = e.target.closest('.pg-body');
-    const ed = e.target.closest('.pg-ed');
-    // Only trigger if click is on pg-body but NOT on pg-ed (i.e. in the gutter)
-    if(!body || ed) return;
-
-    gutterSelecting = true;
-    gutterStartNode = null;
+    if(!e.target.classList.contains('pg-gutter')) return;
     e.preventDefault();
-
-    const bodyEd = body.querySelector('.pg-ed');
-    if(!bodyEd) return;
-    bodyEd.focus();
-
-    const lineRange = getLineRangeAtPoint(bodyEd, e.clientY);
-    if(!lineRange) return;
-    gutterStartNode = lineRange;
-
+    gutterSelecting = true;
+    anchorRange = null;
+    const body = e.target.closest('.pg-body');
+    if(!body) return;
+    const ed = body.querySelector('.pg-ed');
+    if(!ed) return;
+    ed.focus();
+    const node = getLineNodeAtY(ed, e.clientY);
+    if(!node) return;
+    anchorRange = rangeForNode(node);
     const sel = window.getSelection();
     sel.removeAllRanges();
-    sel.addRange(lineRange.cloneRange());
+    sel.addRange(anchorRange.cloneRange());
   }, true);
 
   document.addEventListener('mousemove', function(e){
-    if(!gutterSelecting || !gutterStartNode) return;
-    const body = e.target.closest('.pg-body') || document.querySelector('.pg--endless .pg-body');
+    if(!gutterSelecting || !anchorRange) return;
+    e.preventDefault();
+    // Find ed from any pg-gutter or pg-ed under cursor
+    const body = document.querySelector('.pg--endless .pg-body');
     if(!body) return;
-    const bodyEd = body.querySelector('.pg-ed');
-    if(!bodyEd) return;
-
-    const lineRange = getLineRangeAtPoint(bodyEd, e.clientY);
-    if(!lineRange) return;
-
-    // Extend selection from gutterStartNode start to lineRange end (or start if going up)
+    const ed = body.querySelector('.pg-ed');
+    if(!ed) return;
+    const node = getLineNodeAtY(ed, e.clientY);
+    if(!node) return;
+    const targetRange = rangeForNode(node);
     const sel = window.getSelection();
-    const combined = document.createRange();
     try{
-      // Determine direction
-      const cmp = gutterStartNode.compareBoundaryPoints(Range.START_TO_START, lineRange);
+      const combined = document.createRange();
+      const cmp = anchorRange.compareBoundaryPoints(Range.START_TO_START, targetRange);
       if(cmp <= 0){
-        combined.setStart(gutterStartNode.startContainer, gutterStartNode.startOffset);
-        combined.setEnd(lineRange.endContainer, lineRange.endOffset);
+        combined.setStart(anchorRange.startContainer, anchorRange.startOffset);
+        combined.setEnd(targetRange.endContainer, targetRange.endOffset);
       } else {
-        combined.setStart(lineRange.startContainer, lineRange.startOffset);
-        combined.setEnd(gutterStartNode.endContainer, gutterStartNode.endOffset);
+        combined.setStart(targetRange.startContainer, targetRange.startOffset);
+        combined.setEnd(anchorRange.endContainer, anchorRange.endOffset);
       }
       sel.removeAllRanges();
       sel.addRange(combined);
