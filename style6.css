@@ -248,6 +248,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   body,#main{overflow:visible;height:auto}
   #pages{gap:0;margin-top:0}
   #pages.a4-mode::before{display:none}
+  .pg--endless{display:none!important}
   .pg--a4{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
   .pg--a4:last-child{page-break-after:avoid!important;break-after:avoid!important}
   .pg--a4 .pg-body{padding:0 20mm 0;overflow:visible}

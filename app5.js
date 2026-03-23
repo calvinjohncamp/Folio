@@ -477,8 +477,17 @@ function buildHTML(title){
     +`</style></head><body>${collect()}</body></html>`;
 }
 function doPDF(){
-  if(!isA4Mode) setA4Mode(true);
-  setTimeout(() => window.print(), 400);
+  if(!isA4Mode){
+    setA4Mode(true);
+    // Wait for DOM to fully render all pages before printing
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(() => window.print(), 300);
+      });
+    });
+  } else {
+    window.print();
+  }
 }
 
 // ── Open file ─────────────────────────────────────────────────────
