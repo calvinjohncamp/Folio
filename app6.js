@@ -180,19 +180,38 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    // For brief: strip the header and unwrap outer div(s) before paginating
+    // For brief: strip the header and flatten ALL nested divs for paginator
     let htmlToPaginate = normalizedHTML;
     if(!isNormalDoc){
       const tmpStrip = document.createElement('div');
       tmpStrip.innerHTML = normalizedHTML;
       const briefHdr = tmpStrip.querySelector('[data-brief-header]');
       if(briefHdr) briefHdr.remove();
-      // Recursively unwrap single outer wrapper divs
-      let container = tmpStrip;
-      while(container.children.length === 1 && container.firstElementChild.tagName === 'DIV'){
-        container = container.firstElementChild;
+
+      // Flatten: collect all leaf-level block content as individual divs
+      const flatLines = [];
+      function flatten(node){
+        if(node.nodeType === 3){
+          const t = node.textContent.trim();
+          if(t) flatLines.push('<div>' + t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
+          return;
+        }
+        if(node.nodeType !== 1) return;
+        const tag = node.tagName.toLowerCase();
+        const isBlock = ['div','p','h1','h2','h3','li'].includes(tag);
+        const hasBlockChildren = Array.from(node.children).some(c => ['div','p','h1','h2','h3','li'].includes(c.tagName.toLowerCase()));
+        if(isBlock && !hasBlockChildren){
+          const inner = node.innerHTML.trim();
+          flatLines.push(inner ? '<div>' + inner + '</div>' : '<div><br></div>');
+        } else {
+          Array.from(node.childNodes).forEach(flatten);
+          if(isBlock && flatLines.length && flatLines[flatLines.length-1] !== '<div><br></div>'){
+            // Don't add extra empty line
+          }
+        }
       }
-      htmlToPaginate = container === tmpStrip ? tmpStrip.innerHTML : container.innerHTML;
+      Array.from(tmpStrip.childNodes).forEach(flatten);
+      htmlToPaginate = flatLines.join('') || tmpStrip.innerHTML;
     }
 
     // For brief: header is 20px padding + 167px image = 187px + 38px footer + 30px buffer
@@ -743,23 +762,6 @@ document.addEventListener('paste', function(e){
     const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('');
     document.execCommand('insertHTML',false,divs);
   }
-  // Normalize: if editor still has just 1 child node, break it into lines
-  setTimeout(function(){
-    const ed2 = activeEd();
-    if(!ed2 || ed2.childNodes.length > 3) return;
-    const single = ed2.firstChild;
-    if(!single) return;
-    // Get plain text and re-render as individual divs
-    const raw = ed2.innerText || '';
-    if(!raw.trim()) return;
-    const lines = raw.split('\n');
-    if(lines.length < 2) return;
-    const newHTML = lines.map(l => l.trim() ?
-      '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' :
-      '<div><br></div>'
-    ).join('');
-    ed2.innerHTML = newHTML;
-  }, 50);
 },true);
 
 // ── Line selection gutter ────────────────────────────────────────
