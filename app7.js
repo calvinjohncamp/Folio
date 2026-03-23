@@ -155,24 +155,49 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
 }
 
 
-// ── Measure fixed brief height ────────────────────────────────────
-function measureFixedHeight(fixedHTML){
-  const temp = document.createElement('div');
-  temp.style.position = 'absolute';
-  temp.style.left = '-9999px';
-  temp.style.top = '0';
-  temp.style.visibility = 'hidden';
-  temp.style.width = '654px';
-  temp.style.fontFamily = curFont;
-  temp.style.fontSize = '12pt';
-  temp.style.lineHeight = curLH;
-  temp.style.padding = '0';
-  temp.style.margin = '0';
-  temp.innerHTML = fixedHTML;
-  document.body.appendChild(temp);
-  const height = temp.scrollHeight;
-  document.body.removeChild(temp);
-  return height;
+// ── Measure available flow space on page 1 ───────────────────────
+function measurePage1FlowSpace(fixedHTML){
+  const tempWrap = document.createElement('div');
+  tempWrap.style.position = 'absolute';
+  tempWrap.style.left = '-9999px';
+  tempWrap.style.top = '0';
+  tempWrap.style.visibility = 'hidden';
+
+  const pg = document.createElement('div');
+  pg.className = 'pg pg--a4';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'pg-brief-hdr1';
+  hdr.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:0;box-sizing:border-box"><img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" /><img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" /></div>';
+
+  const body = document.createElement('div');
+  body.className = 'pg-body pg-body--brief-p1';
+
+  const ed = document.createElement('div');
+  ed.className = 'pg-ed';
+  ed.style.height = 'auto';
+  ed.style.overflow = 'visible';
+  ed.style.fontFamily = curFont;
+  ed.style.fontSize = '12pt';
+  ed.style.lineHeight = curLH;
+  ed.innerHTML = fixedHTML;
+
+  const ftr = document.createElement('div');
+  ftr.className = 'pg-ftr';
+  ftr.innerHTML = '<span class="pg-fname">Brief</span><span class="pg-num">1</span>';
+
+  body.appendChild(ed);
+  pg.appendChild(hdr);
+  pg.appendChild(body);
+  pg.appendChild(ftr);
+  tempWrap.appendChild(pg);
+  document.body.appendChild(tempWrap);
+
+  const bodyH = body.clientHeight;
+  const fixedH = ed.scrollHeight;
+
+  document.body.removeChild(tempWrap);
+  return Math.max(bodyH - fixedH, 40);
 }
 
 // ── Switch modes ─────────────────────────────────────────────────
@@ -276,12 +301,8 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      // Echte Höhe des fixen Teils messen (body content only, ohne header)
-      const fixedBodyHeight = measureFixedHeight(fixedHTML);
-      // Header-Block (pg-brief-hdr1) hat feste Höhe: 20px padding + 167px Bild = 187px
-      const HEADER_H = 104;
-      const SAFETY = 20;
-      const availableH = Math.max(PAGE_H - HEADER_H - fixedBodyHeight - SAFETY, 100);
+      // Echten verfügbaren Platz auf Seite 1 messen
+      const availableH = measurePage1FlowSpace(fixedHTML) - 8;
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
