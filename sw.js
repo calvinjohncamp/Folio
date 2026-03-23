@@ -1,9 +1,9 @@
-const CACHE = 'folio-v83';
+const CACHE = 'folio-v84';
 const ASSETS = [
   '/',
   '/index.html',
-  '/style5.css',
-  '/app4.js',
+  '/style6.css',
+  '/app5.js',
   '/sw.js'
 ];
 
@@ -24,7 +24,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network-first: always try network, fall back to cache
   e.respondWith(
     fetch(e.request).then(resp => {
       if(resp && resp.status === 200 && resp.type === 'basic'){

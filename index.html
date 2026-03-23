@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Folio</title>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style5.css">
+<link rel="stylesheet" href="style6.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
@@ -18,8 +18,12 @@
 <div id="hdr">
   <div class="logo">Folio<em>.</em></div>
   <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
-  <button id="aabtn" onclick="openRename()" style="display:none;background:transparent;border:1px solid rgba(250,249,246,.3);color:#faf9f6;border-radius:6px;padding:4px 9px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-right:8px">Aa</button>
   <div class="hbtns">
+    <!-- Mode toggle: ∞ Endless / A4 Preview -->
+    <div class="mode-btns">
+      <button class="mode-btn" id="endlessbtn" onclick="setA4Mode(false)" title="Endlos schreiben">∞</button>
+      <button class="mode-btn" id="a4btn" onclick="setA4Mode(true)" title="A4-Vorschau">A4</button>
+    </div>
     <button class="hbtn" onclick="openFile()">Öffnen</button>
     <button class="hbtn" onclick="openSaveAs()">Speichern unter</button>
     <button class="hbtn p" onclick="doPDF()">PDF</button>
@@ -65,7 +69,7 @@
   <div class="sep"></div>
   <button class="tbtn" title="Alles markieren" onclick="selectAll()" style="font-weight:900;font-size:13px">M</button>
   <div class="sep"></div>
-  <button class="tbtn" title="Alles löschen" onclick="clearAll()" ><svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <button class="tbtn" title="Alles löschen" onclick="clearAll()"><svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
   <line x1="1" y1="2" x2="11" y2="2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
   <line x1="4" y1="0.5" x2="8" y2="0.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
   <line x1="2" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
@@ -74,7 +78,6 @@
   <line x1="5" y1="4" x2="4.5" y2="12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
   <line x1="7" y1="4" x2="7.5" y2="12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
 </svg></button>
-
 </div>
 <div id="main">
   <div id="side"></div>
@@ -83,7 +86,7 @@
 <div id="sb">
   <span>Wörter: <span class="sv" id="wc">0</span></span>
   <span>Zeichen: <span class="sv" id="cc">0</span></span>
-  <span>Seiten: <span class="sv" id="pgc">1</span></span>
+  <span>Seiten: <span class="sv" id="pgc">—</span></span>
   <span id="saved">Folio 1.0</span>
 </div>
 <div id="ruler"></div>
@@ -135,6 +138,6 @@
   </div>
 </div>
 
-<script src="app4.js"></script>
+<script src="app5.js"></script>
 </body>
 </html>
