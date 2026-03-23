@@ -188,7 +188,7 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    const firstH = isNormalDoc ? PAGE_H : PAGE_H - 340;
+    const firstH = isNormalDoc ? PAGE_H : 505;
     const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
@@ -198,6 +198,8 @@ function setA4Mode(on){
     curSize = savedSize;
     syncRuler();
     showSaved('A4-Vorschau');
+    // Scroll to top so header is visible
+    document.getElementById('cv').scrollTop = 0;
   } else {
     // Restore the saved endless content
     pagesEl.classList.remove('a4-mode');
