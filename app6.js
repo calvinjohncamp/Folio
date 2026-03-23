@@ -218,16 +218,10 @@ function setA4Mode(on){
       const flowHTML = flowNodes.map(n => n.outerHTML || n.textContent || '').join('');
 
       // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
-      // Messe Höhe des fixen Teils im Ruler
-      // Bilder werden im Ruler nicht geladen → image2.jpg Höhe (167px) hart kodieren
-      ruler.innerHTML = fixedHTML;
-      const fixedHeightNoImages = ruler.scrollHeight;
-      ruler.innerHTML = '';
-      // image2.jpg ist 167px hoch + margin-top:87px auf dem Header-Container = 254px
-      // Diese Höhe fehlt dem Ruler weil Bilder nicht laden
-      const IMAGE_HEADER_H = 254;
-      const fixedHeight = fixedHeightNoImages + IMAGE_HEADER_H;
-      const availableH = PAGE_H - fixedHeight - 20; // 20px Sicherheitspuffer
+      // Verfügbare Höhe für Text auf Seite 1:
+      // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
+      // PAGE_H(973) - 550 = 423px für Fließtext
+      const availableH = 423;
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
