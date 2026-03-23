@@ -269,7 +269,13 @@ function setA4Mode(on){
       }
 
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
-      const fixedNodes = allNodes.slice(0, splitIdx + 1);
+      // Include the <br> after "Sehr geehrte" in fixedNodes
+      let fixedEnd = splitIdx + 1;
+      if(fixedEnd < allNodes.length){
+        const nextInner = allNodes[fixedEnd].nodeType === 1 ? (allNodes[fixedEnd].innerHTML||'').trim() : '';
+        if(nextInner === '<br>') fixedEnd++;
+      }
+      const fixedNodes = allNodes.slice(0, fixedEnd);
       const fixedHTMLBase = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
       const fixedHTML = fixedHTMLBase + '<div><br></div>'; // extra br nur für Höhenmessung
 
