@@ -69,6 +69,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg--endless .pg-body{
   flex:1;
   padding:0 var(--mg) 40px;
+  cursor:e-resize;
 }
 .pg--endless .pg-body--normal{
   padding-top:68px;
@@ -83,6 +84,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   line-height:1.25;
   color:var(--ink);
   word-wrap:break-word;
+  cursor:text;
 }
 
 /* ── A4 pages (preview mode) ── */

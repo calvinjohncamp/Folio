@@ -683,7 +683,83 @@ document.addEventListener('paste', function(e){
   }
 },true);
 
-// ── Init ──────────────────────────────────────────────────────────
+// ── Line selection gutter ────────────────────────────────────────
+// Clicking/dragging in the left margin (pg-body padding area) selects whole lines
+(function(){
+  let gutterSelecting = false;
+  let gutterStartNode = null;
+
+  function getLineRangeAtPoint(ed, clientY){
+    // Use caretRangeFromPoint to find which node/offset is at this Y position
+    const range = document.caretRangeFromPoint(ed.getBoundingClientRect().left + 10, clientY);
+    if(!range) return null;
+    // Expand to full line by finding the block element
+    let node = range.startContainer;
+    if(node.nodeType === 3) node = node.parentNode;
+    // Walk up to direct child of ed
+    while(node.parentNode && node.parentNode !== ed) node = node.parentNode;
+    if(!node || node === ed) return null;
+    const lineRange = document.createRange();
+    lineRange.selectNodeContents(node);
+    return lineRange;
+  }
+
+  document.addEventListener('mousedown', function(e){
+    if(isA4Mode) return;
+    const body = e.target.closest('.pg-body');
+    const ed = e.target.closest('.pg-ed');
+    // Only trigger if click is on pg-body but NOT on pg-ed (i.e. in the gutter)
+    if(!body || ed) return;
+
+    gutterSelecting = true;
+    gutterStartNode = null;
+    e.preventDefault();
+
+    const bodyEd = body.querySelector('.pg-ed');
+    if(!bodyEd) return;
+    bodyEd.focus();
+
+    const lineRange = getLineRangeAtPoint(bodyEd, e.clientY);
+    if(!lineRange) return;
+    gutterStartNode = lineRange;
+
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(lineRange.cloneRange());
+  }, true);
+
+  document.addEventListener('mousemove', function(e){
+    if(!gutterSelecting || !gutterStartNode) return;
+    const body = e.target.closest('.pg-body') || document.querySelector('.pg--endless .pg-body');
+    if(!body) return;
+    const bodyEd = body.querySelector('.pg-ed');
+    if(!bodyEd) return;
+
+    const lineRange = getLineRangeAtPoint(bodyEd, e.clientY);
+    if(!lineRange) return;
+
+    // Extend selection from gutterStartNode start to lineRange end (or start if going up)
+    const sel = window.getSelection();
+    const combined = document.createRange();
+    try{
+      // Determine direction
+      const cmp = gutterStartNode.compareBoundaryPoints(Range.START_TO_START, lineRange);
+      if(cmp <= 0){
+        combined.setStart(gutterStartNode.startContainer, gutterStartNode.startOffset);
+        combined.setEnd(lineRange.endContainer, lineRange.endOffset);
+      } else {
+        combined.setStart(lineRange.startContainer, lineRange.startOffset);
+        combined.setEnd(gutterStartNode.endContainer, gutterStartNode.endOffset);
+      }
+      sel.removeAllRanges();
+      sel.addRange(combined);
+    } catch(err){}
+  });
+
+  document.addEventListener('mouseup', function(){
+    gutterSelecting = false;
+  });
+})();
 function init(){
   Object.keys(localStorage).forEach(k=>{ if(k.startsWith('folio_doc_')||k===STORE) localStorage.removeItem(k); });
   currentDocId='folio_doc_'+Date.now();
