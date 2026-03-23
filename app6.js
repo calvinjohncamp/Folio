@@ -123,6 +123,7 @@ function buildA4PreviewPage(idx, html){
   const body = document.createElement('div');
   body.className = 'pg-body' +
     (isNormalDoc ? ' pg-body--normal' : '') +
+    (!isNormalDoc && idx === 0 ? ' pg-body--brief-p1' : '') +
     (!isNormalDoc && idx > 0 ? ' pg-body--cont' : '');
 
   const ed = document.createElement('div');
@@ -190,7 +191,7 @@ function setA4Mode(on){
       htmlToPaginate = tmpStrip.innerHTML;
     }
 
-    const firstH = isNormalDoc ? PAGE_H : 600;
+    const firstH = isNormalDoc ? PAGE_H : 750;
     const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {

@@ -122,8 +122,8 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg--a4 .pg-body--normal{
   padding-top:68px;
 }
-.pg--a4 .pg-body--cont{
-  padding-top:12px;
+.pg--a4 .pg-body--brief-p1{
+  padding-top:8px;
 }
 .pg--a4 .pg-ed{
   width:100%;
