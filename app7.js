@@ -247,7 +247,7 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      const availableH = 423;
+      const availableH = 480;
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
@@ -447,7 +447,6 @@ const TEMPLATES = [
 <div style="font-size:12pt;line-height:1.5">[PLZ Ort]</div>
 <div style="height:70px"></div>
 <div style="display:flex;align-items:baseline;margin-bottom:8px;font-size:12pt;line-height:1.5"><span class="betreff-line" style="flex:1">[Betreff]</span><span style="width:33%;text-align:left;flex-shrink:0;padding-left:3px">${today}</span></div>
-<div><br></div>
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Sehr geehrte Damen und Herren,</div>
 <div><br></div>
