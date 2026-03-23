@@ -267,10 +267,10 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   }
   .pg--a4:last-child { page-break-after:avoid!important; break-after:avoid!important; }
   .pg--a4 .pg-body { padding:0 20mm 0!important; overflow:visible!important; }
-  .pg--a4 .pg-body--normal { padding-top:20mm!important; }
-  .pg--a4 .pg-body--cont { padding-top:4mm!important; }
+  .pg--a4 .pg-body--normal { padding-top:25mm!important; }
+  .pg--a4 .pg-body--cont { padding-top:15mm!important; }
   .pg--a4 .pg-ed { overflow:visible!important; height:auto!important; }
-  .pg-ftr { height:12mm!important; padding:3mm 20mm 0!important; }
+  .pg-ftr { height:14mm!important; padding:4mm 20mm 0!important; font-size:8pt!important; }
   .pg-brief-hdr2 { padding:16px 20mm 0!important; }
   @page { size:A4; margin:0; }
 }
