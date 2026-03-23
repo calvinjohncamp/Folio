@@ -272,19 +272,27 @@ function setA4Mode(on){
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
       const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + '<div><br></div>';
 
-      // Abschluss-Teil finden: "Freundliche Grüße" + "Jörn Kämper" am Ende
+      // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
-      for(let i = allNodes.length - 1; i > splitIdx; i--){
+      // Erst von hinten "Jörn Kämper" und "Freundliche Grüße" + umgebende Leerzeilen finden
+      let i = allNodes.length - 1;
+      while(i > splitIdx){
         const txt = (allNodes[i].textContent || '').trim();
-        if(txt === 'Jörn Kämper' || txt === 'Freundliche Grüße' || txt === '' ) {
+        const inner = allNodes[i].nodeType === 1 ? (allNodes[i].innerHTML || '').trim() : '';
+        if(txt === '' || inner === '<br>' || txt === 'Jörn Kämper' || txt === 'Freundliche Grüße'){
           endIdx = i;
+          i--;
         } else {
           break;
         }
       }
       const trailingNodes = allNodes.slice(endIdx);
       const trailingHTML = trailingNodes.length ?
-        '<div><br></div>' + trailingNodes.map(n => n.outerHTML || n.textContent || '').join('') : '';
+        '<div><br></div>' + trailingNodes.filter(n => {
+          const txt = (n.textContent || '').trim();
+          const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
+          return txt !== '' && inner !== '<br>';
+        }).map(n => n.outerHTML || n.textContent || '').join('') : '';
 
       // Fließtext: alles nach Split-Node
       const flowNodes = allNodes.slice(flowStart, endIdx);
