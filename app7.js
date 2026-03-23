@@ -176,11 +176,7 @@ function measureFixedHeight(fixedHTML){
   const body = temp.querySelector('.pg-body');
   const height = body ? body.scrollHeight : 400;
   document.body.removeChild(temp);
-  // Bilder werden nicht geladen im unsichtbaren Container
-  // image2.jpg = 167px hoch, margin-top:87px auf dem Brief-Header = 254px
-  // pg-brief-hdr1 padding-top = 20px
-  // Total Bild-Offset = 274px
-  return height + 274;
+  return height;
 }
 
 // ── Switch modes ─────────────────────────────────────────────────
@@ -287,10 +283,12 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      // Echte Höhe des fixen Teils messen
-      const fixedHeight = measureFixedHeight(fixedHTML);
-      const SAFETY = 10;
-      const availableH = Math.max(PAGE_H - fixedHeight - SAFETY, 100);
+      // Echte Höhe des fixen Teils messen (body content only, ohne header)
+      const fixedBodyHeight = measureFixedHeight(fixedHTML);
+      // Header-Block (pg-brief-hdr1) hat feste Höhe: 20px padding + 167px Bild = 187px
+      const HEADER_H = 187;
+      const SAFETY = 20;
+      const availableH = Math.max(PAGE_H - HEADER_H - fixedBodyHeight - SAFETY, 100);
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
