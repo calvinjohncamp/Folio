@@ -154,6 +154,31 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
   return pg;
 }
 
+
+// ── Measure fixed brief height ────────────────────────────────────
+function measureFixedHeight(fixedHTML){
+  const temp = document.createElement('div');
+  temp.style.position = 'absolute';
+  temp.style.left = '-9999px';
+  temp.style.top = '0';
+  temp.style.width = '794px';
+  temp.style.visibility = 'hidden';
+  temp.innerHTML = `
+    <div class="pg pg--a4">
+      <div class="pg-body pg-body--brief-p1">
+        <div class="pg-ed" style="font-family:${curFont}; font-size:12pt; line-height:${curLH}">
+          ${fixedHTML}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(temp);
+  const body = temp.querySelector('.pg-body');
+  const height = body ? body.scrollHeight : 400;
+  document.body.removeChild(temp);
+  return height;
+}
+
 // ── Switch modes ─────────────────────────────────────────────────
 let savedEndlessHTML = ''; // Content saved before A4 switch
 
@@ -211,18 +236,15 @@ function setA4Mode(on){
       // Kein Split-Punkt gefunden → alles als Fließtext behandeln
       if(splitIdx === -1) splitIdx = 0;
 
-      // Überspringe leere Nodes — ersten <br> behalten als Leerzeile
+      // Überspringe alle leeren Nodes nach Split-Punkt
       let flowStart = splitIdx + 1;
-      let keptBr = false;
       while(flowStart < allNodes.length){
         const n = allNodes[flowStart];
         const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
-        const isBr = inner === '<br>';
-        const isEmpty = inner === '' || (n.nodeType === 3 && !(n.textContent || '').trim());
-        if(isEmpty){ flowStart++; continue; }
-        if(isBr && !keptBr){ keptBr = true; break; }
-        if(isBr && keptBr){ flowStart++; continue; }
-        break;
+        const isEmpty = inner === '<br>' || inner === '' ||
+                        (n.nodeType === 3 && !(n.textContent || '').trim());
+        if(isEmpty) flowStart++;
+        else break;
       }
 
       // Fixer Teil: alles bis inkl. Split-Node
@@ -261,10 +283,13 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      const availableH = 356;
+      // Echte Höhe des fixen Teils messen
+      const fixedHeight = measureFixedHeight(fixedHTML);
+      const SAFETY = 10;
+      const availableH = Math.max(PAGE_H - fixedHeight - SAFETY, 100);
 
       // Fließtext paginieren
-      const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
+      const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
