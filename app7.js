@@ -272,7 +272,7 @@ function setA4Mode(on){
       while(i > splitIdx){
         const txt = (allNodes[i].textContent || '').trim();
         const inner = allNodes[i].nodeType === 1 ? (allNodes[i].innerHTML || '').trim() : '';
-        if(txt === '' || inner === '<br>' || txt === 'Jörn Kämper' || txt === 'Freundliche Grüße'){
+        if(txt === '' || inner === '<br>' || txt.includes('Kämper') || txt.includes('Freundliche') || txt.includes('Grüße')){
           endIdx = i;
           i--;
         } else {
@@ -322,6 +322,8 @@ function setA4Mode(on){
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
+      console.log('trailingNodes count:', trailingNodes.length, 'trailingHTML:', trailingHTML.slice(0,200));
+      console.log('endIdx:', endIdx, 'allNodes.length:', allNodes.length, 'splitIdx:', splitIdx);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
       // trailingHTML an letzten Chunk hängen — auch wenn alles auf Seite 1 passt
