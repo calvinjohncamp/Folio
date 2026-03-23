@@ -211,12 +211,22 @@ function setA4Mode(on){
       // Kein Split-Punkt gefunden → alles als Fließtext behandeln
       if(splitIdx === -1) splitIdx = 0;
 
+      // Überspringe leere <br>-Nodes direkt nach dem Split-Punkt
+      let flowStart = splitIdx + 1;
+      while(flowStart < allNodes.length){
+        const n = allNodes[flowStart];
+        const isEmpty = (n.nodeType === 1 && n.innerHTML && n.innerHTML.trim() === '<br>') ||
+                        (n.nodeType === 3 && !n.textContent.trim());
+        if(isEmpty) flowStart++;
+        else break;
+      }
+
       // Fixer Teil: alles bis inkl. Split-Node
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
       const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
 
       // Fließtext: alles nach Split-Node
-      const flowNodes = allNodes.slice(splitIdx + 1);
+      const flowNodes = allNodes.slice(flowStart);
       // Konvertiere alle Nodes zu divs damit der Paginator umbrechen kann
       const flowDivs = [];
       flowNodes.forEach(n => {
@@ -247,7 +257,7 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      const availableH = 530;
+      const availableH = 560;
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
