@@ -188,7 +188,16 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    const firstH = isNormalDoc ? PAGE_H : 505;
+    const firstH = isNormalDoc ? PAGE_H : (function(){
+      const testPg = buildA4PreviewPage(0, '');
+      testPg.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;visibility:hidden';
+      document.body.appendChild(testPg);
+      const hdr = testPg.querySelector('.pg-brief-hdr1');
+      const hdrH = hdr ? hdr.offsetHeight : 220;
+      document.body.removeChild(testPg);
+      // Subtract header + footer (38px) + safe buffer (20px)
+      return PAGE_H - hdrH - 38 - 20;
+    })();
     const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
