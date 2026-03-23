@@ -279,7 +279,7 @@ function setA4Mode(on){
       // Echte Höhe des fixen Teils messen (body content only, ohne header)
       const fixedBodyHeight = measureFixedHeight(fixedHTML);
       // Header-Block (pg-brief-hdr1) hat feste Höhe: 20px padding + 167px Bild = 187px
-      const HEADER_H = 108;
+      const HEADER_H = 104;
       const SAFETY = 20;
       const availableH = Math.max(PAGE_H - HEADER_H - fixedBodyHeight - SAFETY, 100);
 
