@@ -62,7 +62,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   top:0;
   bottom:0;
   width:var(--mg);
-  cursor:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB1ElEQVR4nM2X23KDQAxDJbf//8WN1YesNt4FEii51DOZEC6rI9sYQgDCByM+Kf4vAL7fJUTSn5QUmfkegCYqb0tiBBOIyMzXAVi4ifpDAGhfAF6QgVk4MzkdFwA8tQSlvgKwECYpu3cZfOwUwCQsSayLk0ySNJSjbv8JoAhjRVgRUfcDAAEgIuq+4wDVcUmzU6sCFCXl2nK/G8CO1hqrCMOZsEi7rm1z4f4hQETcbSwLZ+ZiYWfqdg0h5UJjAbDS0cPiETEAzcJ1HR+7lmGZ/gGg3L+SxA23mtO8Je5z/XueBwMASUQE7jQWPcnuCU8Axb1W3Q8AlbhFkkzDXE+7hhdbW7Q25CP3HUASSDIisszsyEy3sTPhwaLikvXpZjMNuPfLVhDljSgi5KnmfbcHiHppSshlulwuUWbEMHgMt5kBx1T/7qaJ9FXK5KMktpE7u/eam+ILgMHarXFYF7RIc+fMqIiHz5t66hjAGlD5ZptyCeCrCapFf/7caz7HmXfC3j/NaU7z/6H4KQDfOQZwZuYXjpcCuP64NqNLsav2pwGaWHdcY6/70wAt7cMcOeL+GQDs9+cItTuGSfiXaO8MPwCijuS3AQDDA+j4tc8AOBMf/3P6Cx0FrlTNhTzHAAAAAElFTkSuQmCC") 4 2, default;
+  cursor:url('/cursor.png') 4 2, default;
   z-index:10;
   user-select:none;
   -webkit-user-select:none;
