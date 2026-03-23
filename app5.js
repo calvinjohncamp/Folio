@@ -135,31 +135,39 @@ function setA4Mode(on){
   const html = collect();
   isA4Mode = on;
   updateModeButtons();
-  // Lock/unlock toolbar
   document.body.classList.toggle('a4-locked', on);
 
   if(on){
     pagesEl.classList.add('a4-mode');
     pagesEl.innerHTML = '';
-    // Normalize all font-sizes to 12pt for A4 render
+
+    // Normalize all inline font-sizes to 12pt
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
-    // Replace inline font-size spans with 12pt
     tmp.querySelectorAll('[style*="font-size"]').forEach(el => {
       el.style.fontSize = '12pt';
     });
-    // Also normalize the editor's root font-size via ruler
     const normalizedHTML = tmp.innerHTML;
+
+    // Set ruler to 12pt so page-break measurement matches render
+    const savedSize = curSize;
+    curSize = '12';
+    syncRuler();
+
     const firstH = isNormalDoc ? PAGE_H : PAGE_H - 215;
     const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
       const pg = buildA4PreviewPage(i, chunk);
-      // Force 12pt on the editor element itself
       const ed = pg.querySelector('.pg-ed');
       if(ed) ed.style.fontSize = '12pt';
       pagesEl.appendChild(pg);
     });
+
+    // Restore ruler to actual curSize
+    curSize = savedSize;
+    syncRuler();
+
     showSaved('A4-Vorschau');
   } else {
     pagesEl.classList.remove('a4-mode');
