@@ -743,6 +743,23 @@ document.addEventListener('paste', function(e){
     const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('');
     document.execCommand('insertHTML',false,divs);
   }
+  // Normalize: if editor still has just 1 child node, break it into lines
+  setTimeout(function(){
+    const ed2 = activeEd();
+    if(!ed2 || ed2.childNodes.length > 3) return;
+    const single = ed2.firstChild;
+    if(!single) return;
+    // Get plain text and re-render as individual divs
+    const raw = ed2.innerText || '';
+    if(!raw.trim()) return;
+    const lines = raw.split('\n');
+    if(lines.length < 2) return;
+    const newHTML = lines.map(l => l.trim() ?
+      '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' :
+      '<div><br></div>'
+    ).join('');
+    ed2.innerHTML = newHTML;
+  }, 50);
 },true);
 
 // ── Line selection gutter ────────────────────────────────────────
