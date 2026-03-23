@@ -62,7 +62,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   top:0;
   bottom:0;
   width:var(--mg);
-  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 L14 10 M10 5 L15 10 L10 15' stroke='%231a1814' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 4 10, pointer;
+  cursor:default;
   z-index:10;
   user-select:none;
   -webkit-user-select:none;
