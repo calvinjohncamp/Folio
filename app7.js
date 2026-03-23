@@ -258,15 +258,8 @@ function setA4Mode(on){
       if(splitIdx === -1) splitIdx = 0;
 
       // Überspringe alle leeren Nodes nach Split-Punkt
-      let flowStart = splitIdx + 1;
-      while(flowStart < allNodes.length){
-        const n = allNodes[flowStart];
-        const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
-        const isEmpty = inner === '<br>' || inner === '' ||
-                        (n.nodeType === 3 && !(n.textContent || '').trim());
-        if(isEmpty) flowStart++;
-        else break;
-      }
+      // flowStart = direkt nach fixedEnd (br bereits in fixedHTMLBase)
+      let flowStart = fixedEnd;
 
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       // Include the <br> after "Sehr geehrte" in fixedNodes
