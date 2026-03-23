@@ -243,9 +243,9 @@ function setA4Mode(on){
         else break;
       }
 
-      // Fixer Teil: alles bis inkl. Split-Node
+      // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
-      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + '<div><br></div>';
 
       // Fließtext: alles nach Split-Node
       const flowNodes = allNodes.slice(flowStart);
