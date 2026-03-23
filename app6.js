@@ -191,7 +191,7 @@ function setA4Mode(on){
       htmlToPaginate = tmpStrip.innerHTML;
     }
 
-    const firstH = isNormalDoc ? PAGE_H : 750;
+    const firstH = isNormalDoc ? PAGE_H : 920;
     const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
