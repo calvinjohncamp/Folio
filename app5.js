@@ -160,25 +160,30 @@ function buildA4PreviewPage(idx, html){
 }
 
 // ── Switch modes ─────────────────────────────────────────────────
+let savedEndlessHTML = ''; // Content saved before A4 switch
+
 function setA4Mode(on){
-  const html = collect();
   isA4Mode = on;
   updateModeButtons();
   document.body.classList.toggle('a4-locked', on);
 
   if(on){
+    // Save the endless content BEFORE switching
+    const endlessEd = pagesEl.querySelector('.pg--endless .pg-ed');
+    savedEndlessHTML = endlessEd ? endlessEd.innerHTML : '';
+
     pagesEl.classList.add('a4-mode');
     pagesEl.innerHTML = '';
 
-    // Normalize all inline font-sizes to 12pt
+    // Normalize font-sizes to 12pt for A4 render
     const tmp = document.createElement('div');
-    tmp.innerHTML = html;
+    tmp.innerHTML = savedEndlessHTML;
     tmp.querySelectorAll('[style*="font-size"]').forEach(el => {
       el.style.fontSize = '12pt';
     });
     const normalizedHTML = tmp.innerHTML;
 
-    // Set ruler to 12pt so page-break measurement matches render
+    // Set ruler to 12pt
     const savedSize = curSize;
     curSize = '12';
     syncRuler();
@@ -187,26 +192,23 @@ function setA4Mode(on){
     const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
-      const pg = buildA4PreviewPage(i, chunk);
-      const ed = pg.querySelector('.pg-ed');
-      if(ed) ed.style.fontSize = '12pt';
-      pagesEl.appendChild(pg);
+      pagesEl.appendChild(buildA4PreviewPage(i, chunk));
     });
 
-    // Restore ruler to actual curSize
     curSize = savedSize;
     syncRuler();
-
     showSaved('A4-Vorschau');
   } else {
+    // Restore the saved endless content
     pagesEl.classList.remove('a4-mode');
     pagesEl.innerHTML = '';
     const pg = buildEndlessPage();
     pagesEl.appendChild(pg);
-    pg.querySelector('.pg-ed').innerHTML = html;
+    const ed = pg.querySelector('.pg-ed');
+    ed.innerHTML = savedEndlessHTML || '';
     document.getElementById('pgc').textContent = '—';
     stats();
-    setTimeout(() => pg.querySelector('.pg-ed').focus(), 50);
+    setTimeout(() => ed.focus(), 50);
     showSaved('Bearbeiten');
   }
 }
@@ -441,7 +443,8 @@ function newDoc(){
 
 // ── Save / Load ───────────────────────────────────────────────────
 function getState(){
-  return { title:dtEl.value, content:collect(), font:curFont, size:curSize, lh:curLH, isNormalDoc, savedAt:new Date().toISOString() };
+  const content = isA4Mode ? savedEndlessHTML : (pagesEl.querySelector('.pg-ed') ? pagesEl.querySelector('.pg-ed').innerHTML : '');
+  return { title:dtEl.value, content, font:curFont, size:curSize, lh:curLH, isNormalDoc, savedAt:new Date().toISOString() };
 }
 function showSaved(msg){
   const el = document.getElementById('saved');
