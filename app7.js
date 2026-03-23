@@ -161,20 +161,16 @@ function measureFixedHeight(fixedHTML){
   temp.style.position = 'absolute';
   temp.style.left = '-9999px';
   temp.style.top = '0';
-  temp.style.width = '794px';
   temp.style.visibility = 'hidden';
-  temp.innerHTML = `
-    <div class="pg pg--a4">
-      <div class="pg-body pg-body--brief-p1">
-        <div class="pg-ed" style="font-family:${curFont}; font-size:12pt; line-height:${curLH}">
-          ${fixedHTML}
-        </div>
-      </div>
-    </div>
-  `;
+  temp.style.width = '654px';
+  temp.style.fontFamily = curFont;
+  temp.style.fontSize = '12pt';
+  temp.style.lineHeight = curLH;
+  temp.style.padding = '0';
+  temp.style.margin = '0';
+  temp.innerHTML = fixedHTML;
   document.body.appendChild(temp);
-  const body = temp.querySelector('.pg-body');
-  const height = body ? body.scrollHeight : 400;
+  const height = temp.scrollHeight;
   document.body.removeChild(temp);
   return height;
 }
