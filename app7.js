@@ -176,7 +176,11 @@ function measureFixedHeight(fixedHTML){
   const body = temp.querySelector('.pg-body');
   const height = body ? body.scrollHeight : 400;
   document.body.removeChild(temp);
-  return height;
+  // Bilder werden nicht geladen im unsichtbaren Container
+  // image2.jpg = 167px hoch, margin-top:87px auf dem Brief-Header = 254px
+  // pg-brief-hdr1 padding-top = 20px
+  // Total Bild-Offset = 274px
+  return height + 274;
 }
 
 // ── Switch modes ─────────────────────────────────────────────────
