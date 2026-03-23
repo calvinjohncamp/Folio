@@ -765,6 +765,18 @@ document.addEventListener('paste', function(e){
       sel.removeAllRanges();
       sel.addRange(combined);
     } catch(err){}
+
+    // Auto-scroll the #cv container when near edges
+    const cv = document.getElementById('cv');
+    if(!cv) return;
+    const cvRect = cv.getBoundingClientRect();
+    const scrollZone = 60; // px from edge to start scrolling
+    const scrollSpeed = 12;
+    if(e.clientY > cvRect.bottom - scrollZone){
+      cv.scrollTop += scrollSpeed;
+    } else if(e.clientY < cvRect.top + scrollZone){
+      cv.scrollTop -= scrollSpeed;
+    }
   });
 
   document.addEventListener('mouseup', function(){
