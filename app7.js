@@ -262,16 +262,8 @@ function setA4Mode(on){
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
       const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
 
-      // flowStart: überspringe alle leeren Nodes und <br> nach Split
-      let flowStart = splitIdx + 1;
-      while(flowStart < allNodes.length){
-        const n = allNodes[flowStart];
-        const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
-        const isEmpty = inner === '<br>' || inner === '' ||
-                        (n.nodeType === 3 && !(n.textContent || '').trim());
-        if(isEmpty) flowStart++;
-        else break;
-      }
+      // flowStart: direkt nach Split-Node — Leerzeilen gehören zum Fließtext
+      const flowStart = splitIdx + 1;
 
       // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
@@ -332,6 +324,10 @@ function setA4Mode(on){
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
+      // trailingHTML an letzten Chunk hängen — auch wenn alles auf Seite 1 passt
+      if(flowChunks.length === 1 && trailingHTML){
+        flowChunks[0] = (flowChunks[0] || '') + trailingHTML;
+      }
       const page1HTML = fixedHTML + (flowChunks[0] || '');
       document.getElementById('pgc').textContent = flowChunks.length;
 
