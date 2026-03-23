@@ -243,18 +243,34 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 
 /* ── Print ── */
 @media print{
-  #hdr,#tb,#side,#sb,#ruler{display:none!important}
-  #cv{overflow:visible;padding:0;background:white}
-  body,#main{overflow:visible;height:auto}
-  #pages{gap:0;margin-top:0}
-  #pages.a4-mode::before{display:none}
-  .pg--endless{display:none!important}
-  .pg--a4{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;height:297mm!important;width:210mm!important;overflow:visible}
-  .pg--a4:last-child{page-break-after:avoid!important;break-after:avoid!important}
-  .pg--a4 .pg-body{padding:0 20mm 0;overflow:visible}
-  .pg--a4 .pg-body--normal{padding-top:20mm!important}
-  .pg--a4 .pg-body--cont{padding-top:4mm!important}
-  .pg--a4 .pg-ed{overflow:visible;height:auto}
-  .pg-brief-hdr2{padding:16px 20mm 0;height:auto}
-  @page{size:A4;margin:0}
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body > *:not(#main) { display:none!important; }
+  #main > *:not(#cv) { display:none!important; }
+  #cv > *:not(#pages) { display:none!important; }
+  #hdr,#tb,#side,#sb,#ruler { display:none!important; }
+  body,html { height:auto!important; overflow:visible!important; }
+  #main { display:block!important; overflow:visible!important; height:auto!important; }
+  #cv { display:block!important; overflow:visible!important; padding:0!important; background:white!important; height:auto!important; }
+  #pages { display:block!important; margin:0!important; padding:0!important; }
+  #pages.a4-mode::before { display:none!important; }
+  .pg--endless { display:none!important; visibility:hidden!important; }
+  .pg--a4 {
+    display:flex!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    page-break-after:always;
+    break-after:page;
+    height:297mm!important;
+    width:210mm!important;
+    overflow:hidden!important;
+    margin:0!important;
+  }
+  .pg--a4:last-child { page-break-after:avoid!important; break-after:avoid!important; }
+  .pg--a4 .pg-body { padding:0 20mm 0!important; overflow:visible!important; }
+  .pg--a4 .pg-body--normal { padding-top:20mm!important; }
+  .pg--a4 .pg-body--cont { padding-top:4mm!important; }
+  .pg--a4 .pg-ed { overflow:visible!important; height:auto!important; }
+  .pg-ftr { height:12mm!important; padding:3mm 20mm 0!important; }
+  .pg-brief-hdr2 { padding:16px 20mm 0!important; }
+  @page { size:A4; margin:0; }
 }
