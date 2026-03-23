@@ -211,12 +211,14 @@ function setA4Mode(on){
       // Kein Split-Punkt gefunden → alles als Fließtext behandeln
       if(splitIdx === -1) splitIdx = 0;
 
-      // Überspringe leere <br>-Nodes direkt nach dem Split-Punkt
+      // Überspringe leere Nodes und [Text]-Platzhalter nach dem Split-Punkt
       let flowStart = splitIdx + 1;
       while(flowStart < allNodes.length){
         const n = allNodes[flowStart];
-        const isEmpty = (n.nodeType === 1 && n.innerHTML && n.innerHTML.trim() === '<br>') ||
-                        (n.nodeType === 3 && !n.textContent.trim());
+        const txt = (n.textContent || '').trim();
+        const isEmpty = !txt || txt === '[Text]' ||
+                        (n.nodeType === 1 && n.innerHTML && n.innerHTML.trim() === '<br>') ||
+                        (n.nodeType === 3 && !txt);
         if(isEmpty) flowStart++;
         else break;
       }
@@ -257,7 +259,7 @@ function setA4Mode(on){
       // Verfügbare Höhe für Text auf Seite 1:
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
-      const availableH = 560;
+      const availableH = 470;
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
