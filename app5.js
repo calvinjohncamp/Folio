@@ -129,16 +129,8 @@ function buildA4PreviewPage(idx, html){
   ed.className = 'pg-ed';
   ed.contentEditable = 'false';
 
-  // For brief page 1: strip the header div from the html content
-  if(!isNormalDoc && idx === 0){
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    const briefHdr = tmp.querySelector('[data-brief-header]');
-    if(briefHdr) briefHdr.remove();
-    ed.innerHTML = tmp.innerHTML;
-  } else {
-    ed.innerHTML = html;
-  }
+  // For brief page 1: header is already stripped before paginating
+  ed.innerHTML = html;
 
   ed.style.fontFamily = curFont;
   ed.style.fontSize   = '12pt';
@@ -188,17 +180,20 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    const firstH = isNormalDoc ? PAGE_H : (function(){
-      const testPg = buildA4PreviewPage(0, '');
-      testPg.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;visibility:hidden';
-      document.body.appendChild(testPg);
-      const hdr = testPg.querySelector('.pg-brief-hdr1');
-      const hdrH = hdr ? hdr.offsetHeight : 220;
-      document.body.removeChild(testPg);
-      // Subtract header + footer (38px) + safe buffer (20px)
-      return PAGE_H - hdrH - 38 - 20;
-    })();
-    const chunks = paginate(normalizedHTML || '', firstH);
+    // For brief: strip the header from HTML before paginating
+    // so the paginator only measures the actual text content
+    let htmlToPaginate = normalizedHTML;
+    if(!isNormalDoc){
+      const tmpStrip = document.createElement('div');
+      tmpStrip.innerHTML = normalizedHTML;
+      const briefHdr = tmpStrip.querySelector('[data-brief-header]');
+      if(briefHdr) briefHdr.remove();
+      htmlToPaginate = tmpStrip.innerHTML;
+    }
+
+    // For brief: header is 20px padding + 167px image = 187px + 38px footer + 30px buffer
+    const firstH = isNormalDoc ? PAGE_H : PAGE_H - 255;
+    const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
       pagesEl.appendChild(buildA4PreviewPage(i, chunk));
