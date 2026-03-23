@@ -62,7 +62,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   top:0;
   bottom:0;
   width:var(--mg);
-  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M14 1 L2 8 L6 9.5 L2 17 L5 18.5 L9 11 L13 13 Z' fill='white' stroke='%23333' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 14 1, default;
+  cursor:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABMElEQVR4nO1W0RWDIAw8wE7kAEzBlG7mENIfsTEGiC3wU+89XzFY73IJaYEHfwhLb8wgUs5jAGwAMA0mjvyBXgIoMSft6rohV470tNfKgUQacc44NdzFelHNl8ScwJDPyPYNCmLukFrINqc9SSRfy4EKcYKUMY/TvbgL4yVSE+caS3JCEsDXB0pNKNWXCorYh4kCaqct6vXVvqyaPXB1QOpaKX4H6uz5g3ae5xcAt185d5oJQIEklSAJcd77idznSKXmLao7Oj6EAABYloXaLzVkOl4biTUfPA7XrKl4R9aWfbcLaDmATzNXLeeQ6qdBBLB57+mPDZ0PaiHfCkikxzqEYHmst4CTmHVdafbDUDqy6hf8glzG6qPXogR85t869y0cyP03GId9QLVq6Adj8QbbGTbwEI/PYwAAAABJRU5ErkJggg==") 4 2, default;
   z-index:10;
   user-select:none;
   -webkit-user-select:none;
