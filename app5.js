@@ -133,11 +133,8 @@ function buildA4PreviewPage(idx, html){
   if(!isNormalDoc && idx === 0){
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
-    // Remove the first child div that contains the header images
-    const firstDiv = tmp.querySelector('div > div:first-child');
-    if(firstDiv && firstDiv.querySelector('img')){
-      firstDiv.remove();
-    }
+    const briefHdr = tmp.querySelector('[data-brief-header]');
+    if(briefHdr) briefHdr.remove();
     ed.innerHTML = tmp.innerHTML;
   } else {
     ed.innerHTML = html;
@@ -326,7 +323,7 @@ const TEMPLATES = [
     html: () => {
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box">
+<div data-brief-header="1" style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box">
   <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
@@ -511,7 +508,6 @@ function buildHTML(title){
 function doPDF(){
   if(!isA4Mode) setA4Mode(true);
 
-  // Wait for all images to load, then print
   function doprint(){
     const images = Array.from(pagesEl.querySelectorAll('img'));
     const unloaded = images.filter(img => !img.complete);
@@ -532,6 +528,11 @@ function doPDF(){
     setTimeout(doprint, 200);
   }));
 }
+
+// Unlock toolbar after print dialog closes
+window.addEventListener('afterprint', function(){
+  if(!isA4Mode) document.body.classList.remove('a4-locked');
+});
 
 // ── Open file ─────────────────────────────────────────────────────
 function openFile(){ document.getElementById('fileInput').click(); }
