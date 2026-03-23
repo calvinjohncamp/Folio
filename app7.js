@@ -327,7 +327,7 @@ function setA4Mode(on){
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
       // Echten verfügbaren Platz auf Seite 1 messen
-      const availableH = measurePage1FlowSpace(fixedHTML) - 8; // fixedHTML mit br für korrekte Messung
+      const availableH = measurePage1FlowSpace(fixedHTML) - 48; // -48 = ~3 Zeilen Puffer vor Fußzeile
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
