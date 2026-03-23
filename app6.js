@@ -180,43 +180,14 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    // For brief: strip the header and flatten nested divs for paginator
-    // but preserve flex containers (like betreff+datum) as units
+    // For brief: strip header only, keep HTML structure intact
     let htmlToPaginate = normalizedHTML;
     if(!isNormalDoc){
       const tmpStrip = document.createElement('div');
       tmpStrip.innerHTML = normalizedHTML;
       const briefHdr = tmpStrip.querySelector('[data-brief-header]');
       if(briefHdr) briefHdr.remove();
-
-      const flatLines = [];
-      function flatten(node){
-        if(node.nodeType === 3){
-          const t = node.textContent.trim();
-          if(t) flatLines.push('<div>' + t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
-          return;
-        }
-        if(node.nodeType !== 1) return;
-        const tag = node.tagName.toLowerCase();
-        const st = node.style || {};
-        // Preserve flex containers and elements with images as-is
-        if(st.display === 'flex' || node.querySelector('img') || tag === 'table'){
-          flatLines.push(node.outerHTML);
-          return;
-        }
-        const isBlock = ['div','p','h1','h2','h3','li'].includes(tag);
-        const hasBlockChildren = Array.from(node.children).some(c =>
-          ['div','p','h1','h2','h3','li'].includes(c.tagName.toLowerCase())
-        );
-        if(isBlock && !hasBlockChildren){
-          const inner = node.innerHTML.trim();
-          flatLines.push(inner ? '<div>' + inner + '</div>' : '<div><br></div>');
-        } else {
-          Array.from(node.childNodes).forEach(flatten);
-        }
-      }
-      Array.from(tmpStrip.childNodes).forEach(flatten);
-      htmlToPaginate = flatLines.join('') || tmpStrip.innerHTML;
+      htmlToPaginate = tmpStrip.innerHTML;
     }
 
     const firstH = isNormalDoc ? PAGE_H : 600;
@@ -357,8 +328,7 @@ const TEMPLATES = [
     title: 'Brief',
     html: () => {
       const today = getTodayDE();
-      return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
-<div data-brief-header="1" style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box">
+      return `<div data-brief-header="1" style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box">
   <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
@@ -376,8 +346,7 @@ const TEMPLATES = [
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Freundliche Grüße</div>
 <div><br></div>
-<div style="font-size:12pt;line-height:1.25">Jörn Kämper</div>
-</div>`;
+<div style="font-size:12pt;line-height:1.25">Jörn Kämper</div>`;
     }
   }
 ];
