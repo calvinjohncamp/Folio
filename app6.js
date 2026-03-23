@@ -217,7 +217,26 @@ function setA4Mode(on){
 
       // Fließtext: alles nach Split-Node
       const flowNodes = allNodes.slice(splitIdx + 1);
-      const flowHTML = flowNodes.map(n => n.outerHTML || n.textContent || '').join('');
+      let flowHTML = flowNodes.map(n => n.outerHTML || n.textContent || '').join('');
+
+      // Falls flowHTML nur 1 Node ist (eingefügter Text als Block),
+      // in einzelne Zeilen aufbrechen damit der Paginator umbrechen kann
+      if(flowNodes.length === 1 && flowNodes[0].nodeType === 1){
+        const inner = flowNodes[0].innerHTML || '';
+        // Prüfen ob der einzelne Node selbst Block-Kinder hat
+        const tmpFlow = document.createElement('div');
+        tmpFlow.innerHTML = inner;
+        if(tmpFlow.children.length > 1){
+          flowHTML = inner;
+        } else {
+          // Wirklich ein einzelner Block — als plain text aufbrechen
+          const plainLines = (flowNodes[0].innerText || flowNodes[0].textContent || '').split('\n');
+          flowHTML = plainLines.map(l => l.trim() ?
+            '<div>' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' :
+            '<div><br></div>'
+          ).join('');
+        }
+      }
 
       // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
       // Verfügbare Höhe für Text auf Seite 1:
