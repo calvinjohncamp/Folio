@@ -1,5 +1,5 @@
 const STORE = 'folio_v5_r2';
-const PAGE_H = 973;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(44)
+const PAGE_H = 933;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(84)
 const RULER_W = 654;
 
 const ruler   = document.getElementById('ruler');
