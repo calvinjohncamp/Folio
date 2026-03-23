@@ -198,7 +198,7 @@ function setA4Mode(on){
     }
 
     // For brief: header is 20px padding + 167px image = 187px + 38px footer + 30px buffer
-    const firstH = isNormalDoc ? PAGE_H : 400;
+    const firstH = isNormalDoc ? PAGE_H : 490;
     const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
