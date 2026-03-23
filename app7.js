@@ -260,7 +260,14 @@ function setA4Mode(on){
       // Überspringe alle leeren Nodes nach Split-Punkt
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
-      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+      // Für die Messung: erste Leerzeile nach Anrede mitrechnen damit availableH stimmt
+      let measureExtra = '';
+      if(splitIdx + 1 < allNodes.length){
+        const nextN = allNodes[splitIdx + 1];
+        const nextInner = nextN.nodeType === 1 ? (nextN.innerHTML || '').trim() : '';
+        if(nextInner === '<br>' || nextInner === '') measureExtra = nextN.outerHTML || '';
+      }
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + measureExtra;
 
       // flowStart: direkt nach Split-Node — Leerzeilen gehören zum Fließtext
       const flowStart = splitIdx + 1;
