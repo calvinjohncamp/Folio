@@ -93,13 +93,13 @@ function buildEndlessPage(){
 }
 
 // ── Build A4 preview page ────────────────────────────────────────
-function buildA4PreviewPage(idx, html){
+function buildA4PreviewPage(idx, html, briefPage1Fixed){
   const pg = document.createElement('div');
   pg.className = 'pg pg--a4';
 
   if(!isNormalDoc){
-    if(idx === 0){
-      // Brief Seite 1: fester Header oben (aus dem Content herausgezogen)
+    if(idx === 0 && !briefPage1Fixed){
+      // Brief Seite 1 ohne Split: fester Header
       const hdr = document.createElement('div');
       hdr.className = 'pg-brief-hdr1';
       hdr.innerHTML = `
@@ -108,15 +108,17 @@ function buildA4PreviewPage(idx, html){
           <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
         </div>`;
       pg.appendChild(hdr);
-    } else {
+    } else if(idx > 0 || briefPage1Fixed){
       // Brief Seite 2+: zentriertes Logo
-      const hdr = document.createElement('div');
-      hdr.className = 'pg-brief-hdr2';
-      const img = document.createElement('img');
-      img.src = 'image1.jpg';
-      img.alt = 'jörn kämper';
-      hdr.appendChild(img);
-      pg.appendChild(hdr);
+      if(idx > 0){
+        const hdr = document.createElement('div');
+        hdr.className = 'pg-brief-hdr2';
+        const img = document.createElement('img');
+        img.src = 'image1.jpg';
+        img.alt = 'jörn kämper';
+        hdr.appendChild(img);
+        pg.appendChild(hdr);
+      }
     }
   }
 
@@ -225,17 +227,50 @@ function setA4Mode(on){
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
+      console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
       const page1HTML = fixedHTML + (flowChunks[0] || '');
       document.getElementById('pgc').textContent = flowChunks.length;
 
-      // Seite 1 rendern
-      pagesEl.appendChild(buildA4PreviewPage(0, page1HTML));
+      // Seite 1: Header-Block + fixedHTML + erster Fließtext-Chunk
+      // Wir bauen Seite 1 manuell ohne buildA4PreviewPage aufzurufen
+      const pg1 = document.createElement('div');
+      pg1.className = 'pg pg--a4';
+      // Header
+      const hdr1 = document.createElement('div');
+      hdr1.className = 'pg-brief-hdr1';
+      hdr1.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:0;box-sizing:border-box">
+        <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
+        <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
+      </div>`;
+      pg1.appendChild(hdr1);
+      // Body
+      const body1 = document.createElement('div');
+      body1.className = 'pg-body pg-body--brief-p1';
+      const ed1 = document.createElement('div');
+      ed1.className = 'pg-ed';
+      ed1.contentEditable = 'false';
+      ed1.innerHTML = page1HTML;
+      ed1.style.fontFamily = curFont;
+      ed1.style.fontSize = '12pt';
+      ed1.style.lineHeight = curLH;
+      body1.appendChild(ed1);
+      pg1.appendChild(body1);
+      // Footer
+      const ftr1 = document.createElement('div');
+      ftr1.className = 'pg-ftr';
+      const fn1 = document.createElement('span'); fn1.className = 'pg-fname';
+      fn1.textContent = dtEl.value || 'Unbenanntes Dokument';
+      const pn1 = document.createElement('span'); pn1.className = 'pg-num';
+      pn1.textContent = '1';
+      ftr1.appendChild(fn1); ftr1.appendChild(pn1);
+      pg1.appendChild(ftr1);
+      pagesEl.appendChild(pg1);
 
       // Weitere Seiten
       for(let i = 1; i < flowChunks.length; i++){
-        pagesEl.appendChild(buildA4PreviewPage(i, flowChunks[i]));
+        pagesEl.appendChild(buildA4PreviewPage(i, flowChunks[i], false));
       }
 
     } else {
