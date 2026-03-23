@@ -527,8 +527,8 @@ const TEMPLATES = [
 <div style="height:70px"></div>
 <div style="display:flex;align-items:baseline;margin-bottom:8px;font-size:12pt;line-height:1.5"><span class="betreff-line" style="flex:1">[Betreff]</span><span style="width:33%;text-align:left;flex-shrink:0;padding-left:3px">${today}</span></div>
 <div><br></div>
-<div style="font-size:12pt;line-height:1.25">Sehr geehrte Damen und Herren,</div>
 <div><br></div>
+<div style="font-size:12pt;line-height:1.25">Sehr geehrte Damen und Herren,</div>
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">[Text]</div>
 <div><br></div>
