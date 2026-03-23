@@ -331,7 +331,7 @@ function setA4Mode(on){
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
-      const page1HTML = fixedHTMLBase + (flowChunks[0] || '');
+      const page1HTML = fixedHTML + (flowChunks[0] || '');
       document.getElementById('pgc').textContent = flowChunks.length;
 
       // Seite 1: Header-Block + fixedHTML + erster Fließtext-Chunk
