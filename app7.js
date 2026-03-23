@@ -270,7 +270,7 @@ function setA4Mode(on){
 
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
-      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + '<div><br></div><div><br></div>';
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + '<div><br></div>';
 
       // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
