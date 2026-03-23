@@ -180,7 +180,8 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    // For brief: strip the header and flatten ALL nested divs for paginator
+    // For brief: strip the header and flatten nested divs for paginator
+    // but preserve flex containers (like betreff+datum) as units
     let htmlToPaginate = normalizedHTML;
     if(!isNormalDoc){
       const tmpStrip = document.createElement('div');
@@ -188,7 +189,6 @@ function setA4Mode(on){
       const briefHdr = tmpStrip.querySelector('[data-brief-header]');
       if(briefHdr) briefHdr.remove();
 
-      // Flatten: collect all leaf-level block content as individual divs
       const flatLines = [];
       function flatten(node){
         if(node.nodeType === 3){
@@ -198,24 +198,28 @@ function setA4Mode(on){
         }
         if(node.nodeType !== 1) return;
         const tag = node.tagName.toLowerCase();
+        const st = node.style || {};
+        // Preserve flex containers and elements with images as-is
+        if(st.display === 'flex' || node.querySelector('img') || tag === 'table'){
+          flatLines.push(node.outerHTML);
+          return;
+        }
         const isBlock = ['div','p','h1','h2','h3','li'].includes(tag);
-        const hasBlockChildren = Array.from(node.children).some(c => ['div','p','h1','h2','h3','li'].includes(c.tagName.toLowerCase()));
+        const hasBlockChildren = Array.from(node.children).some(c =>
+          ['div','p','h1','h2','h3','li'].includes(c.tagName.toLowerCase())
+        );
         if(isBlock && !hasBlockChildren){
           const inner = node.innerHTML.trim();
           flatLines.push(inner ? '<div>' + inner + '</div>' : '<div><br></div>');
         } else {
           Array.from(node.childNodes).forEach(flatten);
-          if(isBlock && flatLines.length && flatLines[flatLines.length-1] !== '<div><br></div>'){
-            // Don't add extra empty line
-          }
         }
       }
       Array.from(tmpStrip.childNodes).forEach(flatten);
       htmlToPaginate = flatLines.join('') || tmpStrip.innerHTML;
     }
 
-    // For brief: header is 20px padding + 167px image = 187px + 38px footer + 30px buffer
-    const firstH = isNormalDoc ? PAGE_H : 560;
+    const firstH = isNormalDoc ? PAGE_H : 600;
     const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
