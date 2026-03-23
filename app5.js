@@ -7,7 +7,7 @@ const pagesEl = document.getElementById('pages');
 const dtEl    = document.getElementById('dtitle');
 
 let curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-let curSize = '12';
+let curSize = '14';
 let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
@@ -135,16 +135,30 @@ function setA4Mode(on){
   const html = collect();
   isA4Mode = on;
   updateModeButtons();
+  // Lock/unlock toolbar
+  document.body.classList.toggle('a4-locked', on);
 
   if(on){
     pagesEl.classList.add('a4-mode');
     pagesEl.innerHTML = '';
-    // Brief: reduce first page height to account for header + recipient block
+    // Normalize all font-sizes to 12pt for A4 render
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    // Replace inline font-size spans with 12pt
+    tmp.querySelectorAll('[style*="font-size"]').forEach(el => {
+      el.style.fontSize = '12pt';
+    });
+    // Also normalize the editor's root font-size via ruler
+    const normalizedHTML = tmp.innerHTML;
     const firstH = isNormalDoc ? PAGE_H : PAGE_H - 215;
-    const chunks = paginate(html || '', firstH);
+    const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
-      pagesEl.appendChild(buildA4PreviewPage(i, chunk));
+      const pg = buildA4PreviewPage(i, chunk);
+      // Force 12pt on the editor element itself
+      const ed = pg.querySelector('.pg-ed');
+      if(ed) ed.style.fontSize = '12pt';
+      pagesEl.appendChild(pg);
     });
     showSaved('A4-Vorschau');
   } else {
@@ -375,7 +389,7 @@ function newDoc(){
   activePage = 0; isNormalDoc = true;
   dtEl.value = '';
   curFont = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-  curSize = '12'; curLH = '1.25';
+  curSize = '14'; curLH = '1.25';
   document.getElementById('fnt').value = curFont;
   document.getElementById('fsz').value = curSize;
   document.getElementById('flh').value = curLH;

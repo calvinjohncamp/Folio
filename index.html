@@ -18,12 +18,12 @@
 <div id="hdr">
   <div class="logo">Folio<em>.</em></div>
   <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
+  <!-- Mode toggle: centered in header -->
+  <div class="mode-btns" id="modebtnswrap">
+    <button class="mode-btn" id="endlessbtn" onclick="setA4Mode(false)" title="Endlos schreiben">∞</button>
+    <button class="mode-btn" id="a4btn" onclick="setA4Mode(true)" title="A4-Vorschau">A4</button>
+  </div>
   <div class="hbtns">
-    <!-- Mode toggle: ∞ Endless / A4 Preview -->
-    <div class="mode-btns">
-      <button class="mode-btn" id="endlessbtn" onclick="setA4Mode(false)" title="Endlos schreiben">∞</button>
-      <button class="mode-btn" id="a4btn" onclick="setA4Mode(true)" title="A4-Vorschau">A4</button>
-    </div>
     <button class="hbtn" onclick="openFile()">Öffnen</button>
     <button class="hbtn" onclick="openSaveAs()">Speichern unter</button>
     <button class="hbtn p" onclick="doPDF()">PDF</button>
@@ -40,7 +40,7 @@
     <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
   </select>
   <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
-    <option>10</option><option selected>12</option><option>13</option><option>14</option><option>18</option><option>24</option>
+    <option>10</option><option>12</option><option>13</option><option selected>14</option><option>18</option><option>24</option>
   </select>
   <select id="flh" class="sel" style="width:90px;margin-left:4px" onchange="setLineH(this.value)">
     <option value="1.25" selected>1,25-zeilig</option>

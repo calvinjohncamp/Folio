@@ -22,12 +22,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 .hbtn.p{background:var(--accent);border-color:var(--accent)}
 .hbtn.p:hover{background:#b03a14}
 
-/* ── Mode toggle buttons ── */
-.mode-btns{display:flex;gap:4px;margin-right:10px;background:rgba(255,255,255,.08);border-radius:6px;padding:3px}
-.mode-btn{background:transparent;border:none;color:rgba(250,249,246,.55);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+/* ── Mode toggle buttons — centered in header ── */
+.mode-btns{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(255,255,255,.08);border-radius:6px;padding:3px}
+.mode-btn{background:transparent;border:none;color:rgba(250,249,246,.55);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:5px 14px;border-radius:4px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
 .mode-btn:hover{color:#faf9f6}
 .mode-btn.mode-active{background:var(--accent);color:#fff}
-#a4btn.mode-active{background:var(--accent);color:#fff;font-weight:700}
+
+/* ── Toolbar locked in A4 mode ── */
+body.a4-locked #tb .tbtn,
+body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 
 /* ── Toolbar ── */
 #tb{background:#faf9f6;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;height:42px;gap:1px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
