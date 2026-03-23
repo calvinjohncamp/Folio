@@ -159,7 +159,7 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    const firstH = isNormalDoc ? PAGE_H : PAGE_H - 215;
+    const firstH = isNormalDoc ? PAGE_H : PAGE_H - 340;
     const chunks = paginate(normalizedHTML || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
@@ -721,20 +721,38 @@ document.addEventListener('paste', function(e){
   }
 
   function getLineNodeAtY(ed, clientY){
-    const children = Array.from(ed.childNodes);
-    for(const child of children){
-      if(child.nodeType !== 1) continue;
-      const rect = child.getBoundingClientRect();
-      if(clientY >= rect.top && clientY <= rect.bottom) return child;
+    // Find the deepest block-level child at this Y position
+    function findInChildren(parent){
+      const children = Array.from(parent.childNodes);
+      for(const child of children){
+        if(child.nodeType !== 1) continue;
+        const rect = child.getBoundingClientRect();
+        if(clientY >= rect.top && clientY <= rect.bottom){
+          // If this child has block children, recurse
+          const blockChildren = Array.from(child.childNodes).filter(c =>
+            c.nodeType === 1 && ['DIV','P','H1','H2','H3','LI'].includes(c.tagName)
+          );
+          if(blockChildren.length > 0){
+            const deeper = findInChildren(child);
+            if(deeper) return deeper;
+          }
+          return child;
+        }
+      }
+      return null;
     }
+    // First try direct children
+    const direct = findInChildren(ed);
+    if(direct) return direct;
+    // Fallback: closest by Y midpoint among all direct children
     let best = null, bestDist = Infinity;
-    for(const child of children){
-      if(child.nodeType !== 1) continue;
+    Array.from(ed.childNodes).forEach(child => {
+      if(child.nodeType !== 1) return;
       const rect = child.getBoundingClientRect();
       const mid = (rect.top + rect.bottom) / 2;
       const dist = Math.abs(clientY - mid);
       if(dist < bestDist){ bestDist = dist; best = child; }
-    }
+    });
     return best;
   }
 
