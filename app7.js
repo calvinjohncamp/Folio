@@ -270,7 +270,8 @@ function setA4Mode(on){
 
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
-      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+      const fixedHTMLBase = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+      const fixedHTML = fixedHTMLBase + '<div><br></div>'; // extra br nur für Höhenmessung
 
       // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
@@ -324,14 +325,14 @@ function setA4Mode(on){
       // Brief-Elemente (Header+Empfänger+Spacer+Betreff+Anrede) verbrauchen ~550px
       // PAGE_H(973) - 550 = 423px für Fließtext
       // Echten verfügbaren Platz auf Seite 1 messen
-      const availableH = measurePage1FlowSpace(fixedHTML) - 8;
+      const availableH = measurePage1FlowSpace(fixedHTML) - 8; // fixedHTML mit br für korrekte Messung
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
-      const page1HTML = fixedHTML + (flowChunks[0] || '');
+      const page1HTML = fixedHTMLBase + (flowChunks[0] || '');
       document.getElementById('pgc').textContent = flowChunks.length;
 
       // Seite 1: Header-Block + fixedHTML + erster Fließtext-Chunk
