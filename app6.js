@@ -219,10 +219,15 @@ function setA4Mode(on){
 
       // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
       // Messe Höhe des fixen Teils im Ruler
+      // Bilder werden im Ruler nicht geladen → image2.jpg Höhe (167px) hart kodieren
       ruler.innerHTML = fixedHTML;
-      const fixedHeight = ruler.scrollHeight;
+      const fixedHeightNoImages = ruler.scrollHeight;
       ruler.innerHTML = '';
-      const availableH = PAGE_H - fixedHeight - 10; // 10px Puffer
+      // image2.jpg ist 167px hoch + margin-top:87px auf dem Header-Container = 254px
+      // Diese Höhe fehlt dem Ruler weil Bilder nicht laden
+      const IMAGE_HEADER_H = 254;
+      const fixedHeight = fixedHeightNoImages + IMAGE_HEADER_H;
+      const availableH = PAGE_H - fixedHeight - 20; // 20px Sicherheitspuffer
 
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
