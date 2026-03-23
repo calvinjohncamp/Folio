@@ -260,14 +260,7 @@ function setA4Mode(on){
       // Überspringe alle leeren Nodes nach Split-Punkt
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
-      // Für die Messung: erste Leerzeile nach Anrede mitrechnen damit availableH stimmt
-      let measureExtra = '';
-      if(splitIdx + 1 < allNodes.length){
-        const nextN = allNodes[splitIdx + 1];
-        const nextInner = nextN.nodeType === 1 ? (nextN.innerHTML || '').trim() : '';
-        if(nextInner === '<br>' || nextInner === '') measureExtra = nextN.outerHTML || '';
-      }
-      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + measureExtra;
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
 
       // flowStart: direkt nach Split-Node — Leerzeilen gehören zum Fließtext
       const flowStart = splitIdx + 1;
@@ -329,8 +322,8 @@ function setA4Mode(on){
       // Fließtext paginieren
       const flowChunks = flowHTML.trim() ? paginate(flowHTML, availableH) : [''];
       console.log('flowHTML length:', flowHTML.length, 'availableH:', availableH, 'flowChunks:', flowChunks.length, 'chunk0 length:', flowChunks[0] ? flowChunks[0].length : 0);
+      console.log('flowHTML content:', flowHTML.slice(0, 400));
       console.log('trailingNodes count:', trailingNodes.length, 'trailingHTML:', trailingHTML.slice(0,200));
-      console.log('endIdx:', endIdx, 'allNodes.length:', allNodes.length, 'splitIdx:', splitIdx);
 
       // Seite 1: fixer Teil + erste Seite Fließtext
       // trailingHTML an letzten Chunk hängen — auch wenn alles auf Seite 1 passt
