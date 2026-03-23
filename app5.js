@@ -511,9 +511,25 @@ function buildHTML(title){
 function doPDF(){
   if(!isA4Mode) setA4Mode(true);
 
-  // Give browser 2 animation frames to finish rendering A4 pages
+  // Wait for all images to load, then print
+  function doprint(){
+    const images = Array.from(pagesEl.querySelectorAll('img'));
+    const unloaded = images.filter(img => !img.complete);
+    if(unloaded.length > 0){
+      let loaded = 0;
+      unloaded.forEach(img => {
+        img.onload = img.onerror = function(){
+          loaded++;
+          if(loaded >= unloaded.length) window.print();
+        };
+      });
+    } else {
+      window.print();
+    }
+  }
+
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    window.print();
+    setTimeout(doprint, 200);
   }));
 }
 
