@@ -62,7 +62,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   top:0;
   bottom:0;
   width:var(--mg);
-  cursor:url('/cursor.png') 1 1, default;
+  cursor:url('/cursor.png') 2 1, default;
   z-index:10;
   user-select:none;
   -webkit-user-select:none;

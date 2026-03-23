@@ -692,18 +692,41 @@ document.addEventListener('paste', function(e){
 (function(){
   let gutterSelecting = false;
   let anchorRange = null;
+  let lastClientY = 0;
+  let scrollInterval = null;
+
+  function startScrolling(){
+    if(scrollInterval) return;
+    scrollInterval = setInterval(function(){
+      if(!gutterSelecting) return;
+      const cv = document.getElementById('cv');
+      if(!cv) return;
+      const cvRect = cv.getBoundingClientRect();
+      const scrollZone = 80;
+      const maxSpeed = 20;
+      if(lastClientY > cvRect.bottom - scrollZone){
+        const dist = lastClientY - (cvRect.bottom - scrollZone);
+        cv.scrollTop += Math.min(maxSpeed, dist * 0.5);
+        updateSelection();
+      } else if(lastClientY < cvRect.top + scrollZone){
+        const dist = (cvRect.top + scrollZone) - lastClientY;
+        cv.scrollTop -= Math.min(maxSpeed, dist * 0.5);
+        updateSelection();
+      }
+    }, 16);
+  }
+
+  function stopScrolling(){
+    if(scrollInterval){ clearInterval(scrollInterval); scrollInterval = null; }
+  }
 
   function getLineNodeAtY(ed, clientY){
-    // Find which direct child of ed is at this Y
     const children = Array.from(ed.childNodes);
     for(const child of children){
-      if(child.nodeType !== 1 && child.nodeType !== 3) continue;
-      const el = child.nodeType === 1 ? child : null;
-      if(!el) continue;
-      const rect = el.getBoundingClientRect();
-      if(clientY >= rect.top && clientY <= rect.bottom) return el;
+      if(child.nodeType !== 1) continue;
+      const rect = child.getBoundingClientRect();
+      if(clientY >= rect.top && clientY <= rect.bottom) return child;
     }
-    // Fallback: closest child
     let best = null, bestDist = Infinity;
     for(const child of children){
       if(child.nodeType !== 1) continue;
@@ -721,12 +744,38 @@ document.addEventListener('paste', function(e){
     return r;
   }
 
+  function updateSelection(){
+    if(!anchorRange) return;
+    const body = document.querySelector('.pg--endless .pg-body');
+    if(!body) return;
+    const ed = body.querySelector('.pg-ed');
+    if(!ed) return;
+    const node = getLineNodeAtY(ed, lastClientY);
+    if(!node) return;
+    const targetRange = rangeForNode(node);
+    try{
+      const combined = document.createRange();
+      const cmp = anchorRange.compareBoundaryPoints(Range.START_TO_START, targetRange);
+      if(cmp <= 0){
+        combined.setStart(anchorRange.startContainer, anchorRange.startOffset);
+        combined.setEnd(targetRange.endContainer, targetRange.endOffset);
+      } else {
+        combined.setStart(targetRange.startContainer, targetRange.startOffset);
+        combined.setEnd(anchorRange.endContainer, anchorRange.endOffset);
+      }
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(combined);
+    } catch(err){}
+  }
+
   document.addEventListener('mousedown', function(e){
     if(isA4Mode) return;
     if(!e.target.classList.contains('pg-gutter')) return;
     e.preventDefault();
     gutterSelecting = true;
     anchorRange = null;
+    lastClientY = e.clientY;
     const body = e.target.closest('.pg-body');
     if(!body) return;
     const ed = body.querySelector('.pg-ed');
@@ -738,49 +787,19 @@ document.addEventListener('paste', function(e){
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(anchorRange.cloneRange());
+    startScrolling();
   }, true);
 
   document.addEventListener('mousemove', function(e){
     if(!gutterSelecting || !anchorRange) return;
     e.preventDefault();
-    // Find ed from any pg-gutter or pg-ed under cursor
-    const body = document.querySelector('.pg--endless .pg-body');
-    if(!body) return;
-    const ed = body.querySelector('.pg-ed');
-    if(!ed) return;
-    const node = getLineNodeAtY(ed, e.clientY);
-    if(!node) return;
-    const targetRange = rangeForNode(node);
-    const sel = window.getSelection();
-    try{
-      const combined = document.createRange();
-      const cmp = anchorRange.compareBoundaryPoints(Range.START_TO_START, targetRange);
-      if(cmp <= 0){
-        combined.setStart(anchorRange.startContainer, anchorRange.startOffset);
-        combined.setEnd(targetRange.endContainer, targetRange.endOffset);
-      } else {
-        combined.setStart(targetRange.startContainer, targetRange.startOffset);
-        combined.setEnd(anchorRange.endContainer, anchorRange.endOffset);
-      }
-      sel.removeAllRanges();
-      sel.addRange(combined);
-    } catch(err){}
-
-    // Auto-scroll the #cv container when near edges
-    const cv = document.getElementById('cv');
-    if(!cv) return;
-    const cvRect = cv.getBoundingClientRect();
-    const scrollZone = 60; // px from edge to start scrolling
-    const scrollSpeed = 12;
-    if(e.clientY > cvRect.bottom - scrollZone){
-      cv.scrollTop += scrollSpeed;
-    } else if(e.clientY < cvRect.top + scrollZone){
-      cv.scrollTop -= scrollSpeed;
-    }
+    lastClientY = e.clientY;
+    updateSelection();
   });
 
   document.addEventListener('mouseup', function(){
     gutterSelecting = false;
+    stopScrolling();
   });
 })();
 function init(){
