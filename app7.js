@@ -211,14 +211,13 @@ function setA4Mode(on){
       // Kein Split-Punkt gefunden → alles als Fließtext behandeln
       if(splitIdx === -1) splitIdx = 0;
 
-      // Überspringe leere Nodes und [Text]-Platzhalter nach dem Split-Punkt
+      // Überspringe leere Nodes nach dem Split-Punkt
       let flowStart = splitIdx + 1;
       while(flowStart < allNodes.length){
         const n = allNodes[flowStart];
-        const txt = (n.textContent || '').trim();
-        const isEmpty = !txt || txt === '[Text]' ||
-                        (n.nodeType === 1 && n.innerHTML && n.innerHTML.trim() === '<br>') ||
-                        (n.nodeType === 3 && !txt);
+        const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
+        const isEmpty = inner === '<br>' || inner === '' ||
+                        (n.nodeType === 3 && !(n.textContent || '').trim());
         if(isEmpty) flowStart++;
         else break;
       }
