@@ -97,27 +97,54 @@ function buildA4PreviewPage(idx, html){
   const pg = document.createElement('div');
   pg.className = 'pg pg--a4';
 
-  // Brief Seite 2+: zentrierter jörn kämper Header
-  if(!isNormalDoc && idx > 0){
-    const hdr = document.createElement('div');
-    hdr.className = 'pg-brief-hdr2';
-    const img = document.createElement('img');
-    img.src = 'image1.jpg';
-    img.alt = 'jörn kämper';
-    hdr.appendChild(img);
-    pg.appendChild(hdr);
+  if(!isNormalDoc){
+    if(idx === 0){
+      // Brief Seite 1: fester Header oben (aus dem Content herausgezogen)
+      const hdr = document.createElement('div');
+      hdr.className = 'pg-brief-hdr1';
+      hdr.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:0;box-sizing:border-box">
+          <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
+          <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
+        </div>`;
+      pg.appendChild(hdr);
+    } else {
+      // Brief Seite 2+: zentriertes Logo
+      const hdr = document.createElement('div');
+      hdr.className = 'pg-brief-hdr2';
+      const img = document.createElement('img');
+      img.src = 'image1.jpg';
+      img.alt = 'jörn kämper';
+      hdr.appendChild(img);
+      pg.appendChild(hdr);
+    }
   }
 
   const body = document.createElement('div');
-  body.className = 'pg-body' + (isNormalDoc ? ' pg-body--normal' : '') +
-                   (!isNormalDoc && idx > 0 ? ' pg-body--cont' : '');
+  body.className = 'pg-body' +
+    (isNormalDoc ? ' pg-body--normal' : '') +
+    (!isNormalDoc && idx > 0 ? ' pg-body--cont' : '');
 
   const ed = document.createElement('div');
   ed.className = 'pg-ed';
   ed.contentEditable = 'false';
-  ed.innerHTML = html;
+
+  // For brief page 1: strip the header div from the html content
+  if(!isNormalDoc && idx === 0){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    // Remove the first child div that contains the header images
+    const firstDiv = tmp.querySelector('div > div:first-child');
+    if(firstDiv && firstDiv.querySelector('img')){
+      firstDiv.remove();
+    }
+    ed.innerHTML = tmp.innerHTML;
+  } else {
+    ed.innerHTML = html;
+  }
+
   ed.style.fontFamily = curFont;
-  ed.style.fontSize   = curSize + 'pt';
+  ed.style.fontSize   = '12pt';
   ed.style.lineHeight = curLH;
 
   body.appendChild(ed);
