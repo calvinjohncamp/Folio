@@ -477,17 +477,55 @@ function buildHTML(title){
     +`</style></head><body>${collect()}</body></html>`;
 }
 function doPDF(){
-  if(!isA4Mode){
-    setA4Mode(true);
-    // Wait for DOM to fully render all pages before printing
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setTimeout(() => window.print(), 300);
-      });
+  // Always switch to A4 first so user sees what they print
+  if(!isA4Mode) setA4Mode(true);
+
+  // Use a short delay then trigger print via a clean hidden iframe
+  // so Chrome doesn't include the Folio UI or endless page
+  setTimeout(() => {
+    // Build minimal print HTML from current A4 pages
+    const pages = Array.from(pagesEl.querySelectorAll('.pg--a4'));
+    let pagesHTML = '';
+    pages.forEach((pg, i) => {
+      const briefHdr = pg.querySelector('.pg-brief-hdr2');
+      const ed = pg.querySelector('.pg-ed');
+      const fn = pg.querySelector('.pg-fname');
+      const pn = pg.querySelector('.pg-num');
+      const isNormal = pg.querySelector('.pg-body--normal');
+      const isCont   = pg.querySelector('.pg-body--cont');
+
+      const topPad = isCont ? '4mm' : (isNormal ? '20mm' : '0');
+      const hdrHTML = briefHdr ? `<div style="display:flex;align-items:center;justify-content:center;height:80px;padding:16px 20mm 0"><img src="${window.location.origin + (window.location.pathname.endsWith('/') ? '' : window.location.pathname.replace(/\/[^/]*$/, ''))}/image1.jpg" style="height:44px;width:auto"></div>` : '';
+
+      pagesHTML += `<div class="pg" style="width:210mm;height:297mm;background:white;page-break-after:${i < pages.length-1 ? 'always' : 'avoid'};break-after:${i < pages.length-1 ? 'page' : 'avoid'};display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box">
+        ${hdrHTML}
+        <div style="flex:1;overflow:hidden;padding:${topPad} 20mm 0;box-sizing:border-box">
+          <div style="font-family:${curFont};font-size:12pt;line-height:${curLH};color:#1a1814;word-wrap:break-word">${ed ? ed.innerHTML : ''}</div>
+        </div>
+        <div style="flex-shrink:0;height:12mm;padding:3mm 20mm 0;display:flex;align-items:flex-start;justify-content:space-between;border-top:1px solid #e0dbd0;font-size:9px;color:#1a1814;font-family:'DM Sans',sans-serif;box-sizing:border-box">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fn ? fn.textContent : ''}</span>
+          <span>${pn ? pn.textContent : ''}</span>
+        </div>
+      </div>`;
     });
-  } else {
-    window.print();
-  }
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+      <style>*{box-sizing:border-box;margin:0;padding:0}body{background:white}@page{size:A4;margin:0}.pg *{margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important}.pg div,.pg p{margin:0}.pg b,.pg strong{font-weight:bold}.pg i,.pg em{font-style:italic}.pg u{text-decoration:underline}.pg table{border-collapse:collapse;width:100%}.pg td,.pg th{border:1px solid #e0dbd0;padding:4px 8px}</style>
+      </head><body>${pagesHTML}</body></html>`);
+    doc.close();
+
+    iframe.onload = function(){
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => document.body.removeChild(iframe), 2000);
+    };
+  }, 200);
 }
 
 // ── Open file ─────────────────────────────────────────────────────
