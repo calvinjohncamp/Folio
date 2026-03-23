@@ -259,17 +259,19 @@ function setA4Mode(on){
 
       // Überspringe alle leeren Nodes nach Split-Punkt
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
-      // Include the <br> after "Sehr geehrte" in fixedNodes
-      let fixedEnd = splitIdx + 1;
-      if(fixedEnd < allNodes.length){
-        const nextInner = allNodes[fixedEnd].nodeType === 1 ? (allNodes[fixedEnd].innerHTML||'').trim() : '';
-        if(nextInner === '<br>') fixedEnd++;
+      const fixedNodes = allNodes.slice(0, splitIdx + 1);
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+
+      // flowStart: überspringe alle leeren Nodes und <br> nach Split
+      let flowStart = splitIdx + 1;
+      while(flowStart < allNodes.length){
+        const n = allNodes[flowStart];
+        const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
+        const isEmpty = inner === '<br>' || inner === '' ||
+                        (n.nodeType === 3 && !(n.textContent || '').trim());
+        if(isEmpty) flowStart++;
+        else break;
       }
-      // flowStart = direkt nach fixedEnd
-      let flowStart = fixedEnd;
-      const fixedNodes = allNodes.slice(0, fixedEnd);
-      const fixedHTMLBase = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
-      const fixedHTML = fixedHTMLBase + '<div><br></div>'; // extra br nur für Höhenmessung
 
       // Abschluss-Teil finden: Leerzeilen + "Freundliche Grüße" + Leerzeilen + "Jörn Kämper"
       let endIdx = allNodes.length;
