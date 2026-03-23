@@ -249,31 +249,43 @@ function setA4Mode(on){
 
       // Fließtext: alles nach Split-Node
       const flowNodes = allNodes.slice(flowStart);
-      // Konvertiere alle Nodes zu divs damit der Paginator umbrechen kann
-      const flowDivs = [];
-      flowNodes.forEach(n => {
+
+      // Jede Zeile als eigener <div> — keine übergroßen Blöcke
+      function nodeToLines(n){
+        const lines = [];
         if(n.nodeType === 3){
-          // Textknoten → in Zeilen aufteilen
-          const lines = n.textContent.split('\n');
-          lines.forEach(l => {
-            if(l.trim()) flowDivs.push('<div>' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
-            else flowDivs.push('<div><br></div>');
+          n.textContent.split('\n').forEach(l => {
+            if(l.trim()) lines.push('<div>' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
+            else lines.push('<div><br></div>');
           });
         } else if(n.nodeType === 1){
-          // Element-Node: falls es selbst Block-Kinder hat, direkt verwenden
-          const hasBlocks = Array.from(n.children).some(c => ['DIV','P','H1','H2','H3'].includes(c.tagName));
-          if(hasBlocks){
-            // Kinder einzeln hinzufügen
-            Array.from(n.childNodes).forEach(child => {
-              if(child.nodeType === 1) flowDivs.push(child.outerHTML);
-              else if(child.nodeType === 3 && child.textContent.trim()) flowDivs.push('<div>' + child.textContent.trim() + '</div>');
+          const tag = n.tagName.toLowerCase();
+          const inner = n.innerHTML || '';
+          const text = n.innerText || n.textContent || '';
+          // Inline-only node (span, b, i etc.) → als eine Zeile
+          if(['span','b','i','u','strong','em'].includes(tag)){
+            if(text.trim()) lines.push('<div>' + n.outerHTML + '</div>');
+            else lines.push('<div><br></div>');
+          }
+          // Leerer block → Leerzeile
+          else if(!text.trim() || inner.trim() === '<br>'){
+            lines.push('<div><br></div>');
+          }
+          // Block mit Text → innerText zeilenweise aufteilen
+          else {
+            text.split('\n').forEach(l => {
+              if(l.trim()) lines.push('<div>' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
+              else lines.push('<div><br></div>');
             });
-          } else {
-            flowDivs.push(n.outerHTML);
           }
         }
-      });
-      const flowHTML = flowDivs.join('');
+        return lines;
+      }
+
+      const flowDivs = [];
+      flowNodes.forEach(n => nodeToLines(n).forEach(l => flowDivs.push(l)));
+      // Max 2 aufeinanderfolgende Leerzeilen
+      const flowHTML = flowDivs.join('').replace(/(<div><br><\/div>){3,}/g, '<div><br></div><div><br></div>');
 
       // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
       // Verfügbare Höhe für Text auf Seite 1:
