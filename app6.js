@@ -181,22 +181,72 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    // For brief: strip header only, keep HTML structure intact
-    let htmlToPaginate = normalizedHTML;
     if(!isNormalDoc){
+      // ── Brief: Split-Strategie ──────────────────────────────────
+      // 1. Header entfernen
+      // 2. Alles bis inkl. "Sehr geehrte..." = fixer Teil (nie paginiert)
+      // 3. Rest = Fließtext → paginate() mit voller PAGE_H
       const tmpStrip = document.createElement('div');
       tmpStrip.innerHTML = normalizedHTML;
       const briefHdr = tmpStrip.querySelector('[data-brief-header]');
       if(briefHdr) briefHdr.remove();
-      htmlToPaginate = tmpStrip.innerHTML;
-    }
 
-    const firstH = isNormalDoc ? PAGE_H : 920;
-    const chunks = paginate(htmlToPaginate || '', firstH);
-    document.getElementById('pgc').textContent = chunks.length;
-    chunks.forEach((chunk, i) => {
-      pagesEl.appendChild(buildA4PreviewPage(i, chunk));
-    });
+      // Alle direkten Kind-Nodes sammeln
+      const allNodes = Array.from(tmpStrip.childNodes);
+
+      // Split-Punkt finden: Node der "Sehr geehrte" enthält
+      let splitIdx = -1;
+      for(let i = 0; i < allNodes.length; i++){
+        const txt = allNodes[i].textContent || '';
+        if(txt.toLowerCase().includes('sehr geehrte') ||
+           txt.toLowerCase().includes('liebe') ||
+           txt.toLowerCase().includes('hallo')){
+          splitIdx = i;
+          break;
+        }
+      }
+
+      // Kein Split-Punkt gefunden → alles als Fließtext behandeln
+      if(splitIdx === -1) splitIdx = 0;
+
+      // Fixer Teil: alles bis inkl. Split-Node
+      const fixedNodes = allNodes.slice(0, splitIdx + 1);
+      const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
+
+      // Fließtext: alles nach Split-Node
+      const flowNodes = allNodes.slice(splitIdx + 1);
+      const flowHTML = flowNodes.map(n => n.outerHTML || n.textContent || '').join('');
+
+      // Seite 1 bauen: fixer Teil + so viel Fließtext wie auf Seite 1 passt
+      // Messe Höhe des fixen Teils im Ruler
+      ruler.innerHTML = fixedHTML;
+      const fixedHeight = ruler.scrollHeight;
+      ruler.innerHTML = '';
+      const availableH = PAGE_H - fixedHeight - 10; // 10px Puffer
+
+      // Fließtext paginieren
+      const flowChunks = flowHTML.trim() ? paginate(flowHTML, Math.max(availableH, 100)) : [''];
+
+      // Seite 1: fixer Teil + erste Seite Fließtext
+      const page1HTML = fixedHTML + (flowChunks[0] || '');
+      document.getElementById('pgc').textContent = flowChunks.length;
+
+      // Seite 1 rendern
+      pagesEl.appendChild(buildA4PreviewPage(0, page1HTML));
+
+      // Weitere Seiten
+      for(let i = 1; i < flowChunks.length; i++){
+        pagesEl.appendChild(buildA4PreviewPage(i, flowChunks[i]));
+      }
+
+    } else {
+      // Normale Dokumente
+      const chunks = paginate(normalizedHTML || '', PAGE_H);
+      document.getElementById('pgc').textContent = chunks.length;
+      chunks.forEach((chunk, i) => {
+        pagesEl.appendChild(buildA4PreviewPage(i, chunk));
+      });
+    }
 
     curSize = savedSize;
     syncRuler();
