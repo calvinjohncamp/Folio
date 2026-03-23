@@ -180,25 +180,23 @@ function setA4Mode(on){
     curSize = '12';
     syncRuler();
 
-    // For brief: strip the header and unwrap outer div before paginating
-    // so the paginator sees individual lines, not one big block
+    // For brief: strip the header and unwrap outer div(s) before paginating
     let htmlToPaginate = normalizedHTML;
     if(!isNormalDoc){
       const tmpStrip = document.createElement('div');
       tmpStrip.innerHTML = normalizedHTML;
       const briefHdr = tmpStrip.querySelector('[data-brief-header]');
       if(briefHdr) briefHdr.remove();
-      // If there's a single outer wrapper div, unwrap it
-      const outerDiv = tmpStrip.firstElementChild;
-      if(outerDiv && outerDiv.tagName === 'DIV' && tmpStrip.children.length === 1){
-        htmlToPaginate = outerDiv.innerHTML;
-      } else {
-        htmlToPaginate = tmpStrip.innerHTML;
+      // Recursively unwrap single outer wrapper divs
+      let container = tmpStrip;
+      while(container.children.length === 1 && container.firstElementChild.tagName === 'DIV'){
+        container = container.firstElementChild;
       }
+      htmlToPaginate = container === tmpStrip ? tmpStrip.innerHTML : container.innerHTML;
     }
 
     // For brief: header is 20px padding + 167px image = 187px + 38px footer + 30px buffer
-    const firstH = isNormalDoc ? PAGE_H : 540;
+    const firstH = isNormalDoc ? PAGE_H : 560;
     const chunks = paginate(htmlToPaginate || '', firstH);
     document.getElementById('pgc').textContent = chunks.length;
     chunks.forEach((chunk, i) => {
