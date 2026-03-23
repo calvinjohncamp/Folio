@@ -272,8 +272,22 @@ function setA4Mode(on){
       const fixedNodes = allNodes.slice(0, splitIdx + 1);
       const fixedHTML = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('') + '<div><br></div>';
 
+      // Abschluss-Teil finden: "Freundliche Grüße" + "Jörn Kämper" am Ende
+      let endIdx = allNodes.length;
+      for(let i = allNodes.length - 1; i > splitIdx; i--){
+        const txt = (allNodes[i].textContent || '').trim();
+        if(txt === 'Jörn Kämper' || txt === 'Freundliche Grüße' || txt === '' ) {
+          endIdx = i;
+        } else {
+          break;
+        }
+      }
+      const trailingNodes = allNodes.slice(endIdx);
+      const trailingHTML = trailingNodes.length ?
+        '<div><br></div>' + trailingNodes.map(n => n.outerHTML || n.textContent || '').join('') : '';
+
       // Fließtext: alles nach Split-Node
-      const flowNodes = allNodes.slice(flowStart);
+      const flowNodes = allNodes.slice(flowStart, endIdx);
       // Konvertiere alle Nodes zu divs damit der Paginator umbrechen kann
       const flowDivs = [];
       flowNodes.forEach(n => {
@@ -347,9 +361,11 @@ function setA4Mode(on){
       pg1.appendChild(ftr1);
       pagesEl.appendChild(pg1);
 
-      // Weitere Seiten
+      // Weitere Seiten — letzten Chunk mit Abschluss-Teil ergänzen
       for(let i = 1; i < flowChunks.length; i++){
-        pagesEl.appendChild(buildA4PreviewPage(i, flowChunks[i], false));
+        const isLast = (i === flowChunks.length - 1);
+        const chunkHTML = isLast ? flowChunks[i] + trailingHTML : flowChunks[i];
+        pagesEl.appendChild(buildA4PreviewPage(i, chunkHTML, false));
       }
 
     } else {
