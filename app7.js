@@ -258,9 +258,6 @@ function setA4Mode(on){
       if(splitIdx === -1) splitIdx = 0;
 
       // Überspringe alle leeren Nodes nach Split-Punkt
-      // flowStart = direkt nach fixedEnd (br bereits in fixedHTMLBase)
-      let flowStart = fixedEnd;
-
       // Fixer Teil: alles bis inkl. Split-Node + eine Leerzeile danach
       // Include the <br> after "Sehr geehrte" in fixedNodes
       let fixedEnd = splitIdx + 1;
@@ -268,6 +265,8 @@ function setA4Mode(on){
         const nextInner = allNodes[fixedEnd].nodeType === 1 ? (allNodes[fixedEnd].innerHTML||'').trim() : '';
         if(nextInner === '<br>') fixedEnd++;
       }
+      // flowStart = direkt nach fixedEnd
+      let flowStart = fixedEnd;
       const fixedNodes = allNodes.slice(0, fixedEnd);
       const fixedHTMLBase = fixedNodes.map(n => n.outerHTML || n.textContent || '').join('');
       const fixedHTML = fixedHTMLBase + '<div><br></div>'; // extra br nur für Höhenmessung
