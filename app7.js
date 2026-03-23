@@ -529,6 +529,7 @@ const TEMPLATES = [
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Sehr geehrte Damen und Herren,</div>
 <div><br></div>
+<div><br></div>
 <div style="font-size:12pt;line-height:1.25">[Text]</div>
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Freundliche Grüße</div>
