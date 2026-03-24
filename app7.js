@@ -679,7 +679,8 @@ function newDoc(){
 
 // ── Save / Load ───────────────────────────────────────────────────
 function getState(){
-  const content = isA4Mode ? savedEndlessHTML : (pagesEl.querySelector('.pg-ed') ? pagesEl.querySelector('.pg-ed').innerHTML : '');
+  const raw = isA4Mode ? savedEndlessHTML : (pagesEl.querySelector('.pg-ed') ? pagesEl.querySelector('.pg-ed').innerHTML : '');
+  const content = flattenHTML(raw);
   return { title:dtEl.value, content, font:curFont, size:curSize, lh:curLH, isNormalDoc, savedAt:new Date().toISOString() };
 }
 function showSaved(msg){
@@ -790,6 +791,43 @@ window.addEventListener('afterprint', function(){
 });
 
 // ── Open file ─────────────────────────────────────────────────────
+// ── Verschachtelte Divs aufflachen ───────────────────────────────
+function flattenHTML(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const result = [];
+  function walk(node){
+    if(node.nodeType === 3){
+      const t = node.textContent;
+      if(t.trim()) result.push('<div>' + t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>');
+      return;
+    }
+    if(node.nodeType !== 1) return;
+    const tag = node.tagName.toLowerCase();
+    if(tag === 'br'){ result.push('<div><br></div>'); return; }
+    const isBlock = ['div','p','h1','h2','h3','h4','h5','li'].includes(tag);
+    if(isBlock){
+      const hasBlockChildren = Array.from(node.childNodes).some(c =>
+        c.nodeType === 1 && ['div','p','h1','h2','h3','li'].includes(c.tagName.toLowerCase())
+      );
+      if(hasBlockChildren){
+        Array.from(node.childNodes).forEach(walk);
+      } else {
+        const inner = node.innerHTML.trim();
+        if(!inner || inner === '<br>') result.push('<div><br></div>');
+        else result.push('<div>' + node.innerHTML + '</div>');
+      }
+    } else {
+      result.push('<div>' + node.outerHTML + '</div>');
+    }
+  }
+  Array.from(tmp.childNodes).forEach(walk);
+  const deduped = result.filter((r,i) =>
+    !(r === '<div><br></div>' && result[i-1] === '<div><br></div>')
+  );
+  return deduped.join('') || '<div><br></div>';
+}
+
 function openFile(){ document.getElementById('fileInput').click(); }
 function loadFile(input){
   const file = input.files[0];
@@ -805,7 +843,7 @@ function loadFile(input){
     pagesEl.innerHTML = '';
     const pg = buildEndlessPage();
     pagesEl.appendChild(pg);
-    pg.querySelector('.pg-ed').innerHTML = html;
+    pg.querySelector('.pg-ed').innerHTML = flattenHTML(html);
     document.getElementById('pgc').textContent = '—';
     stats(); saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
   }
