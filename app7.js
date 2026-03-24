@@ -1,6 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 920;   // A4(1123) - paddingTop(68) - footer(38) - buffer(97)
+const PAGE_H = 960;   // A4(1123) - paddingTop(68) - footer(38) - buffer(57)
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
