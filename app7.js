@@ -928,7 +928,7 @@ document.addEventListener('paste', function(e){
       .replace(/<w:[^>]*>[\s\S]*?<\/w:[^>]*>/gi,'').replace(/<m:[^>]*>[\s\S]*?<\/m:[^>]*>/gi,'');
     const tmp=document.createElement('div'); tmp.innerHTML=h;
     const resultLines=[]; let currentLine=[];
-    function flushLine(){ if(currentLine.length){const d=document.createElement('div');currentLine.forEach(n=>d.appendChild(n));resultLines.push(d);currentLine=[];}else{resultLines.push(null);} }
+    function flushLine(){ if(currentLine.length){const d=document.createElement('div');currentLine.forEach(n=>d.appendChild(n));resultLines.push(d);currentLine=[];}else{ /* Leerzeile nur wenn vorheriger Eintrag Inhalt hatte */ if(resultLines.length && resultLines[resultLines.length-1] !== null) resultLines.push(null);} }
     function walk(node,bold,italic,underline){
       if(node.nodeType===3){const t=node.textContent;if(!t)return;let el=document.createTextNode(t);if(underline){const u=document.createElement('u');u.appendChild(el);el=u;}if(italic){const i=document.createElement('i');i.appendChild(el);el=i;}if(bold){const b=document.createElement('b');b.appendChild(el);el=b;}currentLine.push(el);return;}
       if(node.nodeType!==1)return;const tag=node.tagName.toLowerCase();if(tag==='br'){flushLine();return;}
@@ -943,9 +943,9 @@ document.addEventListener('paste', function(e){
     Array.from(tmp.childNodes).forEach(c=>walk(c,false,false,false));
     if(currentLine.length)flushLine();
     const finalHTML=resultLines.map(d=>!d?'<div><br></div>':(d.innerHTML.trim()?d.outerHTML:'<div><br></div>')).join('');
-    document.execCommand('insertHTML',false,finalHTML.replace(/(<div><br><\/div>){3,}/g,'<div><br></div><div><br></div>'));
+    document.execCommand('insertHTML',false,finalHTML.replace(/(<div><br><\/div>){2,}/g,'<div><br></div>'));
   } else {
-    const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('');
+    const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
     document.execCommand('insertHTML',false,divs);
   }
 },true);
