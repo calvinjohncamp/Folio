@@ -135,7 +135,8 @@ function paginate(html, firstPageH){
     ed.style.position = 'absolute';
     ed.style.width = '654px';
     ed.innerHTML = testHTML;
-    return ed.scrollHeight <= body.clientHeight + 1;
+    const paddingTop = parseFloat(window.getComputedStyle(body).paddingTop) || 0;
+    return ed.scrollHeight <= body.clientHeight - paddingTop + 1;
   }
 
   const pages = [];
