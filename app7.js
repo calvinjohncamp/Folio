@@ -28,48 +28,27 @@ function collect(){
 }
 
 // ── Paginate ─────────────────────────────────────────────────────
-// ── HTML → saubere Zeilen (inkl. Format-Erhalt) ─────────────────
-function htmlToLines(html){
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  const lines = [];
-  function pushLine(inner){
-    const clean = (inner || '').trim();
-    lines.push(clean === '' ? '<br>' : clean);
-  }
-  Array.from(tmp.childNodes).forEach(n => {
-    if(n.nodeType === 1){
-      const html = n.innerHTML || '';
-      const split = html.split(/<br\s*\/?>/i);
-      split.forEach(part => {
-        const clean = part.trim();
-        pushLine(clean);
-      });
-    } else if(n.nodeType === 3){
-      const split = (n.textContent || '').split('\n');
-      split.forEach(l => pushLine(l));
-    }
-  });
-  return lines.length ? lines : ['<br>'];
-}
-
-// ── Zeilen → HTML ────────────────────────────────────────────────
-function linesToHTML(lines){
-  return lines.map(l => `<div>${l}</div>`).join('');
-}
-
-// ── Alte paginate-Logik für Brief ────────────────────────────────
-function paginateBriefExisting(html, firstPageH){
+function paginate(html, firstPageH){
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
 
-  const measurePage = buildA4PreviewPage(0, '', false);
-  measurePage.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
-  document.body.appendChild(measurePage);
+  // Echte verfügbare Texthöhe dynamisch messen
+  const measureWrap = document.createElement('div');
+  measureWrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
+  const measurePage = buildA4PreviewPage(0, '<div>X</div>', isNormalDoc);
+  measureWrap.appendChild(measurePage);
+  document.body.appendChild(measureWrap);
   const measureBody = measurePage.querySelector('.pg-body');
-  document.body.removeChild(measurePage);
+  const measureStyle = window.getComputedStyle(measureBody);
+  const realPageH = measureBody.clientHeight
+    - (parseFloat(measureStyle.paddingTop) || 0)
+    - (parseFloat(measureStyle.paddingBottom) || 0);
+  document.body.removeChild(measureWrap);
+  console.log('[v109] realPageH:', realPageH);
+
+  const availH = firstPageH !== undefined ? Math.min(firstPageH, realPageH) : realPageH;
 
   const chunks = [];
   let bucket = [];
@@ -79,31 +58,34 @@ function paginateBriefExisting(html, firstPageH){
     return arr.map(n => n.outerHTML || n.textContent || '').join('');
   }
 
-  function fitsOnPage(arr){
+  function fitsOnPage(arr, pageH){
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
     const page = buildA4PreviewPage(0, '', false);
     const body = page.querySelector('.pg-body');
     const ed = page.querySelector('.pg-ed');
-    body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
+    if(isNormalDoc){
+      body.className = 'pg-body pg-body--normal';
+    } else {
+      body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
+    }
     ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
     ed.style.fontSize = '12pt';
     ed.style.lineHeight = curLH;
-    ed.style.width = '654px';
-    ed.style.height = 'auto';
-    ed.style.position = 'absolute';
+    ed.style.height = pageH + 'px';
+    ed.style.overflow = 'hidden';
     wrap.appendChild(page);
     document.body.appendChild(wrap);
-    const limit = body.clientHeight - 40;
-    const fits = ed.scrollHeight <= limit;
+    const fits = ed.scrollHeight <= pageH + 1;
     document.body.removeChild(wrap);
     return fits;
   }
 
   for(const node of nodes){
     bucket.push(node.cloneNode(true));
-    if(!fitsOnPage(bucket) && bucket.length > 1){
+    const currentH = isFirstPage ? availH : realPageH;
+    if(!fitsOnPage(bucket, currentH) && bucket.length > 1){
       const overflow = bucket.pop();
       chunks.push(getBucketHTML(bucket));
       bucket = [overflow];
@@ -113,52 +95,6 @@ function paginateBriefExisting(html, firstPageH){
 
   if(bucket.length) chunks.push(getBucketHTML(bucket));
   return chunks.length ? chunks : [''];
-}
-
-// ── Paginate v108 ────────────────────────────────────────────────
-function paginate(html, firstPageH){
-  if(!isNormalDoc){
-    return paginateBriefExisting(html, firstPageH);
-  }
-
-  const lines = htmlToLines(html);
-  if(!lines.length) return [''];
-
-  const measurePage = buildA4PreviewPage(0, '', false);
-  measurePage.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;';
-  document.body.appendChild(measurePage);
-  const body = measurePage.querySelector('.pg-body');
-  const ed = measurePage.querySelector('.pg-ed');
-
-  function fits(testHTML){
-    body.className = 'pg-body pg-body--normal';
-    ed.innerHTML = testHTML;
-    return ed.scrollHeight <= ed.clientHeight + 1;
-  }
-
-  const pages = [];
-  let bucket = [];
-  let isFirstPage = true;
-  const BUFFER_LINES = 0;
-
-  for(const line of lines){
-    bucket.push(line);
-    if(!fits(linesToHTML(bucket)) && bucket.length > 1){
-      const overflowStart = Math.max(1, bucket.length - (1 + BUFFER_LINES));
-      const currentPageLines = bucket.slice(0, overflowStart);
-      const nextPageLines = bucket.slice(overflowStart);
-      pages.push(linesToHTML(currentPageLines));
-      bucket = nextPageLines;
-      isFirstPage = false;
-    }
-  }
-
-  if(bucket.length){
-    pages.push(linesToHTML(bucket));
-  }
-
-  document.body.removeChild(measurePage);
-  return pages;
 }
 
 // ── Build endless editor ─────────────────────────────────────────

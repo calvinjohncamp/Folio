@@ -115,8 +115,6 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   position:relative;
 }
 .pg--a4 .pg-body{
-  display:flex;
-  flex-direction:column;
   flex:1;
   min-height:0;
   overflow:hidden;
@@ -132,10 +130,8 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   padding-top:20px;
 }
 .pg--a4 .pg-ed{
-  flex:1;
   width:100%;
-  min-height:0;
-  height:auto!important;
+  height:100%;
   outline:none;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
   font-size:12pt;
