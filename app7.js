@@ -38,18 +38,16 @@ function htmlToLines(html){
     lines.push(clean === '' ? '<br>' : clean);
   }
   Array.from(tmp.childNodes).forEach(n => {
-    if(n.nodeType === 1 && n.tagName === 'DIV'){
-      pushLine(n.innerHTML);
-    } else if(n.nodeType === 3){
-      const split = (n.textContent || '').split('\n');
-      split.forEach(l => pushLine(l));
-    } else if(n.nodeType === 1){
+    if(n.nodeType === 1){
       const html = n.innerHTML || '';
       const split = html.split(/<br\s*\/?>/i);
       split.forEach(part => {
         const clean = part.trim();
         pushLine(clean);
       });
+    } else if(n.nodeType === 3){
+      const split = (n.textContent || '').split('\n');
+      split.forEach(l => pushLine(l));
     }
   });
   return lines.length ? lines : ['<br>'];
@@ -132,11 +130,8 @@ function paginate(html, firstPageH){
   const body = measurePage.querySelector('.pg-body');
   const ed = measurePage.querySelector('.pg-ed');
 
-  function fits(testHTML, isFirst){
-    body.className = isFirst
-      ? 'pg-body pg-body--normal'
-      : 'pg-body pg-body--cont';
-    ed.style.cssText = '';
+  function fits(testHTML){
+    body.className = 'pg-body pg-body--normal';
     ed.innerHTML = testHTML;
     return ed.scrollHeight <= ed.clientHeight + 1;
   }
@@ -148,7 +143,7 @@ function paginate(html, firstPageH){
 
   for(const line of lines){
     bucket.push(line);
-    if(!fits(linesToHTML(bucket), isFirstPage) && bucket.length > 1){
+    if(!fits(linesToHTML(bucket)) && bucket.length > 1){
       const overflowStart = Math.max(1, bucket.length - (1 + BUFFER_LINES));
       const currentPageLines = bucket.slice(0, overflowStart);
       const nextPageLines = bucket.slice(overflowStart);
