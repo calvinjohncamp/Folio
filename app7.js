@@ -70,7 +70,7 @@ function paginate(html, firstPageH){
     }
     ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
-    ed.style.fontSize = '12pt';
+    ed.style.fontSize = curSize + 'pt';
     ed.style.lineHeight = curLH;
     ed.style.height = pageH + 'px';
     ed.style.overflow = 'hidden';
@@ -422,8 +422,8 @@ function setA4Mode(on){
       }
 
     } else {
-      // Normale Dokumente
-      const chunks = paginate(normalizedHTML || '', PAGE_H);
+      // Normale Dokumente — kein firstPageH übergeben, paginate() nutzt realPageH
+      const chunks = paginate(normalizedHTML || '');
       document.getElementById('pgc').textContent = chunks.length;
       chunks.forEach((chunk, i) => {
         pagesEl.appendChild(buildA4PreviewPage(i, chunk));
