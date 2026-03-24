@@ -1,6 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 955;   // A4(1123) - paddingTop(68) - footer(38) - buffer(62)
+const PAGE_H = 967;   // A4(1123) - paddingTop(68) - footer(38) - buffer(50)
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
@@ -39,9 +39,22 @@ function paginate(html, firstPageH){
   let bucket = [];
   let currentLimit = limit1;
 
+  function normalizeNode(n){
+    if(n.nodeType === 3){
+      return `<div>${n.textContent || ''}</div>`;
+    }
+    if(n.nodeType === 1){
+      const txt = (n.textContent || '').trim();
+      if(txt === ''){
+        return `<div style="height:1.25em"></div>`;
+      }
+      return `<div>${txt}</div>`;
+    }
+    return '';
+  }
+
   function bucketH(){
-    ruler.innerHTML = '';
-    bucket.forEach(n => ruler.appendChild(n.cloneNode(true)));
+    ruler.innerHTML = bucket.map(normalizeNode).join('');
     const h = ruler.scrollHeight;
     ruler.innerHTML = '';
     return h;
