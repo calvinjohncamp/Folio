@@ -1,5 +1,5 @@
 const STORE = 'folio_v5_r2';
-const PAGE_H = 933;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(84)
+const PAGE_H = 953;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(64)
 const RULER_W = 654;
 
 const ruler   = document.getElementById('ruler');
@@ -687,18 +687,34 @@ function dl(blob, name){
   reader.readAsDataURL(blob);
 }
 function getPlainText(){
+  // HTML zu Plaintext konvertieren — funktioniert auch ohne DOM-Rendering
+  function htmlToText(html){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const lines = [];
+    function walk(node){
+      if(node.nodeType === 3){
+        lines.push(node.textContent);
+      } else if(node.nodeType === 1){
+        const tag = node.tagName.toLowerCase();
+        if(tag === 'br'){ lines.push('\n'); return; }
+        const isBlock = ['div','p','h1','h2','h3','h4','h5','li'].includes(tag);
+        if(isBlock && lines.length && lines[lines.length-1] !== '\n') lines.push('\n');
+        Array.from(node.childNodes).forEach(walk);
+        if(isBlock) lines.push('\n');
+      }
+    }
+    Array.from(tmp.childNodes).forEach(walk);
+    return lines.join('').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  // Im A4-Modus savedEndlessHTML verwenden
+  if(isA4Mode && savedEndlessHTML){
+    return htmlToText(savedEndlessHTML).replace(/\n/g, '\r\n');
+  }
   const ed = activeEd();
   if(!ed) return '';
-  const clone = ed.cloneNode(true);
-  clone.querySelectorAll('div').forEach(d => {
-    if(d.lastChild && d.lastChild.nodeName === 'BR' && d.childNodes.length > 1)
-      d.removeChild(d.lastChild);
-  });
-  document.body.appendChild(clone);
-  clone.style.cssText = 'position:fixed;left:-9999px;top:0;width:654px;visibility:hidden';
-  const text = clone.innerText || '';
-  document.body.removeChild(clone);
-  return text.replace(/\n{3,}/g, '\n\n').trim().replace(/\n/g, '\r\n');
+  return htmlToText(ed.innerHTML).replace(/\n/g, '\r\n');
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
