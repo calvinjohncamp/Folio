@@ -39,18 +39,30 @@ function paginate(html, firstPageH){
   let bucket = [];
   let currentLimit = limit1;
 
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
   function normalizeNode(n){
     if(n.nodeType === 3){
-      return `<div>${n.textContent || ''}</div>`;
+      const text = (n.textContent || '');
+      if(!text.trim()) return '<div class="r-empty"></div>';
+      return '<div>' + escapeHtml(text) + '</div>';
     }
-    if(n.nodeType === 1){
-      const txt = (n.textContent || '').trim();
-      if(txt === ''){
-        return `<div style="height:1.25em"></div>`;
-      }
-      return `<div>${txt}</div>`;
+    if(n.nodeType !== 1) return '';
+    const tag = n.tagName.toUpperCase();
+    const inner = (n.innerHTML || '').trim();
+    const text = (n.textContent || '').trim();
+    if(inner === '' || inner === '<br>' || inner === '<br/>' || inner === '<br />'){
+      return '<div class="r-empty"></div>';
     }
-    return '';
+    if(tag === 'DIV' || tag === 'P'){
+      return text ? `<div>${escapeHtml(text)}</div>` : '<div class="r-empty"></div>';
+    }
+    if(tag === 'H1') return `<h1>${escapeHtml(text)}</h1>`;
+    if(tag === 'H2') return `<h2>${escapeHtml(text)}</h2>`;
+    if(tag === 'H3') return `<h3>${escapeHtml(text)}</h3>`;
+    return text ? `<div>${escapeHtml(text)}</div>` : '<div class="r-empty"></div>';
   }
 
   function bucketH(){

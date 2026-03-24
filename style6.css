@@ -207,6 +207,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   color:var(--ink);word-wrap:break-word;
 }
 #ruler div,#ruler p{margin:0;line-height:1.25;font-size:12pt}
+#ruler .r-empty{height:1.25em;display:block}
 #ruler h1{font-family:'DM Serif Display',serif;font-size:24px;line-height:1.2;margin:0}
 #ruler h2{font-family:'DM Serif Display',serif;font-size:18px;line-height:1.3;margin:0}
 #ruler h3{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;margin:0}
