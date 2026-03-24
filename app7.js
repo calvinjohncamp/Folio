@@ -44,7 +44,12 @@ function htmlToLines(html){
       const split = (n.textContent || '').split('\n');
       split.forEach(l => pushLine(l));
     } else if(n.nodeType === 1){
-      pushLine(n.outerHTML);
+      const html = n.innerHTML || '';
+      const split = html.split(/<br\s*\/?>/i);
+      split.forEach(part => {
+        const clean = part.trim();
+        pushLine(clean);
+      });
     }
   });
   return lines.length ? lines : ['<br>'];
@@ -131,12 +136,9 @@ function paginate(html, firstPageH){
     body.className = isFirst
       ? 'pg-body pg-body--normal'
       : 'pg-body pg-body--cont';
-    ed.style.height = 'auto';
-    ed.style.position = 'absolute';
-    ed.style.width = '654px';
+    ed.style.cssText = '';
     ed.innerHTML = testHTML;
-    const paddingTop = parseFloat(window.getComputedStyle(body).paddingTop) || 0;
-    return ed.scrollHeight <= body.clientHeight - paddingTop + 1;
+    return ed.scrollHeight <= ed.clientHeight + 1;
   }
 
   const pages = [];
