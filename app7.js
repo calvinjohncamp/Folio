@@ -1,6 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 695;   // 1017px verfügbar / 1.384 Render-Faktor - 40px Puffer
+const PAGE_H = 920;   // A4(1123) - paddingTop(68) - footer(38) - buffer(97)
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
@@ -53,16 +53,18 @@ function paginate(html, firstPageH){
     const tag = n.tagName.toUpperCase();
     const inner = (n.innerHTML || '').trim();
     const text = (n.textContent || '').trim();
+    // Font-size aus Original übernehmen
+    const fs = n.style && n.style.fontSize ? ' style="font-size:' + n.style.fontSize + '"' : '';
     if(inner === '' || inner === '<br>' || inner === '<br/>' || inner === '<br />'){
-      return '<div class="r-empty"></div>';
+      return '<div class="r-empty"' + fs + '></div>';
     }
     if(tag === 'DIV' || tag === 'P'){
-      return text ? `<div>${escapeHtml(text)}</div>` : '<div class="r-empty"></div>';
+      return text ? `<div${fs}>${escapeHtml(text)}</div>` : '<div class="r-empty"' + fs + '></div>';
     }
     if(tag === 'H1') return `<h1>${escapeHtml(text)}</h1>`;
     if(tag === 'H2') return `<h2>${escapeHtml(text)}</h2>`;
     if(tag === 'H3') return `<h3>${escapeHtml(text)}</h3>`;
-    return text ? `<div>${escapeHtml(text)}</div>` : '<div class="r-empty"></div>';
+    return text ? `<div${fs}>${escapeHtml(text)}</div>` : '<div class="r-empty"' + fs + '></div>';
   }
 
   function bucketH(){
