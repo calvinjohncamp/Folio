@@ -1,10 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-// Render-Faktor: echte Seite rendert Zeilen größer als der Ruler misst
-// Ruler: 20px/Zeile, echte Seite: 22.4px/Zeile → Faktor 1.12
-// Verfügbare Höhe: 1123 - 68 (padding) - 38 (footer) - 50 (buffer) = 967px
-// In Ruler-Pixeln: 967 / 1.12 = 863
-const PAGE_H = 863;
+const PAGE_H = 967;   // echte verfügbare Texthöhe: A4(1123) - paddingTop(68) - footer(38) - buffer(50)
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
@@ -33,62 +29,63 @@ function collect(){
 
 // ── Paginate ─────────────────────────────────────────────────────
 function paginate(html, firstPageH){
-  syncRuler();
-  const limit1 = firstPageH !== undefined ? firstPageH : PAGE_H;
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
+
   const chunks = [];
   let bucket = [];
-  let currentLimit = limit1;
+  let isFirstPage = true;
 
-  function escapeHtml(s){
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function buildMeasurePage(bucketHTML, availableH){
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
+    const pg = document.createElement('div');
+    pg.className = 'pg pg--a4';
+    const body = document.createElement('div');
+    body.className = 'pg-body' + (isNormalDoc ? ' pg-body--normal' : ' pg-body--cont');
+    const ed = document.createElement('div');
+    ed.className = 'pg-ed';
+    ed.contentEditable = 'false';
+    ed.style.fontFamily = curFont;
+    ed.style.fontSize = '12pt';
+    ed.style.lineHeight = curLH;
+    ed.style.height = availableH + 'px';
+    ed.style.overflow = 'hidden';
+    ed.innerHTML = bucketHTML;
+    body.appendChild(ed);
+    pg.appendChild(body);
+    wrap.appendChild(pg);
+    document.body.appendChild(wrap);
+    return { wrap, ed };
   }
 
-  function normalizeNode(n){
-    if(n.nodeType === 3){
-      const text = (n.textContent || '');
-      if(!text.trim()) return '<div class="r-empty"></div>';
-      return '<div>' + escapeHtml(text) + '</div>';
-    }
-    if(n.nodeType !== 1) return '';
-    const tag = n.tagName.toUpperCase();
-    const inner = (n.innerHTML || '').trim();
-    const text = (n.textContent || '').trim();
-    // Font-size aus Original übernehmen
-    const fs = n.style && n.style.fontSize ? ' style="font-size:' + n.style.fontSize + '"' : '';
-    if(inner === '' || inner === '<br>' || inner === '<br/>' || inner === '<br />'){
-      return '<div class="r-empty"' + fs + '></div>';
-    }
-    if(tag === 'DIV' || tag === 'P'){
-      return text ? `<div${fs}>${escapeHtml(text)}</div>` : '<div class="r-empty"' + fs + '></div>';
-    }
-    if(tag === 'H1') return `<h1>${escapeHtml(text)}</h1>`;
-    if(tag === 'H2') return `<h2>${escapeHtml(text)}</h2>`;
-    if(tag === 'H3') return `<h3>${escapeHtml(text)}</h3>`;
-    return text ? `<div${fs}>${escapeHtml(text)}</div>` : '<div class="r-empty"' + fs + '></div>';
+  function getBucketHTML(arr){
+    return arr.map(n => n.outerHTML || n.textContent || '').join('');
   }
 
-  function bucketH(){
-    ruler.innerHTML = bucket.map(normalizeNode).join('');
-    const h = ruler.scrollHeight;
-    ruler.innerHTML = '';
-    return h;
+  function fitsOnPage(arr, availableH){
+    const { wrap, ed } = buildMeasurePage(getBucketHTML(arr), availableH);
+    const fits = ed.scrollHeight <= ed.clientHeight + 1;
+    document.body.removeChild(wrap);
+    return fits;
   }
+
   for(const node of nodes){
     bucket.push(node.cloneNode(true));
-    if(bucketH() > currentLimit && bucket.length > 1){
+    const availableH = isFirstPage
+      ? (firstPageH !== undefined ? firstPageH : PAGE_H)
+      : PAGE_H;
+    if(!fitsOnPage(bucket, availableH) && bucket.length > 1){
       const overflow = bucket.pop();
-      chunks.push(bucket.map(n => n.outerHTML || n.textContent || '').join(''));
+      chunks.push(getBucketHTML(bucket));
       bucket = [overflow];
-      currentLimit = PAGE_H;
+      isFirstPage = false;
     }
   }
-  if(bucket.length)
-    chunks.push(bucket.map(n => n.outerHTML || n.textContent || '').join(''));
-  ruler.innerHTML = '';
+
+  if(bucket.length) chunks.push(getBucketHTML(bucket));
   return chunks.length ? chunks : [''];
 }
 
