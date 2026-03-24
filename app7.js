@@ -34,20 +34,12 @@ function paginate(html, firstPageH){
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
 
-  // Echte verfügbare Texthöhe dynamisch messen (kein Magic-Number-Abzug)
+  // Verfügbare Texthöhe dynamisch messen
   const measurePage = buildA4PreviewPage(0, '', isNormalDoc);
   measurePage.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
   document.body.appendChild(measurePage);
   const measureBody = measurePage.querySelector('.pg-body');
-  const measureStyle = window.getComputedStyle(measureBody);
-  const ptTop    = parseFloat(measureStyle.paddingTop)    || 0;
-  const ptBottom = parseFloat(measureStyle.paddingBottom) || 0;
-  const safetyBuffer = 35; // ~2-3 Leerzeilen Abstand vor Fußzeile
-  const realPageH = measureBody.clientHeight - ptTop - ptBottom - safetyBuffer;
-  console.log('[Paginate v106] Body-H:', measureBody.clientHeight, '| padding-top:', ptTop, '| padding-bottom:', ptBottom, '| realPageH:', realPageH);
   document.body.removeChild(measurePage);
-
-  const availH = firstPageH !== undefined ? Math.min(firstPageH, realPageH) : realPageH;
 
   const chunks = [];
   let bucket = [];
@@ -70,7 +62,7 @@ function paginate(html, firstPageH){
     }
     ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
-    ed.style.fontSize = curSize + 'pt';
+    ed.style.fontSize = '12pt';
     ed.style.lineHeight = curLH;
     wrap.appendChild(page);
     document.body.appendChild(wrap);
@@ -171,8 +163,6 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
   ed.style.fontFamily = curFont;
   ed.style.fontSize   = '12pt';
   ed.style.lineHeight = curLH;
-  ed.style.height     = '100%';
-  ed.style.overflow   = 'hidden';
 
   body.appendChild(ed);
   pg.appendChild(body);
@@ -422,7 +412,7 @@ function setA4Mode(on){
       }
 
     } else {
-      // Normale Dokumente — kein firstPageH übergeben, paginate() nutzt realPageH
+      // Normale Dokumente
       const chunks = paginate(normalizedHTML || '');
       document.getElementById('pgc').textContent = chunks.length;
       chunks.forEach((chunk, i) => {
