@@ -7,8 +7,8 @@ function getPageH(){
   const page = buildA4PreviewPage(0, '<div>X</div>', false);
   wrap.appendChild(page);
   document.body.appendChild(wrap);
-  const ed = page.querySelector('.pg-ed');
-  const h = ed.clientHeight;
+  const body = page.querySelector('.pg-body');
+  const h = body.clientHeight;
   document.body.removeChild(wrap);
   return h;
 }
