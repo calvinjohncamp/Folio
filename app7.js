@@ -64,9 +64,12 @@ function paginate(html, firstPageH){
     ed.style.fontFamily = curFont;
     ed.style.fontSize = '12pt';
     ed.style.lineHeight = curLH;
+    ed.style.width = '654px';
+    ed.style.height = 'auto';
+    ed.style.position = 'absolute';
     wrap.appendChild(page);
     document.body.appendChild(wrap);
-    const limit = ed.clientHeight - 40;
+    const limit = body.clientHeight - 40;
     const fits = ed.scrollHeight <= limit;
     document.body.removeChild(wrap);
     return fits;
