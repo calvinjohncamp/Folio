@@ -212,6 +212,7 @@ function setA4Mode(on){
     // Save the endless content BEFORE switching
     const endlessEd = pagesEl.querySelector('.pg--endless .pg-ed');
     savedEndlessHTML = endlessEd ? endlessEd.innerHTML : '';
+    console.log('savedEndlessHTML first 300:', savedEndlessHTML.slice(0,300));
 
     pagesEl.classList.add('a4-mode');
     pagesEl.innerHTML = '';
@@ -945,7 +946,8 @@ document.addEventListener('paste', function(e){
 
   // Plaintext bevorzugen wenn vorhanden — vermeidet Div-Struktur-Probleme aus Folio/anderen Editoren
   if(text){
-    const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
+    const lines = text.split(/\r?\n/);
+    const divs = lines.map(l => l.trim() ? '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' : '<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
     document.execCommand('insertHTML',false,divs);
     return;
   }
