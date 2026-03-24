@@ -942,6 +942,14 @@ document.addEventListener('paste', function(e){
   e.preventDefault();
   const html=(e.clipboardData||window.clipboardData).getData('text/html');
   const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+
+  // Plaintext bevorzugen wenn vorhanden — vermeidet Div-Struktur-Probleme aus Folio/anderen Editoren
+  if(text){
+    const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
+    document.execCommand('insertHTML',false,divs);
+    return;
+  }
+
   if(html){
     let h=html.replace(/<!--[\s\S]*?-->/g,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<meta[^>]*>/gi,'')
       .replace(/<link[^>]*>/gi,'').replace(/<o:[^>]*>[\s\S]*?<\/o:[^>]*>/gi,'').replace(/<o:[^>]*\/>/gi,'')
@@ -970,9 +978,6 @@ document.addEventListener('paste', function(e){
     const deduped = resultLines.filter((d,i) => !(d === null && resultLines[i-1] === null));
     const finalHTML=deduped.map(d=>!d?'<div><br></div>':(d.innerHTML.trim()?d.outerHTML:'<div><br></div>')).join('');
     document.execCommand('insertHTML',false,finalHTML);
-  } else {
-    const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
-    document.execCommand('insertHTML',false,divs);
   }
 },true);
 
