@@ -1,6 +1,24 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 967;   // echte verfügbare Texthöhe: A4(1123) - paddingTop(68) - footer(38) - buffer(50)
+// PAGE_H: echte verfügbare Texthöhe zur Laufzeit messen
+function getPageH(){
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
+  const pg = document.createElement('div');
+  pg.className = 'pg pg--a4';
+  const body = document.createElement('div');
+  body.className = 'pg-body pg-body--normal';
+  const ed = document.createElement('div');
+  ed.className = 'pg-ed';
+  body.appendChild(ed);
+  pg.appendChild(body);
+  wrap.appendChild(pg);
+  document.body.appendChild(wrap);
+  const h = body.clientHeight;
+  document.body.removeChild(wrap);
+  return h;
+}
+const PAGE_H = getPageH();
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
