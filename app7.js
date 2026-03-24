@@ -40,7 +40,7 @@ function paginate(html, firstPageH){
   const measurePage = buildA4PreviewPage(0, '<div>X</div>', false);
   measureWrap.appendChild(measurePage);
   document.body.appendChild(measureWrap);
-  const realPageH = measurePage.querySelector('.pg-body').clientHeight - 38 - 50; // Footer + 2-3 Zeilen Puffer
+  const realPageH = measurePage.querySelector('.pg-body').clientHeight - 105; // → 980px
   document.body.removeChild(measureWrap);
 
   const availH = firstPageH !== undefined ? Math.min(firstPageH, realPageH) : realPageH;
