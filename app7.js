@@ -1157,6 +1157,18 @@ function init(){
   stats();
 }
 
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js', {
+        updateViaCache: 'none'
+      });
+      reg.update();
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    } catch (e) {}
+  });
+}
 
 init();
