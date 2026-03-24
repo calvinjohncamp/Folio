@@ -173,6 +173,8 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
   ed.style.fontFamily = curFont;
   ed.style.fontSize   = '12pt';
   ed.style.lineHeight = curLH;
+  ed.style.height     = '100%';
+  ed.style.overflow   = 'hidden';
 
   body.appendChild(ed);
   pg.appendChild(body);
@@ -426,7 +428,12 @@ function setA4Mode(on){
       const chunks = paginate(normalizedHTML || '');
       document.getElementById('pgc').textContent = chunks.length;
       chunks.forEach((chunk, i) => {
-        pagesEl.appendChild(buildA4PreviewPage(i, chunk));
+        const pg = buildA4PreviewPage(i, chunk);
+        pagesEl.appendChild(pg);
+        // Höhe explizit setzen nachdem Seite im DOM ist, damit overflow:hidden greift
+        const pgBody = pg.querySelector('.pg-body');
+        const pgEd   = pg.querySelector('.pg-ed');
+        if(pgBody && pgEd) pgEd.style.height = pgBody.clientHeight + 'px';
       });
     }
 
