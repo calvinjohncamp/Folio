@@ -28,14 +28,41 @@ function collect(){
 }
 
 // ── Paginate ─────────────────────────────────────────────────────
-function paginate(html, firstPageH){
+// ── HTML → saubere Zeilen (inkl. Format-Erhalt) ─────────────────
+function htmlToLines(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const lines = [];
+  function pushLine(inner){
+    const clean = (inner || '').trim();
+    lines.push(clean === '' ? '<br>' : clean);
+  }
+  Array.from(tmp.childNodes).forEach(n => {
+    if(n.nodeType === 1 && n.tagName === 'DIV'){
+      pushLine(n.innerHTML);
+    } else if(n.nodeType === 3){
+      const split = (n.textContent || '').split('\n');
+      split.forEach(l => pushLine(l));
+    } else if(n.nodeType === 1){
+      pushLine(n.outerHTML);
+    }
+  });
+  return lines.length ? lines : ['<br>'];
+}
+
+// ── Zeilen → HTML ────────────────────────────────────────────────
+function linesToHTML(lines){
+  return lines.map(l => `<div>${l}</div>`).join('');
+}
+
+// ── Alte paginate-Logik für Brief ────────────────────────────────
+function paginateBriefExisting(html, firstPageH){
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
 
-  // Verfügbare Texthöhe dynamisch messen
-  const measurePage = buildA4PreviewPage(0, '', isNormalDoc);
+  const measurePage = buildA4PreviewPage(0, '', false);
   measurePage.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
   document.body.appendChild(measurePage);
   const measureBody = measurePage.querySelector('.pg-body');
@@ -55,11 +82,7 @@ function paginate(html, firstPageH){
     const page = buildA4PreviewPage(0, '', false);
     const body = page.querySelector('.pg-body');
     const ed = page.querySelector('.pg-ed');
-    if(isNormalDoc){
-      body.className = 'pg-body pg-body--normal';
-    } else {
-      body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
-    }
+    body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
     ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
     ed.style.fontSize = '12pt';
@@ -87,6 +110,54 @@ function paginate(html, firstPageH){
 
   if(bucket.length) chunks.push(getBucketHTML(bucket));
   return chunks.length ? chunks : [''];
+}
+
+// ── Paginate v108 ────────────────────────────────────────────────
+function paginate(html, firstPageH){
+  if(!isNormalDoc){
+    return paginateBriefExisting(html, firstPageH);
+  }
+
+  const lines = htmlToLines(html);
+  if(!lines.length) return [''];
+
+  const measurePage = buildA4PreviewPage(0, '', false);
+  measurePage.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;';
+  document.body.appendChild(measurePage);
+  const body = measurePage.querySelector('.pg-body');
+  const ed = measurePage.querySelector('.pg-ed');
+
+  function fits(testHTML, isFirst){
+    body.className = isFirst
+      ? 'pg-body pg-body--normal'
+      : 'pg-body pg-body--cont';
+    ed.innerHTML = testHTML;
+    return ed.scrollHeight <= ed.clientHeight + 1;
+  }
+
+  const pages = [];
+  let bucket = [];
+  let isFirstPage = true;
+  const BUFFER_LINES = 2;
+
+  for(const line of lines){
+    bucket.push(line);
+    if(!fits(linesToHTML(bucket), isFirstPage) && bucket.length > 1){
+      const overflowStart = Math.max(1, bucket.length - (1 + BUFFER_LINES));
+      const currentPageLines = bucket.slice(0, overflowStart);
+      const nextPageLines = bucket.slice(overflowStart);
+      pages.push(linesToHTML(currentPageLines));
+      bucket = nextPageLines;
+      isFirstPage = false;
+    }
+  }
+
+  if(bucket.length){
+    pages.push(linesToHTML(bucket));
+  }
+
+  document.body.removeChild(measurePage);
+  return pages;
 }
 
 // ── Build endless editor ─────────────────────────────────────────
