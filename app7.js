@@ -1,6 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 868;   // (1017px verfügbar) / 1.12 Render-Faktor - 40px Puffer
+const PAGE_H = 695;   // 1017px verfügbar / 1.384 Render-Faktor - 40px Puffer
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
