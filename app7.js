@@ -1,19 +1,6 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-// PAGE_H: echte verfügbare Texthöhe zur Laufzeit messen
-let PAGE_H = 0;
-function getPageH(){
-  if(PAGE_H > 0) return PAGE_H;
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
-  const page = buildA4PreviewPage(0, '<div>X</div>', false);
-  wrap.appendChild(page);
-  document.body.appendChild(wrap);
-  const body = page.querySelector('.pg-body');
-  PAGE_H = body.clientHeight;
-  document.body.removeChild(wrap);
-  return PAGE_H;
-}
+const PAGE_H = 940;
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
@@ -47,6 +34,17 @@ function paginate(html, firstPageH){
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
 
+  // Echte verfügbare Höhe einmalig messen
+  const measureWrap = document.createElement('div');
+  measureWrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
+  const measurePage = buildA4PreviewPage(0, '<div>X</div>', false);
+  measureWrap.appendChild(measurePage);
+  document.body.appendChild(measureWrap);
+  const realPageH = measurePage.querySelector('.pg-body').clientHeight;
+  document.body.removeChild(measureWrap);
+
+  const availH = firstPageH !== undefined ? Math.min(firstPageH, realPageH) : realPageH;
+
   const chunks = [];
   let bucket = [];
   let isFirstPage = true;
@@ -55,7 +53,7 @@ function paginate(html, firstPageH){
     return arr.map(n => n.outerHTML || n.textContent || '').join('');
   }
 
-  function buildMeasurePage(bucketHTML, isFirst){
+  function fitsOnPage(arr, pageH){
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
     const page = buildA4PreviewPage(0, '', false);
@@ -64,29 +62,25 @@ function paginate(html, firstPageH){
     if(isNormalDoc){
       body.className = 'pg-body pg-body--normal';
     } else {
-      body.className = isFirst ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
+      body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
     }
-    ed.innerHTML = bucketHTML;
+    ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
     ed.style.fontSize = '12pt';
     ed.style.lineHeight = curLH;
-    ed.style.height = '';
+    ed.style.height = pageH + 'px';
     ed.style.overflow = 'hidden';
     wrap.appendChild(page);
     document.body.appendChild(wrap);
-    return { wrap, ed };
-  }
-
-  function fitsOnPage(arr, isFirst){
-    const { wrap, ed } = buildMeasurePage(getBucketHTML(arr), isFirst);
-    const fits = ed.scrollHeight <= ed.clientHeight + 1;
+    const fits = ed.scrollHeight <= pageH + 1;
     document.body.removeChild(wrap);
     return fits;
   }
 
   for(const node of nodes){
     bucket.push(node.cloneNode(true));
-    if(!fitsOnPage(bucket, isFirstPage) && bucket.length > 1){
+    const currentH = isFirstPage ? availH : realPageH;
+    if(!fitsOnPage(bucket, currentH) && bucket.length > 1){
       const overflow = bucket.pop();
       chunks.push(getBucketHTML(bucket));
       bucket = [overflow];
