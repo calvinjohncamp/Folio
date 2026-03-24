@@ -42,17 +42,7 @@ function paginate(html, firstPageH){
   function bucketH(){
     ruler.innerHTML = '';
     bucket.forEach(n => ruler.appendChild(n.cloneNode(true)));
-    let h = ruler.scrollHeight;
-    // Leere Divs (<div><br></div>) kollabieren im Ruler auf 0 — manuell korrigieren
-    const emptyDivs = bucket.filter(n => {
-      if(n.nodeType !== 1) return false;
-      const tag = n.tagName && n.tagName.toLowerCase();
-      if(tag !== 'div' && tag !== 'p') return false;
-      const inner = (n.innerHTML || '').trim();
-      return inner === '<br>' || inner === '';
-    });
-    const lineH = parseFloat(curLH || 1.25) * parseFloat(ruler.style.fontSize || 16);
-    h += emptyDivs.length * lineH;
+    const h = ruler.scrollHeight;
     ruler.innerHTML = '';
     return h;
   }
@@ -957,7 +947,10 @@ document.addEventListener('paste', function(e){
   // Plaintext bevorzugen wenn vorhanden — vermeidet Div-Struktur-Probleme aus Folio/anderen Editoren
   if(text){
     const lines = text.split(/\r?\n/);
-    const divs = lines.map(l => l.trim() ? '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' : '<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
+    const divs = lines.map(l => l.trim() 
+      ? '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' 
+      : '<div style="font-size:'+curSize+'pt"><br></div>'
+    ).join('').replace(/(<div[^>]*><br><\/div>){2,}/g,'<div style="font-size:'+curSize+'pt"><br></div>');
     document.execCommand('insertHTML',false,divs);
     return;
   }
