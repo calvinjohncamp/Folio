@@ -1,6 +1,10 @@
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
-const PAGE_H = 940;
+// Render-Faktor: echte Seite rendert Zeilen größer als der Ruler misst
+// Ruler: 20px/Zeile, echte Seite: 22.4px/Zeile → Faktor 1.12
+// Verfügbare Höhe: 1123 - 68 (padding) - 38 (footer) - 50 (buffer) = 967px
+// In Ruler-Pixeln: 967 / 1.12 = 863
+const PAGE_H = 863;
 
 const ruler   = document.getElementById('ruler');
 const pagesEl = document.getElementById('pages');
