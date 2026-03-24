@@ -1,5 +1,5 @@
 const STORE = 'folio_v5_r2';
-const PAGE_H = 953;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(64)
+const PAGE_H = 940;   // A4(1123) - top-pad(68) - footer(38) - bottom-gap(77)
 const RULER_W = 654;
 
 const ruler   = document.getElementById('ruler');
@@ -852,8 +852,28 @@ function loadFile(input){
     };
     reader.readAsArrayBuffer(file);
   } else {
-    alert('Nicht unterstütztes Format. Bitte .folio, .txt oder .docx verwenden.');
-    input.value='';
+    // Unbekannte Endung: als .folio (JSON) versuchen, dann als .txt
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const s = JSON.parse(e.target.result);
+        if(s.content !== undefined){
+          if(s.font){ curFont=s.font; document.getElementById('fnt').value=s.font; }
+          if(s.size){ curSize=s.size; document.getElementById('fsz').value=s.size; }
+          if(s.lh)  { curLH=s.lh;   document.getElementById('flh').value=s.lh; }
+          syncRuler();
+          applyContent(s.content||'', s.title||name.replace(/\.[^.]+$/,'')||'', s.isNormalDoc !== false);
+        } else { throw new Error('kein folio-Format'); }
+      } catch(err){
+        // Als Plaintext behandeln
+        const html = (e.target.result||'').split(/\r?\n/).map(line =>
+          `<div>${line.trim() ? line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<br>'}</div>`
+        ).join('');
+        applyContent(html, name.replace(/\.[^.]+$/,'')||'Dokument', true);
+      }
+      input.value = '';
+    };
+    reader.readAsText(file);
   }
 }
 
@@ -938,12 +958,18 @@ document.addEventListener('paste', function(e){
       const isUnder=underline||tag==='u'||(st.textDecoration&&st.textDecoration.includes('underline'));
       const isBlock=['p','div','h1','h2','h3','h4','h5','li'].includes(tag);
       Array.from(node.childNodes).forEach(c=>walk(c,isBold,isItalic,isUnder));
-      if(isBlock)flushLine();
+      if(isBlock && currentLine.length) flushLine();
+      else if(isBlock && !currentLine.length){
+        // Leerer Block = echte Leerzeile, aber nur wenn vorheriger Eintrag Inhalt hatte
+        if(resultLines.length && resultLines[resultLines.length-1] !== null) resultLines.push(null);
+      }
     }
     Array.from(tmp.childNodes).forEach(c=>walk(c,false,false,false));
     if(currentLine.length)flushLine();
-    const finalHTML=resultLines.map(d=>!d?'<div><br></div>':(d.innerHTML.trim()?d.outerHTML:'<div><br></div>')).join('');
-    document.execCommand('insertHTML',false,finalHTML.replace(/(<div><br><\/div>){2,}/g,'<div><br></div>'));
+    // Aufeinanderfolgende Leerzeilen auf eine reduzieren
+    const deduped = resultLines.filter((d,i) => !(d === null && resultLines[i-1] === null));
+    const finalHTML=deduped.map(d=>!d?'<div><br></div>':(d.innerHTML.trim()?d.outerHTML:'<div><br></div>')).join('');
+    document.execCommand('insertHTML',false,finalHTML);
   } else {
     const divs=text.split('\n').map(l=>l.trim()?'<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>':'<div><br></div>').join('').replace(/(<div><br><\/div>){2,}/g,'<div><br></div>');
     document.execCommand('insertHTML',false,divs);
