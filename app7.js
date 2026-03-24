@@ -131,14 +131,17 @@ function paginate(html, firstPageH){
     body.className = isFirst
       ? 'pg-body pg-body--normal'
       : 'pg-body pg-body--cont';
+    ed.style.height = 'auto';
+    ed.style.position = 'absolute';
+    ed.style.width = '654px';
     ed.innerHTML = testHTML;
-    return ed.scrollHeight <= ed.clientHeight + 1;
+    return ed.scrollHeight <= body.clientHeight + 1;
   }
 
   const pages = [];
   let bucket = [];
   let isFirstPage = true;
-  const BUFFER_LINES = 2;
+  const BUFFER_LINES = 0;
 
   for(const line of lines){
     bucket.push(line);
