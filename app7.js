@@ -57,7 +57,7 @@ function paginate(html, firstPageH){
     return arr.map(n => n.outerHTML || n.textContent || '').join('');
   }
 
-  function fitsOnPage(arr, pageH){
+  function fitsOnPage(arr){
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
     const page = buildA4PreviewPage(0, '', false);
@@ -72,19 +72,17 @@ function paginate(html, firstPageH){
     ed.style.fontFamily = curFont;
     ed.style.fontSize = curSize + 'pt';
     ed.style.lineHeight = curLH;
-    ed.style.height = pageH + 'px';
-    ed.style.overflow = 'hidden';
     wrap.appendChild(page);
     document.body.appendChild(wrap);
-    const fits = ed.scrollHeight <= pageH + 1;
+    const limit = ed.clientHeight - 40;
+    const fits = ed.scrollHeight <= limit;
     document.body.removeChild(wrap);
     return fits;
   }
 
   for(const node of nodes){
     bucket.push(node.cloneNode(true));
-    const currentH = isFirstPage ? availH : realPageH;
-    if(!fitsOnPage(bucket, currentH) && bucket.length > 1){
+    if(!fitsOnPage(bucket) && bucket.length > 1){
       const overflow = bucket.pop();
       chunks.push(getBucketHTML(bucket));
       bucket = [overflow];
@@ -428,12 +426,7 @@ function setA4Mode(on){
       const chunks = paginate(normalizedHTML || '');
       document.getElementById('pgc').textContent = chunks.length;
       chunks.forEach((chunk, i) => {
-        const pg = buildA4PreviewPage(i, chunk);
-        pagesEl.appendChild(pg);
-        // Höhe explizit setzen nachdem Seite im DOM ist, damit overflow:hidden greift
-        const pgBody = pg.querySelector('.pg-body');
-        const pgEd   = pg.querySelector('.pg-ed');
-        if(pgBody && pgEd) pgEd.style.height = pgBody.clientHeight + 'px';
+        pagesEl.appendChild(buildA4PreviewPage(i, chunk));
       });
     }
 
