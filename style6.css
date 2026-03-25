@@ -320,19 +320,19 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   }
 
   /* ── Editor: feste Höhe, kein flex ── */
-  /* normal: 297 - 25 (top) - 8 (bottom-pad) - 14 (footer) = 250mm */
+  /* normal: 297 - 25 (top) - 8 (bottom-pad) - 14 (footer) - 9 (2-Zeilen-Puffer) = 241mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
     width:170mm!important;
-    height:250mm!important;
+    height:241mm!important;
     overflow:hidden!important;
   }
 
-  /* cont: 297 - 15 (top) - 8 (bottom-pad) - 14 (footer) = 260mm */
+  /* cont: 297 - 15 (top) - 8 (bottom-pad) - 14 (footer) - 9 (2-Zeilen-Puffer) = 251mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
     width:170mm!important;
-    height:260mm!important;
+    height:251mm!important;
     overflow:hidden!important;
   }
 
