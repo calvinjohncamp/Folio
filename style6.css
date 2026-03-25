@@ -295,8 +295,6 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
     width:210mm!important;
     overflow:hidden!important;
     margin:0!important;
-    background:white!important;
-    position:relative!important;
   }
   .pg--a4:last-child { page-break-after:avoid!important; break-after:avoid!important; }
   .pg--a4 .pg-body { display:flex!important; flex-direction:column!important; flex:1!important; min-height:0!important; padding:0 20mm 8mm!important; overflow:hidden!important; }
