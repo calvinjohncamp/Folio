@@ -778,7 +778,7 @@ function doPDF(){
         const pgH = pg.offsetHeight || 1123;
         const style = window.getComputedStyle(body);
         const padT = parseFloat(style.paddingTop) || 0;
-        const edH = pgH - hdrH - ftrH - padT - 40; // 40px Puffer vor Fußzeile
+        const edH = pgH - hdrH - ftrH - padT - 80; // 80px Puffer vor Fußzeile (~21mm)
         ed.style.height = edH + 'px';
         ed.style.overflow = 'hidden';
         ed.style.flex = 'none';
