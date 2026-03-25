@@ -765,6 +765,26 @@ function doPDF(){
   if(!isA4Mode) setA4Mode(true);
 
   function doprint(){
+    // Explizite Höhe auf pg-ed setzen damit Druck-Layout = Vorschau-Layout
+    pagesEl.querySelectorAll('.pg--a4').forEach(pg => {
+      const body = pg.querySelector('.pg-body');
+      const ed = pg.querySelector('.pg-ed');
+      if(body && ed){
+        const ftr = pg.querySelector('.pg-ftr');
+        const ftrH = ftr ? ftr.offsetHeight : 0;
+        const hdr1 = pg.querySelector('.pg-brief-hdr1');
+        const hdr2 = pg.querySelector('.pg-brief-hdr2');
+        const hdrH = (hdr1 ? hdr1.offsetHeight : 0) + (hdr2 ? hdr2.offsetHeight : 0);
+        const pgH = pg.offsetHeight || 1123;
+        const style = window.getComputedStyle(body);
+        const padT = parseFloat(style.paddingTop) || 0;
+        const edH = pgH - hdrH - ftrH - padT;
+        ed.style.height = edH + 'px';
+        ed.style.overflow = 'hidden';
+        ed.style.flex = 'none';
+      }
+    });
+
     const images = Array.from(pagesEl.querySelectorAll('img'));
     const unloaded = images.filter(img => !img.complete);
     if(unloaded.length > 0){
@@ -785,9 +805,14 @@ function doPDF(){
   }));
 }
 
-// Unlock toolbar after print dialog closes
+// Unlock toolbar after print dialog closes + reset print styles
 window.addEventListener('afterprint', function(){
   if(!isA4Mode) document.body.classList.remove('a4-locked');
+  pagesEl.querySelectorAll('.pg--a4 .pg-ed').forEach(ed => {
+    ed.style.height = '';
+    ed.style.overflow = '';
+    ed.style.flex = '';
+  });
 });
 
 // ── Open file ─────────────────────────────────────────────────────
