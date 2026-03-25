@@ -1,3 +1,4 @@
+const APP_VERSION = '111';
 const STORE = 'folio_v5_r2';
 const RULER_W = 654;
 const PAGE_H = 940;

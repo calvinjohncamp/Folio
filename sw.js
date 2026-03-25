@@ -1,10 +1,6 @@
-const CACHE = 'folio-v87';
-const APP_SHELL = ['/', '/index.html', '/sw.js'];
+const CACHE = 'folio-v111';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(APP_SHELL))
-  );
   self.skipWaiting();
 });
 
@@ -22,10 +18,12 @@ self.addEventListener('fetch', event => {
 
   if (req.method !== 'GET') return;
 
-  // Niemals app7.js / style6.css cachen
+  // Niemals cachen: app7.js, style6.css, index.html — immer frisch vom Server
   if (
     url.pathname.endsWith('/app7.js') ||
     url.pathname.endsWith('/style6.css') ||
+    url.pathname.endsWith('/index.html') ||
+    url.pathname === '/' ||
     url.pathname.includes('app7.js?v=') ||
     url.pathname.includes('style6.css?v=')
   ) {
@@ -33,21 +31,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Navigation: network first
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(resp => {
-          const copy = resp.clone();
-          caches.open(CACHE).then(cache => cache.put('/index.html', copy));
-          return resp;
-        })
-        .catch(() => caches.match('/index.html'))
-    );
-    return;
-  }
-
-  // Für den kleinen Rest: network first, fallback cache
+  // Für alles andere: network first, fallback cache
   event.respondWith(
     fetch(req)
       .then(resp => {
