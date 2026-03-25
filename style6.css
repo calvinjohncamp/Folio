@@ -269,6 +269,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 
 /* ── Print ── */
 @media print{
+  @page { size:A4; margin:0; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body > *:not(#main) { display:none!important; }
   #main > *:not(#cv) { display:none!important; }
@@ -280,30 +281,76 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   #pages { display:block!important; margin:0!important; padding:0!important; }
   #pages.a4-mode::before { display:none!important; }
   .pg--endless { display:none!important; visibility:hidden!important; }
+
+  /* ── A4-Seite: blockbasiert, kein Flexbox ── */
   .pg--a4 {
-    display:flex!important;
-    flex-direction:column!important;
-    box-shadow:none!important;
-    border-radius:0!important;
-    page-break-after:always;
-    break-after:page;
-    page-break-inside:avoid;
-    break-inside:avoid;
-    height:297mm!important;
+    display:block!important;
+    position:relative!important;
     width:210mm!important;
+    height:297mm!important;
     overflow:hidden!important;
     margin:0!important;
+    padding:0!important;
     background:white!important;
-    position:relative!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    page-break-after:always!important;
+    break-after:page!important;
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
   }
   .pg--a4:last-child { page-break-after:avoid!important; break-after:avoid!important; }
-  .pg--a4 .pg-body { display:flex!important; flex-direction:column!important; flex:1!important; min-height:0!important; padding:0 20mm 8mm!important; overflow:hidden!important; }
-  .pg--a4 .pg-body--normal { padding-top:25mm!important; }
-  .pg--a4 .pg-body--cont { padding-top:15mm!important; }
-  .pg--a4 .pg-ed { flex:none!important; width:170mm!important; height:220mm!important; overflow:hidden!important; }
-  .pg-ftr { flex-shrink:0!important; height:14mm!important; padding:4mm 20mm 0!important; font-size:8pt!important; }
-  .pg-brief-hdr1 { padding:20px 20mm 0!important; flex-shrink:0!important; overflow:visible!important; }
+
+  /* ── pg-body: block, kein flex ── */
+  .pg--a4 .pg-body {
+    display:block!important;
+    margin:0!important;
+    padding:0 20mm!important;
+    overflow:hidden!important;
+  }
+
+  /* ── Normale Seite (Seite 1): padding-top 25mm ── */
+  .pg--a4 .pg-body--normal {
+    padding-top:25mm!important;
+  }
+
+  /* ── Folgeseiten: padding-top 15mm ── */
+  .pg--a4 .pg-body--cont {
+    padding-top:15mm!important;
+  }
+
+  /* ── Editor: feste Höhe, kein flex ── */
+  /* normal: 297 - 25 (top) - 8 (bottom-pad) - 14 (footer) = 250mm */
+  .pg--a4 .pg-body--normal .pg-ed {
+    display:block!important;
+    width:170mm!important;
+    height:250mm!important;
+    overflow:hidden!important;
+  }
+
+  /* cont: 297 - 15 (top) - 8 (bottom-pad) - 14 (footer) = 260mm */
+  .pg--a4 .pg-body--cont .pg-ed {
+    display:block!important;
+    width:170mm!important;
+    height:260mm!important;
+    overflow:hidden!important;
+  }
+
+  /* ── Footer: absolut am Seitenende ── */
+  .pg-ftr {
+    display:block!important;
+    position:absolute!important;
+    left:20mm!important;
+    right:20mm!important;
+    bottom:8mm!important;
+    height:14mm!important;
+    padding:0!important;
+    font-size:8pt!important;
+    border-top:1px solid var(--border)!important;
+  }
+
+  /* ── Brief-Layout: unverändert lassen ── */
+  .pg-brief-hdr1 { padding:20px 20mm 0!important; overflow:visible!important; }
   .pg-brief-hdr1 img { display:block!important; }
   .pg-brief-hdr2 { padding:16px 20mm 0!important; }
-  @page { size:A4; margin:0; }
 }
