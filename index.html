@@ -2,141 +2,3072 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Folio">
-<meta name="theme-color" content="#1a1814">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Folio</title>
-<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style6.css?v=111"><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Padel Bielstein – Courts buchen</title>
+<style>
+:root {
+  --bg: #000000;
+  --card: #0d0d0d;
+  --border: #222222;
+  --blue: #1F6FD2;
+  --blue-dk: #1657A8;
+  --gold: #E6EA18;
+  --gold-dk: #C9CD14;
+  --gray: #a0a0a0;
+  --gray-lt: #d0d0d0;
+  --white: #ffffff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Arial","Helvetica",sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+
+/* ■■ HEADER ■■ */
+.hero { margin-bottom: 18px; border-bottom: 1px solid var(--border); background: #000; overflow: hidden; }
+.hero-frame { width: 100%; aspect-ratio: 3830 / 1563; background: #000; }
+.hero-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
+
+/* ■■ LOADING ■■ */
+.loading-bar { width: 100%; height: 2px; background: var(--border); margin-bottom: 18px; overflow: hidden; display: none; }
+.loading-bar.active { display: block; }
+.loading-bar-inner { height: 100%; width: 40%; background: var(--blue); animation: loadSlide 1.2s ease-in-out infinite; }
+@keyframes loadSlide { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+
+/* ■■ MAIN ■■ */
+main { max-width: 960px; margin: 0 auto; padding: 2px 16px 80px; }
+
+/* ■■ MODE TABS ■■ */
+.mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+.mode-tab {
+  height: 60px; padding: 0 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+  border: 1.5px solid var(--border); background: var(--card);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 1rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--white);
+}
+#tabAbo:not(.active) { color: var(--blue); border-color: var(--blue); }
+.mode-tab:hover { border-color: #444; }
+.mode-tab.active { background: var(--gold); border-color: var(--gold-dk); color: #0a0a0a !important; }
+.mode-tab .tab-icon { font-size: 1.1rem; }
+
+/* ■■ STEPS ■■ */
+.step-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: #0a0a0a; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-lbl { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 0.84rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-lt); }
+.gap { margin-bottom: 28px; }
+
+/* ■■ DATE SCROLL ■■ */
+.date-scroll-wrap { position: relative; }
+.date-scroll { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 6px; padding-left: 38px; padding-right: 38px; scrollbar-width: none; }
+.date-scroll::-webkit-scrollbar { display: none; }
+.scroll-btn { position: absolute; top: 50%; transform: translateY(-60%); z-index: 10; background: var(--blue); border: none; color: #fff; font-size: 1.1rem; width: 28px; height: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.scroll-btn.left { left: 0; }
+.scroll-btn.right { right: 0; }
+.date-chip { flex-shrink: 0; background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 13px; cursor: pointer; transition: all 0.16s; text-align: center; min-width: 62px; }
+.date-chip:hover { border-color: var(--gold); }
+.date-chip.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
+.date-chip .dname { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; }
+.date-chip .dnum { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.5rem; line-height: 1.1; }
+.date-chip .dmon { font-size: 0.65rem; opacity: 0.5; margin-top: 1px; }
+
+/* ■■ DURATION ■■ */
+.dur-row { display: flex; gap: 10px; }
+.dur-btn { flex: 1; height: 60px; padding: 0 16px; background: var(--card); border: 1.5px solid var(--border); color: var(--white); font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 10px; cursor: pointer; transition: all 0.16s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.dur-btn:hover { border-color: var(--white); }
+.dur-btn.selected { background: var(--gold); border-color: var(--gold-dk); color: #0a0a0a; }
+.dur-btn .dprice { font-size: 0.78rem; font-weight: 600; opacity: 0.75; }
+.dur-btn.selected .dprice { opacity: 0.65; }
+.dur-sub { font-size: 0.72rem; color: #888; text-align: center; margin-top: 8px; letter-spacing: 0.04em; }
+
+/* ■■ LEGEND ■■ */
+.price-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 4px 11px; font-size: 0.72rem; color: #c0c0c0; letter-spacing: 0.04em; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #c0c0c0; }
+.ldot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* ■■ COURTS ■■ */
+.courts-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.court-col { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--blue); }
+.court-hdr { padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background: #000; border-bottom: 1px solid var(--blue); }
+.court-name { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 600; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); }
+.slots-grid { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.slot { border-radius: 8px; padding: 10px 13px; cursor: pointer; transition: all 0.13s; display: flex; align-items: center; justify-content: space-between; border: 1.5px solid transparent; }
+.slot.free { background: #272727; border-color: #333; }
+.slot.free:hover { background: #222; border-color: var(--blue); transform: translateX(3px); }
+.slot.booked { background: #1a1a1a; cursor: not-allowed; }
+.slot.abo-booked { background: #1a0a0a; border-color: #3a1a1a; cursor: not-allowed; }
+.slot.selected { background: var(--blue); border-color: var(--blue-dk); }
+.slot.selected-second { background: var(--blue); border-color: var(--blue-dk); }
+.slot-time { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 0.03em; }
+.slot.free .slot-time, .slot.selected .slot-time { color: #fff; }
+.slot.booked .slot-time { text-decoration: line-through; color: #888; }
+.slot.abo-booked .slot-time { color: #664444; }
+.slot-price { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 0.92rem; }
+.slot.free .slot-price { color: var(--blue); }
+.slot.selected .slot-price { color: #fff; }
+.bkd-lbl { font-size: 0.62rem; color: #999; text-transform: uppercase; letter-spacing: 0.08em; }
+.abo-lbl { font-size: 0.62rem; color: #cc4444; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+/* ■■ SUMMARY ■■ */
+.summary-card { background: var(--card); border: 1.5px solid var(--blue); border-radius: 12px; padding: 16px 20px; margin-bottom: 14px; display: none; animation: fadeUp 0.25s ease; }
+.summary-card.visible { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.sum-hdr { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--white); margin-bottom: 12px; }
+.sum-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.sum-row:last-child { border-bottom: none; }
+.sum-row .sl { font-size: 0.83rem; color: #b8b8b8; }
+.sum-row .sv { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 1rem; }
+.sum-row.total .sl { color: var(--white); font-weight: 600; }
+.sum-row.total .sv { font-size: 1.5rem; color: var(--blue); }
+.disc-badge { background: rgba(31,111,210,0.18); border: 1px solid rgba(31,111,210,0.55); color: var(--blue); font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
+
+/* ■■ BOOK BTN ■■ */
+.book-btn { width: 100%; height: 60px; background: var(--blue); color: #fff; border: none; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.15rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: none; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 24px rgba(31,111,210,0.3); }
+.book-btn.visible { display: flex; }
+.book-btn:hover { background: var(--blue-dk); transform: translateY(-2px); }
+
+/* ■■ ABO ■■ */
+.weekday-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.wd-btn { flex: 1; min-width: 50px; background: var(--card); border: 1.5px solid var(--border); color: var(--gray-lt); font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 11px 6px; border-radius: 10px; cursor: pointer; transition: all 0.16s; text-align: center; }
+.wd-btn:hover { border-color: #555; color: var(--white); }
+.wd-btn.selected { background: var(--gold); border-color: var(--gold-dk); color: #0a0a0a; }
+.abo-summary { background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 20px 22px; margin-top: 20px; display: none; animation: fadeUp 0.25s ease; }
+.abo-summary.visible { display: block; }
+.abo-sum-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.abo-sum-title { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.abo-details { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.abo-detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.abo-detail-row .dl { font-size: 0.83rem; color: #b8b8b8; }
+.abo-detail-row .dv { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--white); }
+.abo-52 { font-size: 0.75rem; color: #888; text-align: center; margin-bottom: 16px; letter-spacing: 0.05em; }
+.abo-pricing { margin-bottom: 16px; }
+.abo-price-reg { font-size: 0.82rem; color: #888; margin-bottom: 4px; }
+.abo-price-total { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.8rem; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+.abo-price-save { font-size: 0.85rem; color: #4ade80; font-weight: 600; }
+.abo-benefits { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.abo-benefit { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #c0c0c0; }
+.abo-benefit-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.abo-weather { font-size: 0.82rem; color: #999; line-height: 1.5; margin-bottom: 18px; font-style: italic; }
+.abo-cta { width: 100%; height: 60px; background: var(--gold); color: #0a0a0a; border: none; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 28px rgba(230,234,24,0.2); }
+.abo-cta:hover { background: var(--gold-dk); transform: translateY(-2px); }
+
+/* ■■ AUTH MODAL ■■ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--card); border: 1.5px solid var(--blue); border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 420px; animation: fadeUp 0.25s ease; position: relative; }
+.modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #666; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: #fff; }
+.modal-title { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+.modal-sub { font-size: 0.78rem; color: #888; margin-bottom: 22px; line-height: 1.5; }
+.modal-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+.modal-tab { padding: 10px; background: #1a1a1a; border: 1.5px solid var(--border); border-radius: 8px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: #888; cursor: pointer; text-align: center; transition: all 0.15s; }
+.modal-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 0.72rem; color: #888; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+.form-input { width: 100%; background: #111; border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 13px; color: var(--white); font-size: 0.95rem; font-family: inherit; transition: border-color 0.15s; }
+.form-input:focus { outline: none; border-color: var(--blue); }
+.form-input::placeholder { color: #444; }
+.form-hint { font-size: 0.68rem; color: #666; margin-top: 4px; }
+.modal-btn { width: 100%; height: 52px; background: var(--blue); color: #fff; border: none; border-radius: 10px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; margin-top: 6px; }
+.modal-btn:hover { background: var(--blue-dk); }
+.modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.modal-btn.gold { background: var(--gold); color: #0a0a0a; }
+.modal-btn.gold:hover { background: var(--gold-dk); }
+.modal-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+.modal-divider span { font-size: 0.68rem; color: #555; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+.modal-divider::before, .modal-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.modal-err { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.4); border-radius: 8px; padding: 9px 12px; font-size: 0.78rem; color: #fca5a5; margin-bottom: 12px; display: none; }
+.modal-err.show { display: block; }
+.modal-ok { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.35); border-radius: 8px; padding: 9px 12px; font-size: 0.78rem; color: #4ade80; margin-bottom: 12px; display: none; }
+.modal-ok.show { display: block; }
+.user-bar { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; margin-top: 0; margin-bottom: 20px; }
+.user-bar-name { font-size: 0.82rem; color: #c0c0c0; }
+.user-bar-name strong { color: var(--gold); }
+.user-bar-out { background: none; border: 1px solid #444; color: #888; font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.user-bar-out:hover { border-color: #888; color: #fff; }
+.user-bar-portal { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; margin-right: 6px; }
+.user-bar-portal:hover { background: var(--gold); color: #000; }
+.user-bar-login { background: var(--blue); border: none; color: #fff; font-size: 0.72rem; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.user-bar-login:hover { background: var(--blue-dk); }
+.user-bar-register { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; margin-right: 6px; }
+.user-bar-register:hover { background: var(--gold); color: #000; }
+
+/* ■■ JETZT SPIELEN ■■ */
+.play-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+.play-card-title { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
+.play-booking-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.play-booking-item:last-child { border-bottom: none; }
+.play-booking-info { display: flex; flex-direction: column; gap: 3px; }
+.play-booking-court { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 1rem; color: var(--gold); }
+.play-booking-time { font-size: 0.82rem; color: #b0b0b0; }
+.play-badge-now  { border: 1.5px solid #4ade80; background: rgba(74,222,128,0.08); color: #4ade80; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.play-badge-soon { border: 1.5px solid var(--gold); background: rgba(230,234,24,0.08); color: var(--gold); font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.play-badge-past { border: 1.5px solid #444; color: #555; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+
+.door-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.door-btn { height: 86px; border-radius: 14px; border: none; cursor: pointer; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
+.door-btn-icon { font-size: 1.7rem; line-height: 1; }
+.door-btn.access { background: var(--blue); color: #fff; box-shadow: 0 4px 20px rgba(31,111,210,0.35); }
+.door-btn.access:hover:not(:disabled) { background: var(--blue-dk); transform: translateY(-2px); }
+.door-btn.court { background: var(--gold); color: #0a0a0a; box-shadow: 0 4px 20px rgba(230,234,24,0.25); }
+.door-btn.court:hover:not(:disabled) { background: var(--gold-dk); transform: translateY(-2px); }
+.door-btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+
+.door-info { background: #0a1a0a; border: 1px solid #1a3a1a; border-radius: 10px; padding: 12px 16px; font-size: 0.78rem; color: #6a9a6a; line-height: 1.6; margin-bottom: 14px; }
+.door-info strong { color: #4ade80; }
+.door-log { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+.door-log-entry { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #0d0d0d; border-radius: 8px; border: 1px solid var(--border); }
+.door-log-icon { font-size: 1rem; }
+.door-log-text { font-size: 0.78rem; color: #b0b0b0; flex: 1; }
+.door-log-time { font-size: 0.68rem; color: #555; font-family: "Arial Narrow","Impact",sans-serif; }
+.play-empty { text-align: center; padding: 56px 16px; color: #555; }
+.play-empty-icon { font-size: 2.8rem; margin-bottom: 14px; }
+.play-empty-text { font-size: 0.88rem; line-height: 1.6; }
+.play-no-active { background: #0d0d0d; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; color: #666; font-size: 0.82rem; margin-bottom: 16px; }
+
+/* ■■ ADMIN ■■ */
+.admin-section { margin-bottom: 28px; }
+.admin-section-title { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gray); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.admin-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
+.admin-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.admin-row:last-child { margin-bottom: 0; }
+.admin-label { font-size: 0.78rem; color: #999; min-width: 160px; }
+.admin-input { background: #111; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: 0.88rem; font-family: inherit; flex: 1; min-width: 120px; transition: border-color 0.15s; }
+.admin-input:focus { outline: none; border-color: var(--blue); }
+.admin-save-btn { height: 38px; padding: 0 18px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.admin-save-btn:hover { background: var(--blue-dk); }
+.admin-save-btn.gold { background: var(--gold); color: #0a0a0a; }
+.admin-save-btn.gold:hover { background: var(--gold-dk); }
+.admin-save-btn.danger { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+.admin-save-btn.danger:hover { background: #991b1b; }
+.admin-toggle { display: flex; align-items: center; gap: 10px; }
+.admin-toggle-btn { height: 32px; padding: 0 14px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--card); color: #666; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.admin-toggle-btn.active { background: #14532d; border-color: #166534; color: #4ade80; }
+.closure-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
+.closure-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #111; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; }
+.closure-item-date { color: #c0c0c0; }
+.closure-item-note { color: #666; font-size: 0.72rem; }
+.closure-remove { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; padding: 0 4px; transition: color 0.15s; }
+.closure-remove:hover { color: #ef4444; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.admin-table th { text-align: left; padding: 8px 10px; color: #666; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; border-bottom: 1px solid var(--border); }
+.admin-table td { padding: 9px 10px; border-bottom: 1px solid #111; color: #c0c0c0; vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: #0d0d0d; }
+.admin-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.admin-badge.paid    { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid #166534; }
+.admin-badge.active  { background: rgba(230,234,24,0.10); color: var(--gold); border: 1px solid #713f12; }
+.admin-badge.member  { background: rgba(31,111,210,0.15); color: var(--blue); border: 1px solid var(--blue-dk); }
+.admin-badge.account { background: #1a1a1a; color: #666; border: 1px solid #333; }
+.admin-badge.guest   { background: #1a1a1a; color: #555; border: 1px solid #333; }
+.admin-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.admin-stat { background: #0d0d0d; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align: center; }
+.admin-stat-val { font-family: "Arial Narrow","Impact",sans-serif; font-weight: 900; font-size: 1.6rem; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+.admin-stat-lbl { font-size: 0.68rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; }
+.admin-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.admin-tab { padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--card); color: #666; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.admin-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.admin-ok  { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.35); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; color: #4ade80; margin-top: 10px; display: none; }
+.admin-ok.show { display: block; }
+.admin-err { background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.35); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; color: #fca5a5; margin-top: 10px; display: none; }
+.admin-err.show { display: block; }
+@media (max-width: 560px) {
+  .admin-stat-grid { grid-template-columns: 1fr 1fr; }
+  .admin-stat-val { font-size: 1.3rem; }
+  .admin-row { flex-direction: column; align-items: flex-start; }
+  .admin-input { width: 100%; }
+  .admin-label { min-width: unset; }
+}
+
+/* ■■ FOOTER ■■ */
+.site-footer { margin-top: 56px; padding: 20px 0 28px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.site-footer-left a { font-family: "Arial Narrow","Impact",sans-serif; font-size: 0.75rem; color: #555; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: color 0.2s; }
+.site-footer-left a:hover { color: #999; }
+.site-footer-center { text-align: center; }
+.site-footer-right { text-align: right; font-size: 0.72rem; color: #444; line-height: 1.6; letter-spacing: 0.04em; }
+.admin-footer-link { background: none; border: none; font-family: "Arial Narrow","Impact",sans-serif; font-size: 0.72rem; color: #333; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; padding: 0; transition: color 0.2s; display: none; }
+.admin-footer-link:hover { color: #fca5a5; }
+@media (max-width: 560px) {
+  .site-footer { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .site-footer-center { grid-column: 1 / -1; order: -1; }
+  .site-footer-right { text-align: right; }
+}
+
+/* ■■ TOAST ■■ */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--gold); color: #000; font-family: "Arial Narrow","Impact",sans-serif; font-weight: 800; font-size: 0.92rem; letter-spacing: 0.06em; padding: 11px 22px; border-radius: 10px; box-shadow: 0 4px 24px rgba(230,234,24,0.25); transition: transform 0.3s ease; z-index: 999; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ■■ SCROLLBAR ■■ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+* { scrollbar-width: thin; scrollbar-color: #333 #0a0a0a; }
+
+/* ════════════════════════════════════════
+   MOBILE ≤ 560px
+════════════════════════════════════════ */
+@media (max-width: 560px) {
+  body { font-size: 18px; line-height: 1.25; }
+  main { padding: 18px 14px 56px; }
+  .hero { margin-bottom: 16px; }
+  .mode-tab { padding: 16px 14px; font-size: 1.06rem; border-radius: 14px; }
+  .mode-tab .tab-icon { font-size: 1.2rem; }
+  .step-num { width: 26px; height: 26px; font-size: 0.9rem; }
+  .step-lbl { font-size: 0.88rem; letter-spacing: 0.12em; }
+  .date-chip { min-width: 74px; padding: 12px 14px; border-radius: 12px; }
+  .date-chip .dname { font-size: 0.75rem; }
+  .date-chip .dnum { font-size: 1.85rem; }
+  .date-chip .dmon { font-size: 0.75rem; }
+  .dur-btn { padding: 16px 12px; font-size: 1.06rem; border-radius: 12px; flex-direction: column; gap: 2px; }
+  .dur-btn .dprice { font-size: 0.84rem; margin-top: 2px; }
+  .price-tag { font-size: 0.84rem; padding: 6px 12px; border-radius: 8px; }
+  .legend-item { font-size: 0.84rem; }
+  .courts-wrap { grid-template-columns: 1fr; }
+  .slots-grid { gap: 9px; padding: 12px; }
+  .slot { padding: 14px 14px; border-radius: 12px; }
+  .slot-time { font-size: 1.10rem; }
+  .slot-price { font-size: 1.04rem; }
+  .bkd-lbl, .abo-lbl { font-size: 0.74rem; }
+  .summary-card { padding: 18px; border-radius: 14px; }
+  .sum-hdr { font-size: 0.88rem; }
+  .sum-row .sl { font-size: 0.94rem; }
+  .sum-row .sv { font-size: 1.06rem; }
+  .sum-row.total .sv { font-size: 1.75rem; }
+  .book-btn { font-size: 1.2rem; border-radius: 14px; }
+  .abo-cta  { font-size: 1.15rem; border-radius: 14px; }
+  .abo-price-total { font-size: 1.5rem; }
+  .toast { font-size: 1rem; padding: 12px 18px; border-radius: 12px; white-space: normal; text-align: center; max-width: calc(100vw - 24px); }
+}
+
+/* ════════════════════════════════════════
+   SEHR KLEIN ≤ 390px
+════════════════════════════════════════ */
+@media (max-width: 390px) {
+  body { font-size: 17px; }
+  main { padding: 16px 12px 54px; }
+  .date-chip { min-width: 64px; padding: 10px; }
+  .date-chip .dnum { font-size: 1.65rem; }
+  .slot { padding: 12px; }
+  .slot-time { font-size: 1.05rem; }
+  .mode-tab { font-size: 0.9rem; }
+  .step-lbl { font-size: 0.78rem; }
+}
+</style>
 </head>
 <body>
-<input type="file" id="fileInput" accept=".folio,.txt,.docx,.doc,application/octet-stream,*/*" style="display:none" onchange="loadFile(this)">
-<div id="hdr">
-  <div class="logo">Folio<em>.</em></div>
-  <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
-  <!-- Mode toggle: centered in header -->
-  <div class="mode-btns" id="modebtnswrap">
-    <button class="mode-btn" id="endlessbtn" onclick="setA4Mode(false)" title="Endlos schreiben">∞</button>
-    <button class="mode-btn" id="a4btn" onclick="setA4Mode(true)" title="A4-Vorschau">A4</button>
-  </div>
-  <div class="hbtns">
-    <button class="hbtn" onclick="openFile()">Öffnen</button>
-    <button class="hbtn" onclick="openSaveAs()">Speichern unter</button>
-    <button class="hbtn p" onclick="doPDF()">PDF</button>
-  </div>
-</div>
-<div id="tb">
-  <select id="fnt" class="sel" style="width:130px" onchange="setFont(this.value)">
-    <option value="'Helvetica Neue',Helvetica,Arial,sans-serif" selected>Helvetica Neue</option>
-    <option value="'Lora',Georgia,serif">Lora</option>
-    <option value="'DM Serif Display',serif">DM Serif</option>
-    <option value="'Playfair Display',serif">Playfair</option>
-    <option value="'Libre Baskerville',serif">Baskerville</option>
-    <option value="'DM Sans',sans-serif">DM Sans</option>
-    <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
-  </select>
-  <select id="fsz" class="sel" style="width:52px;margin-left:4px" onchange="setSize(this.value)">
-    <option>10</option><option>12</option><option>13</option><option selected>14</option><option>18</option><option>24</option>
-  </select>
-  <select id="flh" class="sel" style="width:90px;margin-left:4px" onchange="setLineH(this.value)">
-    <option value="1.25" selected>1,25-zeilig</option>
-    <option value="1.5">1,5-zeilig</option>
-    <option value="1.75">1,75-zeilig</option>
-    <option value="2">2-zeilig</option>
-  </select>
-  <div class="sep"></div>
-  <button class="tbtn" id="bb" onclick="fmt('bold')"><b>B</b></button>
-  <button class="tbtn" id="bi" onclick="fmt('italic')"><i>I</i></button>
-  <button class="tbtn" id="bu" onclick="fmt('underline')"><u>U</u></button>
-  <div class="sep"></div>
-  <button class="tbtn" onclick="aln('left')"><svg viewBox="0 0 16 16"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="10" y2="8"/><line x1="1" y1="12" x2="15" y2="12"/></svg></button>
-  <button class="tbtn" onclick="aln('center')"><svg viewBox="0 0 16 16"><line x1="2" y1="4" x2="14" y2="4"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg></button>
-  <button class="tbtn" onclick="aln('right')"><svg viewBox="0 0 16 16"><line x1="1" y1="4" x2="15" y2="4"/><line x1="6" y1="8" x2="15" y2="8"/><line x1="1" y1="12" x2="15" y2="12"/></svg></button>
-  <div class="sep"></div>
-  <button class="tbtn" onclick="lst('ul')"><svg viewBox="0 0 16 16"><circle cx="2.5" cy="5" r="1.5" fill="currentColor" stroke="none"/><line x1="6" y1="5" x2="15" y2="5"/><circle cx="2.5" cy="11" r="1.5" fill="currentColor" stroke="none"/><line x1="6" y1="11" x2="15" y2="11"/></svg></button>
-  <button class="tbtn" onclick="lst('ol')"><svg viewBox="0 0 16 16"><text x="1" y="7" font-size="5.5" fill="currentColor" stroke="none">1.</text><line x1="7" y1="5" x2="15" y2="5"/><text x="1" y="13" font-size="5.5" fill="currentColor" stroke="none">2.</text><line x1="7" y1="11" x2="15" y2="11"/></svg></button>
-  <div class="sep"></div>
-  <button class="tbtn" onclick="showTM()" style="font-size:11px;padding:0 7px;min-width:auto">+ Tabelle</button>
-  <div class="sep"></div>
-  <button class="tbtn" title="Gesamten Text kopieren" onclick="copyAll()" style="font-size:11px;padding:0 8px;min-width:auto">Alles kopieren</button>
-  <button class="tbtn" title="Markierten Text kopieren" onclick="copySelection()" style="font-size:11px;padding:0 8px;min-width:auto">Kopieren</button>
-  <button class="tbtn" title="Aus Zwischenablage einfügen" onclick="pasteClipboard()" style="font-size:11px;padding:0 8px;min-width:auto">Einfügen</button>
-  <button class="tbtn" title="Rückgängig" onclick="document.execCommand('undo')">↩</button>
-  <div class="sep"></div>
-  <button class="tbtn" title="Alles markieren" onclick="selectAll()" style="font-weight:900;font-size:13px">M</button>
-  <div class="sep"></div>
-  <button class="tbtn" title="Alles löschen" onclick="clearAll()"><svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <line x1="1" y1="2" x2="11" y2="2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="4" y1="0.5" x2="8" y2="0.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="2" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="10" y1="3" x2="9" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="3" y1="13" x2="9" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="5" y1="4" x2="4.5" y2="12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-  <line x1="7" y1="4" x2="7.5" y2="12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-</svg></button>
-</div>
-<div id="main">
-  <div id="side"></div>
-  <div id="cv"><div id="pages"></div></div>
-</div>
-<div id="sb">
-  <span>Wörter: <span class="sv" id="wc">0</span></span>
-  <span>Zeichen: <span class="sv" id="cc">0</span></span>
-  <span>Seiten: <span class="sv" id="pgc">—</span></span>
-  <span id="saved">Folio 1.0</span>
-</div>
-<div id="ruler"></div>
 
-<!-- Table modal -->
-<div class="mo" id="tm">
-  <div class="md"><h3>Tabelle einfügen</h3>
-    <div class="mrow"><label>Zeilen</label><input type="number" id="tr2" value="3" min="1" max="20"></div>
-    <div class="mrow"><label>Spalten</label><input type="number" id="tc2" value="3" min="1" max="10"></div>
-    <div class="mbtns"><button onclick="cmo('tm')">Abbrechen</button><button class="p" onclick="insT()">Einfügen</button></div>
-  </div>
-</div>
+<!-- ■■ AUTH MODAL ■■ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle">Anmelden</div>
+    <div class="modal-sub" id="modalSub">Melde dich an um fortzufahren</div>
 
-<!-- Save As modal -->
-<div class="mo" id="sam">
-  <div class="md"><h3>Speichern unter</h3>
-    <div class="mrow"><label>Dateiname</label><input type="text" id="saname"></div>
-    <div class="fmtg">
-      <div class="fmto sf" id="ff" onclick="sf('folio')"><span>📄</span><b>.folio</b><small>Folio-Format</small></div>
-      <div class="fmto" id="fh" onclick="sf('html')"><span>🌐</span><b>.html</b><small>Browser</small></div>
-      <div class="fmto" id="ft" onclick="sf('txt')"><span>📝</span><b>.txt</b><small>Reiner Text</small></div>
-      <div class="fmto" id="fp" onclick="sf('pdf')"><span>📕</span><b>PDF</b><small>Druckfertig</small></div>
+    <!-- Login / Registrieren Tabs -->
+    <div class="modal-tabs" id="authTabs">
+      <div class="modal-tab active" id="tabLogin" onclick="switchAuthTab('login')">Anmelden</div>
+      <div class="modal-tab" id="tabRegister" onclick="switchAuthTab('register')">Registrieren</div>
     </div>
-    <div class="mbtns"><button onclick="cmo('sam')">Abbrechen</button><button class="p" onclick="doSaveAs()">Herunterladen</button></div>
+
+    <div class="modal-err" id="authErr"></div>
+    <div class="modal-ok" id="authOk"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="formLogin">
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="deine@email.de" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Passwort</label>
+        <input class="form-input" type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="modal-btn" id="loginBtn" onclick="doLogin()">Anmelden →</button>
+      <div class="modal-divider"><span>oder</span></div>
+      <button class="modal-btn" style="background:#1a1a1a;border:1.5px solid var(--border);color:#aaa;" onclick="switchAuthTab('reset')">Passwort vergessen?</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="formRegister" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Vor- und Nachname</label>
+        <input class="form-input" type="text" id="regName" placeholder="Max Mustermann" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" id="regEmail" placeholder="deine@email.de" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Passwort</label>
+        <input class="form-input" type="password" id="regPw" placeholder="Min. 8 Zeichen" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Geburtsjahr</label>
+        <input class="form-input" type="number" id="regYear" placeholder="z.B. 1985" min="1920" max="2015">
+        <div class="form-hint">Wird für die Altersstatistik benötigt</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">TFB-Mitgliedsnummer (optional)</label>
+        <input class="form-input" type="text" id="regMember" placeholder="z.B. TFB001">
+        <div class="form-hint">Nur für TFB-Mitglieder – aktiviert Mitgliederrabatt</div>
+      </div>
+      <button class="modal-btn gold" id="regBtn" onclick="doRegister()">Konto erstellen →</button>
+    </div>
+
+    <!-- RESET FORM -->
+    <div id="formReset" style="display:none;">
+      <div class="modal-sub" style="margin-bottom:16px;">Wir schicken dir einen Link zum Zurücksetzen deines Passworts.</div>
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" id="resetEmail" placeholder="deine@email.de">
+      </div>
+      <button class="modal-btn" onclick="doReset()">Link senden →</button>
+      <div class="modal-divider"><span>oder</span></div>
+      <button class="modal-btn" style="background:#1a1a1a;border:1.5px solid var(--border);color:#aaa;" onclick="switchAuthTab('login')">← Zurück zum Login</button>
+    </div>
+
+    <!-- kein Gast-Zugang: Registrierung erforderlich -->
   </div>
 </div>
 
-<!-- Rename modal -->
-<div id="rename-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
-    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#8a8478;margin-bottom:8px">Dokumentname</div>
-    <input id="rename-input" type="text" spellcheck="false"
-      style="width:100%;box-sizing:border-box;border:1px solid #e0dbd0;border-radius:6px;padding:10px 12px;font-size:15px;font-family:'DM Sans',sans-serif;color:#1a1814;outline:none;margin-bottom:16px">
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="closeRename()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
-      <button onclick="confirmRename()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">OK</button>
+<div class="loading-bar" id="loadingBar"><div class="loading-bar-inner"></div></div>
+
+<div class="hero" aria-label="Padel Bielstein" id="heroHeader" onclick="if(curMode==='admin') setMode('book');" style="cursor:default;">
+  <div class="hero-frame">
+    <img class="hero-img" src="padel_bielstein_header_ULTIMATE_BLUE_ohne_Ball.jpg" alt="Padel Bielstein">
+  </div>
+</div>
+
+<main>
+  <!-- USER BAR -->
+  <div class="user-bar" id="userBar">
+    <!-- Eingeloggt -->
+    <div id="userBarLoggedIn" style="display:none;width:100%;align-items:center;justify-content:space-between;">
+      <span class="user-bar-name">Angemeldet als <strong id="userBarName">—</strong></span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="user-bar-portal" id="portalBtn" style="display:none;" onclick="openPortal()">■ Abo verwalten</button>
+        <button class="user-bar-out" onclick="doLogout()">Abmelden</button>
+      </div>
+    </div>
+    <!-- Ausgeloggt -->
+    <div id="userBarLoggedOut" style="width:100%;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:0.82rem;color:#666;">Zum Buchen bitte anmelden</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="user-bar-register" onclick="openModal('register')">Registrieren</button>
+        <button class="user-bar-login" onclick="openModal('login')">Anmelden</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Clear modal -->
-<div id="clear-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
-    <div style="font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1814;margin-bottom:16px">Gesamten Inhalt löschen?</div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="clearAllCancel()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
-      <button onclick="clearAllConfirm()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">Löschen</button>
+
+  <div class="mode-tabs" style="grid-template-columns:1fr 1fr 1fr;" id="mainTabs">
+    <div class="mode-tab active" id="tabBook" onclick="setMode('book')"><span class="tab-icon">■</span> Jetzt buchen</div>
+    <div class="mode-tab" id="tabAbo" onclick="setMode('abo')"><span class="tab-icon">■</span> Jahresabo sichern</div>
+    <div class="mode-tab" id="tabPlay" onclick="setMode('play')"><span class="tab-icon">▶</span> Jetzt spielen</div>
+  </div>
+  <!-- Admin Tab entfernt – Admin-Zugang über Fußzeile -->
+
+  <!-- BOOK MODE -->
+  <div id="modeBook">
+    <div class="step-row"><div class="step-num">1</div><div class="step-lbl">Datum wählen</div></div>
+    <div class="date-scroll-wrap gap">
+      <button class="scroll-btn left" onclick="document.getElementById('dateScroll').scrollBy({left:-200,behavior:'smooth'})">‹</button>
+      <div class="date-scroll" id="dateScroll"></div>
+      <button class="scroll-btn right" onclick="document.getElementById('dateScroll').scrollBy({left:200,behavior:'smooth'})">›</button>
+    </div>
+
+    <div class="step-row"><div class="step-num">2</div><div class="step-lbl">Spieldauer wählen</div></div>
+    <div class="dur-row gap">
+      <button class="dur-btn selected" onclick="setDur(1)" id="dur1">1 Stunde <span class="dprice" id="dp1">ab 16 €</span></button>
+      <button class="dur-btn" onclick="setDur(2)" id="dur2">2 Stunden <span class="dprice" id="dp2">ab 32 €</span></button>
+    </div>
+
+    <div class="step-row" style="margin-bottom:8px;"><div class="step-num">3</div><div class="step-lbl">Platz & Zeit wählen</div></div>
+    <div style="margin-bottom:14px;"><div class="price-tag">■ <span id="priceTxt">Wochentag-Preise (Mo–Fr)</span></div></div>
+    <div class="legend">
+      <div class="legend-item"><div class="ldot" style="background:#272727;border:1px solid var(--blue)"></div> Verfügbar</div>
+      <div class="legend-item"><div class="ldot" style="background:var(--blue)"></div> Ausgewählt</div>
+      <div class="legend-item"><div class="ldot" style="background:#1a1a1a;border:1px solid #333"></div> Belegt</div>
+    </div>
+
+    <div class="courts-wrap gap">
+      <div class="court-col"><div class="court-hdr"><div class="court-name">Court #1</div></div><div class="slots-grid" id="slots1"></div></div>
+      <div class="court-col"><div class="court-hdr"><div class="court-name">Court #2</div></div><div class="slots-grid" id="slots2"></div></div>
+    </div>
+
+    <div class="summary-card" id="sumCard">
+      <div class="sum-hdr">Deine Buchung</div>
+      <div class="sum-row"><span class="sl">Datum</span><span class="sv" id="sDate">—</span></div>
+      <div class="sum-row"><span class="sl">Platz</span><span class="sv" id="sCourt">—</span></div>
+      <div class="sum-row"><span class="sl">Zeit</span><span class="sv" id="sTime">—</span></div>
+      <div class="sum-row"><span class="sl">Dauer</span><span class="sv" id="sDur">—</span></div>
+      <div class="sum-row" id="discRow" style="display:none;"><span class="sl">Rabatt <span class="disc-badge" id="discBadge"></span></span><span class="sv" id="sDisc" style="color:#4ade80">—</span></div>
+      <div class="sum-row total"><span class="sl">Gesamt</span><span class="sv" id="sTotal">—</span></div>
+    </div>
+    <button class="book-btn" id="bookBtn" onclick="confirmBooking()">Jetzt buchen &amp; bezahlen →</button>
+  </div>
+
+  <!-- ABO MODE -->
+  <div id="modeAbo" style="display:none;">
+    <div class="step-row"><div class="step-num">1</div><div class="step-lbl">Wochentag wählen</div></div>
+    <div class="weekday-row gap">
+      <button class="wd-btn" onclick="setWd(1)" id="wd1">Mo</button>
+      <button class="wd-btn" onclick="setWd(2)" id="wd2">Di</button>
+      <button class="wd-btn" onclick="setWd(3)" id="wd3">Mi</button>
+      <button class="wd-btn" onclick="setWd(4)" id="wd4">Do</button>
+      <button class="wd-btn" onclick="setWd(5)" id="wd5">Fr</button>
+      <button class="wd-btn" onclick="setWd(6)" id="wd6">Sa</button>
+      <button class="wd-btn" onclick="setWd(0)" id="wd0">So</button>
+    </div>
+    <div class="step-row"><div class="step-num">2</div><div class="step-lbl">Spieldauer wählen</div></div>
+    <div class="dur-row" style="margin-bottom:8px;">
+      <button class="dur-btn selected" onclick="setAboDur(1)" id="adur1">1 Stunde <span class="dprice">ab 16 €/Woche</span></button>
+      <button class="dur-btn" onclick="setAboDur(2)" id="adur2">2 Stunden <span class="dprice">ab 32 €/Woche</span></button>
+    </div>
+    <div class="dur-sub gap">Jede Woche zur gleichen Zeit</div>
+    <div class="step-row" style="margin-bottom:8px;"><div class="step-num">3</div><div class="step-lbl">Platz & Uhrzeit wählen</div></div>
+    <div class="legend" style="margin-bottom:14px;">
+      <div class="legend-item"><div class="ldot" style="background:#272727;border:1px solid var(--blue)"></div> Verfügbar</div>
+      <div class="legend-item"><div class="ldot" style="background:var(--blue)"></div> Ausgewählt</div>
+      <div class="legend-item"><div class="ldot" style="background:#1a1a1a;border:1px solid #333"></div> Belegt</div>
+      <div class="legend-item"><div class="ldot" style="background:#1a0a0a;border:1px solid #3a1a1a"></div> Abo vergeben</div>
+    </div>
+    <div class="courts-wrap gap">
+      <div class="court-col"><div class="court-hdr"><div class="court-name">Court #1</div></div><div class="slots-grid" id="aboSlots1"></div></div>
+      <div class="court-col"><div class="court-hdr"><div class="court-name">Court #2</div></div><div class="slots-grid" id="aboSlots2"></div></div>
+    </div>
+    <div class="abo-summary" id="aboSummary">
+      <div class="abo-sum-hdr"><span style="font-size:1.1rem">■</span><span class="abo-sum-title">Dein Jahresabo</span></div>
+      <div class="abo-details">
+        <div class="abo-detail-row"><span class="dl">Platz</span><span class="dv" id="as-court">—</span></div>
+        <div class="abo-detail-row"><span class="dl">Wochentag</span><span class="dv" id="as-day">—</span></div>
+        <div class="abo-detail-row"><span class="dl">Uhrzeit</span><span class="dv" id="as-time">—</span></div>
+        <div class="abo-detail-row"><span class="dl">Dauer</span><span class="dv" id="as-dur">—</span></div>
+      </div>
+      <div class="abo-52">52 Wochen exklusiv für dich reserviert</div>
+      <div class="abo-pricing">
+        <div class="abo-price-reg" id="as-reg">Einzelbuchung: 52 × — € = — €</div>
+        <div class="abo-price-total" id="as-total">— €</div>
+        <div class="abo-price-save" id="as-save">Du sparst — €</div>
+      </div>
+      <div class="abo-benefits">
+        <div class="abo-benefit"><div class="abo-benefit-dot"></div>Dein fester Trainingsplatz</div>
+        <div class="abo-benefit"><div class="abo-benefit-dot"></div>Keine Konkurrenz um freie Slots</div>
+        <div class="abo-benefit"><div class="abo-benefit-dot"></div>22 Wochen gratis gegenüber Einzelbuchung</div>
+        <div class="abo-benefit"><div class="abo-benefit-dot"></div>Ihr spielt zu viert – jeder zahlt somit nur <strong id="as-perperson" style="color:var(--gold)">—</strong></div>
+      </div>
+      <div class="abo-weather">Dein Slot gehört dir – gespielt wird, wenn das Wetter es zulässt.</div>
+      <button class="abo-cta" onclick="submitAbo(false)">■ Jahresabo sichern</button>
     </div>
   </div>
-</div>
 
-<script src="app7.js?v=111"></script>
+  <!-- JETZT SPIELEN MODE -->
+  <div id="modePlay" style="display:none;">
+
+    <!-- Nicht eingeloggt -->
+    <div id="playNotLoggedIn" style="display:none;">
+      <div class="play-empty">
+        <div class="play-empty-icon">🔒</div>
+        <div class="play-empty-text">Bitte <strong style="color:var(--white);">anmelden</strong>, um deine Buchungen zu sehen und die Türen zu öffnen.</div>
+        <button class="user-bar-login" style="margin-top:18px;padding:10px 28px;font-size:0.82rem;" onclick="openModal('login')">Jetzt anmelden</button>
+      </div>
+    </div>
+
+    <!-- Eingeloggt -->
+    <div id="playLoggedIn" style="display:none;">
+
+      <!-- Meine heutigen Buchungen -->
+      <div class="play-card">
+        <div class="play-card-title">▶ Heutige Buchungen</div>
+        <div id="playBookingsList">
+          <div class="play-empty" style="padding:24px 0;">
+            <div style="font-size:2rem;margin-bottom:8px;">📅</div>
+            <div style="font-size:0.82rem;color:#555;">Wird geladen …</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zugangsinformation -->
+      <div class="door-info" id="doorAccessInfo">
+        Wird geladen …
+      </div>
+
+      <!-- Tür-Buttons -->
+      <div id="doorButtons" style="display:none;">
+        <div class="play-card-title" style="margin-bottom:12px;">■ Türen öffnen</div>
+        <div class="door-grid">
+          <button class="door-btn access" id="btnAccessDoor" onclick="openAccessDoor()" disabled>
+            <span class="door-btn-icon">🚪</span>
+            <span id="btnAccessLabel">Zugangstür öffnen</span>
+          </button>
+          <button class="door-btn court" id="btnCourtDoor" onclick="openCourtDoors()" disabled>
+            <span class="door-btn-icon">🎾</span>
+            <span id="btnCourtLabel">Court-Türen öffnen</span>
+          </button>
+        </div>
+        <div style="font-size:0.72rem;color:#555;text-align:center;margin-bottom:20px;">
+          Türen öffnen sich ab 15 Min. vor Spielbeginn · Nur zur gebuchten Zeit aktiv
+        </div>
+      </div>
+
+      <!-- Türprotokoll -->
+      <div class="play-card" id="doorLogCard" style="display:none;">
+        <div class="play-card-title">■ Türprotokoll heute</div>
+        <div class="door-log" id="doorLogList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ADMIN MODE -->
+  <div id="modeAdmin" style="display:none;">
+
+    <div class="admin-tabs">
+      <div class="admin-tab active" id="atab-freibad"   onclick="setAdminTab('freibad')">🏊 Freibad & Padel-Anlage</div>
+      <div class="admin-tab"        id="atab-prices"    onclick="setAdminTab('prices')">💰 Preise</div>
+      <div class="admin-tab"        id="atab-internal"  onclick="setAdminTab('internal')">📋 Interne Buchungen</div>
+      <div class="admin-tab"        id="atab-bookings"  onclick="setAdminTab('bookings')">📅 Buchungsübersicht</div>
+      <div class="admin-tab"        id="atab-mis"       onclick="setAdminTab('mis')">📊 MIS</div>
+      <div class="admin-tab"        id="atab-users"     onclick="setAdminTab('users')">👤 Nutzer</div>
+    </div>
+
+    <!-- ── FREIBAD & ANLAGE ── -->
+    <div id="adminFreibad">
+
+      <!-- Saison -->
+      <div class="admin-section">
+        <div class="admin-section-title">Freibad-Saison</div>
+        <div class="admin-card">
+          <div class="admin-row">
+            <span class="admin-label">Saisonstart</span>
+            <input class="admin-input" type="date" id="cfgSeasonStart">
+            <span class="admin-label" style="min-width:80px;">Saisonende</span>
+            <input class="admin-input" type="date" id="cfgSeasonEnd">
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn" onclick="saveFreibadConfig()">Saison speichern</button>
+          </div>
+          <div class="admin-ok"  id="cfgSeasonOk"></div>
+          <div class="admin-err" id="cfgSeasonErr"></div>
+        </div>
+      </div>
+
+      <!-- Standard-Öffnungszeiten -->
+      <div class="admin-section">
+        <div class="admin-section-title">Standard-Öffnungszeiten Freibad</div>
+        <div class="admin-card">
+          <div class="admin-row">
+            <span class="admin-label">Öffnet um</span>
+            <input class="admin-input" type="number" id="cfgOpenH" min="6" max="14" style="max-width:80px;"> Uhr
+            <span class="admin-label" style="min-width:60px;">Schließt um</span>
+            <input class="admin-input" type="number" id="cfgCloseH" min="14" max="22" style="max-width:80px;"> Uhr
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn" onclick="saveFreibadConfig()">Zeiten speichern</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datumsabhängige Öffnungszeiten -->
+      <div class="admin-section">
+        <div class="admin-section-title">Abweichende Öffnungszeiten (einzelnes Datum)</div>
+        <div class="admin-card">
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:0.72rem;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">🏊 Freibad</div>
+              <div class="admin-row" style="flex-wrap:nowrap;gap:6px;">
+                <input class="admin-input" type="date" id="excDateFB" style="flex:2;">
+                <input class="admin-input" type="number" id="excOpenFB"  min="6"  max="14" placeholder="von (Uhr)" style="max-width:90px;">
+                <input class="admin-input" type="number" id="excCloseFB" min="14" max="22" placeholder="bis (Uhr)" style="max-width:90px;">
+                <button class="admin-save-btn gold" onclick="addException('freibad')" style="white-space:nowrap;">+ Eintragen</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">🎾 Padel-Anlage</div>
+              <div class="admin-row" style="flex-wrap:nowrap;gap:6px;">
+                <input class="admin-input" type="date" id="excDatePD" style="flex:2;">
+                <input class="admin-input" type="number" id="excOpenPD"  min="6"  max="14" placeholder="von (Uhr)" style="max-width:90px;">
+                <input class="admin-input" type="number" id="excClosePD" min="14" max="22" placeholder="bis (Uhr)" style="max-width:90px;">
+                <button class="admin-save-btn gold" onclick="addException('padel')" style="white-space:nowrap;">+ Eintragen</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-ok"  id="excOk"></div>
+          <div class="admin-err" id="excErr"></div>
+          <div class="closure-list" id="excList">
+            <div style="color:#555;font-size:0.78rem;padding:8px 0;">Wird geladen …</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anlage sperren — schreibt direkt in bookings (status=blocked, customer_type=internal) -->
+      <div class="admin-section">
+        <div class="admin-section-title">Anlage gesperrt</div>
+        <div class="admin-card">
+          <div style="font-size:0.78rem;color:#888;margin-bottom:14px;line-height:1.6;">
+            Gesperrte Courts werden sofort im Buchungssystem als nicht buchbar angezeigt (orangener Grund). Bestehende Buchungen bleiben erhalten.
+          </div>
+          <div class="admin-row" style="flex-wrap:wrap;gap:8px;">
+            <input class="admin-input" type="date" id="newClosureDate" style="max-width:160px;">
+            <select class="admin-input" id="newClosureTarget" style="max-width:180px;">
+              <option value="freibad">🏊 Nur Freibad (Tür B)</option>
+              <option value="court1">🎾 Court #1</option>
+              <option value="court2">🎾 Court #2</option>
+              <option value="both">🎾 Beide Courts</option>
+            </select>
+            <input class="admin-input" type="text" id="newClosureNote" placeholder="Grund (z.B. Reparatur)" style="flex:2;min-width:160px;">
+          </div>
+          <div style="margin:10px 0 14px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#888;cursor:pointer;margin-bottom:8px;">
+              <input type="checkbox" id="closureTimeCheck" onchange="document.getElementById('closureTimeFields').style.display=this.checked?'flex':'none'" style="accent-color:var(--gold);">
+              Nur für bestimmten Zeitraum sperren (statt ganzer Tag)
+            </label>
+            <div id="closureTimeFields" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:0.78rem;color:#888;">Von</span>
+              <input class="admin-input" type="number" id="newClosureFrom" min="8" max="21" placeholder="Stunde" style="max-width:80px;">
+              <span style="font-size:0.78rem;color:#888;">Uhr &nbsp; Bis</span>
+              <input class="admin-input" type="number" id="newClosureTo" min="9" max="22" placeholder="Stunde" style="max-width:80px;">
+              <span style="font-size:0.78rem;color:#888;">Uhr</span>
+            </div>
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn gold" onclick="addClosure()">+ Eintragen & Slots sperren</button>
+          </div>
+          <div class="admin-ok"  id="closureOk"></div>
+          <div class="admin-err" id="closureErr"></div>
+          <div class="closure-list" id="closureList">
+            <div style="color:#555;font-size:0.78rem;padding:8px 0;">Wird geladen …</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit-Modal für Closure -->
+      <div id="closureEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
+          <button onclick="closeClosureEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
+          <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Sperrung bearbeiten</div>
+          <input type="hidden" id="editClosureIds">
+          <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <span class="admin-label">Grund</span>
+            <input class="admin-input" type="text" id="editClosureNote" style="flex:1;min-width:160px;">
+          </div>
+          <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <span class="admin-label">Von Uhr</span>
+            <input class="admin-input" type="number" id="editClosureFrom" min="8" max="21" style="max-width:80px;">
+            <span class="admin-label">Bis Uhr</span>
+            <input class="admin-input" type="number" id="editClosureTo" min="9" max="22" style="max-width:80px;">
+          </div>
+          <div style="font-size:0.72rem;color:#666;margin-bottom:16px;">Datum und Court können nicht geändert werden — bitte löschen und neu anlegen.</div>
+          <div class="admin-ok"  id="editClosureOk"></div>
+          <div class="admin-err" id="editClosureErr"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="admin-save-btn gold" style="flex:1;" onclick="saveClosureEdit()">Änderung speichern</button>
+            <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeClosureEdit()">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /adminFreibad -->
+
+    <!-- ── PREISE ── -->
+    <div id="adminPrices" style="display:none;">
+
+      <!-- Mitgliederrabatt -->
+      <div class="admin-section">
+        <div class="admin-section-title">Mitgliederrabatt</div>
+        <div class="admin-card">
+          <div class="admin-row">
+            <span class="admin-label">Rabatt TFB-Mitglieder</span>
+            <input class="admin-input" type="number" id="priceDiscount" min="0" max="50" step="1" value="10" style="max-width:80px;"> %
+            <span style="font-size:0.75rem;color:#666;margin-left:8px;">Voreinstellung: 10 %</span>
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn" onclick="saveDiscount()">Rabatt speichern</button>
+          </div>
+          <div class="admin-ok"  id="discountOk"></div>
+          <div class="admin-err" id="discountErr"></div>
+        </div>
+      </div>
+
+      <!-- Preismatrix -->
+      <div class="admin-section">
+        <div class="admin-section-title">Preismatrix</div>
+        <div class="admin-card">
+          <div style="font-size:0.78rem;color:#888;margin-bottom:16px;line-height:1.6;">
+            Preise in € pro Stunde · Änderungen gelten sofort für alle neuen Buchungen.
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <!-- Wochentag -->
+            <div>
+              <div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Mo – Fr</div>
+              <div id="priceGridWeekday"></div>
+            </div>
+            <!-- Wochenende -->
+            <div>
+              <div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Sa + So</div>
+              <div id="priceGridWeekend"></div>
+            </div>
+          </div>
+          <div class="admin-row" style="margin-top:16px;">
+            <button class="admin-save-btn gold" onclick="savePrices()">Alle Preise speichern</button>
+          </div>
+          <div class="admin-ok"  id="pricesOk"></div>
+          <div class="admin-err" id="pricesErr"></div>
+        </div>
+      </div>
+
+    </div><!-- /adminPrices -->
+
+    <!-- ── INTERNE BUCHUNGEN ── -->
+    <div id="adminInternal" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">Neue interne Buchung / Blockierung</div>
+        <div class="admin-card">
+          <div class="admin-row">
+            <span class="admin-label">Datum</span>
+            <input class="admin-input" type="date" id="intDate" style="max-width:160px;">
+            <span class="admin-label" style="min-width:50px;">Court</span>
+            <select class="admin-input" id="intCourt" style="max-width:140px;">
+              <option value="1">Court #1</option>
+              <option value="2">Court #2</option>
+              <option value="0">Beide Courts</option>
+            </select>
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">Von</span>
+            <input class="admin-input" type="number" id="intFrom" min="8" max="21" placeholder="Stunde" style="max-width:80px;"> Uhr
+            <span class="admin-label" style="min-width:30px;">Bis</span>
+            <input class="admin-input" type="number" id="intTo"   min="9" max="22" placeholder="Stunde" style="max-width:80px;"> Uhr
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">Preis</span>
+            <input class="admin-input" type="number" id="intPrice" min="0" step="0.50" value="0" style="max-width:90px;"> €/Std.
+            <span style="font-size:0.75rem;color:#666;margin-left:8px;">0 € = Vereinskosten (kein Umsatz) · Betrag = wird als Umsatz gezählt</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">Grund</span>
+            <input class="admin-input" type="text" id="intReason" placeholder="z.B. Training Jugend, Turnier, Platzpflege …">
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">Art</span>
+            <div style="display:flex;gap:8px;">
+              <button class="admin-toggle-btn active" id="intTypeOnce" onclick="setIntType('once')">Einzeltermin</button>
+              <button class="admin-toggle-btn"        id="intTypeRecurring" onclick="setIntType('recurring')">Wiederkehrend</button>
+            </div>
+          </div>
+          <!-- Nur bei Wiederkehrend -->
+          <div id="intRecurringOpts" style="display:none;">
+            <div class="admin-row">
+              <span class="admin-label">Wöchentlich bis</span>
+              <input class="admin-input" type="date" id="intRecurUntil" style="max-width:180px;">
+            </div>
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn gold" onclick="saveInternalBooking()">Blockierung speichern</button>
+          </div>
+          <div class="admin-ok"  id="intOk"></div>
+          <div class="admin-err" id="intErr"></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Bestehende interne Blockierungen</div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr>
+              <th>Wochentag / Datum</th><th>Zeit</th><th>Court</th><th>Grund</th><th>€</th><th>Wöchentlich bis</th><th>Aktionen</th>
+            </tr></thead>
+            <tbody id="internalTbody">
+              <tr><td colspan="7" style="color:#555;text-align:center;padding:24px;">Wird geladen …</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Edit-Modal für interne Buchungen -->
+      <div id="intEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
+          <button onclick="closeIntEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
+          <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Blockierung bearbeiten</div>
+          <input type="hidden" id="editIntId">
+          <input type="hidden" id="editIntRecurGroup">
+          <div class="admin-row" style="margin-bottom:12px;">
+            <span class="admin-label">Grund</span>
+            <input class="admin-input" type="text" id="editIntReason" style="flex:1;">
+          </div>
+          <div class="admin-row" style="margin-bottom:12px;">
+            <span class="admin-label">Von Uhr</span>
+            <input class="admin-input" type="number" id="editIntFrom" min="8" max="21" style="max-width:80px;">
+            <span class="admin-label">Bis Uhr</span>
+            <input class="admin-input" type="number" id="editIntTo" min="9" max="22" style="max-width:80px;">
+          </div>
+          <div class="admin-row" style="margin-bottom:12px;">
+            <span class="admin-label">Preis</span>
+            <input class="admin-input" type="number" id="editIntPrice" min="0" step="0.5" style="max-width:90px;"> €/Std.
+          </div>
+          <div id="editIntRecurNote" style="display:none;font-size:0.72rem;color:#888;margin-bottom:12px;">Diese Buchung ist Teil einer Reihe. Änderungen gelten für alle zukünftigen Termine.</div>
+          <div class="admin-ok"  id="editIntOk"></div>
+          <div class="admin-err" id="editIntErr"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="admin-save-btn gold" style="flex:1;" onclick="saveIntEdit()">Änderung speichern</button>
+            <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeIntEdit()">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+
+    <!-- ── BUCHUNGSÜBERSICHT ── -->
+    <div id="adminBookings" style="display:none;">
+      <div class="admin-stat-grid">
+        <div class="admin-stat"><div class="admin-stat-val" id="statBookings">—</div><div class="admin-stat-lbl">Offene Buchungen</div></div>
+        <div class="admin-stat"><div class="admin-stat-val" id="statRevenue">—</div><div class="admin-stat-lbl">Erwarteter Umsatz (€)</div></div>
+        <div class="admin-stat"><div class="admin-stat-val" id="statAbos">—</div><div class="admin-stat-lbl">Aktive Abos</div></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">Kommende Buchungen (ab heute, nach Datum)</div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>Datum</th><th>Zeit</th><th>Court</th><th>Name</th><th>€</th></tr></thead>
+            <tbody id="bookingsTbody">
+              <tr><td colspan="5" style="color:#555;text-align:center;padding:24px;">Wird geladen …</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">Aktive Jahresabos</div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Court</th><th>Tag</th><th>Zeit</th><th>€/Wo</th><th>Läuft bis</th></tr></thead>
+            <tbody id="abosTbody">
+              <tr><td colspan="6" style="color:#555;text-align:center;padding:24px;">Wird geladen …</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /adminBookings -->
+
+    <!-- ── MIS ── -->
+    <div id="adminMis" style="display:none;">
+      <div class="admin-card" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:2rem;margin-bottom:12px;">📊</div>
+        <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Management Information System</div>
+        <div style="font-size:0.82rem;color:#666;line-height:1.7;max-width:480px;margin:0 auto;">
+          Wird in einer der nächsten Sessions implementiert.<br>
+          Geplante Inhalte: rollierender 12-Monats-Umsatz, Auslastung nach Court/Stunde/Wochentag, Unique Customers, Altersgruppen, Umsatz intern vs. extern.
+        </div>
+      </div>
+    </div><!-- /adminMis -->
+
+    <!-- ── NUTZERVERWALTUNG ── -->
+    <div id="adminUsers" style="display:none;">
+
+      <!-- Nutzerliste -->
+      <div class="admin-section">
+        <div class="admin-section-title">Registrierte Nutzer</div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>E-Mail</th><th>Typ</th><th>Mitglied#</th><th>Jahrgang</th><th>Registriert</th></tr></thead>
+            <tbody id="usersTbody">
+              <tr><td colspan="6" style="color:#555;text-align:center;padding:24px;">Wird geladen …</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Neuen Nutzer anlegen -->
+      <div class="admin-section">
+        <div class="admin-section-title">+ Neuen Nutzer / Mitglied anlegen</div>
+        <div class="admin-card">
+          <div class="admin-row">
+            <span class="admin-label">Name</span>
+            <input class="admin-input" type="text" id="newUserName" placeholder="Vor- und Nachname">
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">E-Mail</span>
+            <input class="admin-input" type="email" id="newUserEmail" placeholder="email@beispiel.de">
+          </div>
+          <div class="admin-row">
+            <span class="admin-label">Typ</span>
+            <select class="admin-input" id="newUserType" style="max-width:180px;" onchange="document.getElementById('newUserMemberRow').style.display=this.value==='member'?'flex':'none'">
+              <option value="account">Konto (kein Mitglied)</option>
+              <option value="member">TFB-Mitglied</option>
+            </select>
+          </div>
+          <div class="admin-row" id="newUserMemberRow" style="display:none;">
+            <span class="admin-label">Mitgliedsnr.</span>
+            <input class="admin-input" type="text" id="newUserMember" placeholder="z.B. TFB042" style="max-width:160px;">
+            <span class="admin-label" style="min-width:60px;">Jahrgang</span>
+            <input class="admin-input" type="number" id="newUserYear" placeholder="z.B. 1975" style="max-width:110px;">
+          </div>
+          <div class="admin-row">
+            <button class="admin-save-btn gold" onclick="createUserByAdmin()">+ Nutzer anlegen</button>
+            <span style="font-size:0.72rem;color:#666;margin-left:8px;">Nutzer erhält E-Mail zur Passwort-Vergabe</span>
+          </div>
+          <div class="admin-ok"  id="newUserOk"></div>
+          <div class="admin-err" id="newUserErr"></div>
+        </div>
+      </div>
+
+    </div><!-- /adminUsers -->
+
+  </div><!-- /modeAdmin -->
+
+  <footer class="site-footer">
+    <div class="site-footer-left">
+      <a href="https://tfbielstein.de" target="_blank">Tennisfreunde Bielstein e.V. →</a>
+    </div>
+    <div class="site-footer-center">
+      <button class="admin-footer-link" id="adminFooterBtn" onclick="curMode==='admin' ? setMode('book') : setMode('admin')">⚙ Admin</button>
+    </div>
+    <div class="site-footer-right">
+      Padel Bielstein<br>Jahnstraße 15 · 51674 Wiehl-Bielstein
+    </div>
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ■■ SUPABASE SDK ■■ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ============================================================
+//  SUPABASE CONFIG
+// ============================================================
+const SUPABASE_URL  = 'https://hioaqcwqzeqcvvikollq.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_hPdHQmbez9NKPtA9m9Izmg_DPcrLzv7';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ============================================================
+//  PREISE – aus Supabase geladen, Fallback auf hardcoded
+// ============================================================
+// Fallback (falls DB nicht erreichbar)
+const PW_FB = {8:16,9:16,10:16,11:16,12:16,13:16,14:24,15:24,16:32,17:32,18:32,19:32,20:32,21:32};
+const PE_FB = {8:24,9:24,10:32,11:32,12:32,13:32,14:24,15:24,16:24,17:24,18:24,19:24,20:24,21:24};
+
+let PW = {...PW_FB};  // Wochentag-Preise (Mo–Fr)
+let PE = {...PE_FB};  // Wochenend-Preise (Sa+So)
+let pricesLoaded = false;
+
+async function loadPrices() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/prices?select=hour,day_type,price_cents&valid_from=lte.${today}&or=(valid_until.is.null,valid_until.gte.${today})&order=valid_from.desc`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }, signal: controller.signal }
+    );
+    clearTimeout(timer);
+    if (!res.ok) { console.warn('Preise HTTP Fehler:', res.status); return; }
+    const data = await res.json();
+    if (!data || data.length === 0) return;
+    const seen = new Set();
+    PW = {}; PE = {};
+    for (const row of data) {
+      const key = `${row.day_type}-${row.hour}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const euros = row.price_cents / 100;
+      if (row.day_type === 'weekday') PW[row.hour] = euros;
+      else PE[row.hour] = euros;
+    }
+    for (let h = 8; h <= 21; h++) {
+      if (!PW[h]) PW[h] = PW_FB[h];
+      if (!PE[h]) PE[h] = PE_FB[h];
+    }
+    pricesLoaded = true;
+  } catch(e) {
+    console.warn('Preise: Fallback aktiv', e.message);
+    PW = {...PW_FB}; PE = {...PE_FB};
+  }
+
+  // Mitgliederrabatt aus app_config laden
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_config?key=eq.member_discount&select=value&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.length > 0 && member) {
+        member.discount = parseFloat(data[0].value);
+      }
+    }
+  } catch(e) { /* Fallback: 10% bleibt */ }
+}
+
+// ============================================================
+//  BUCHUNGEN – nativer fetch
+// ============================================================
+let booked = {1: new Set(), 2: new Set()};
+let aboBooked = {1: new Set(), 2: new Set()};
+
+let blockedSlots = {1: {}, 2: {}};  // {court: {key: reason}}
+
+async function loadBookings(date) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?select=court,date,hour_start,duration,status,full_name,customer_type&date=eq.${date}&status=in.(paid,blocked)`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }, signal: controller.signal }
+    );
+    clearTimeout(timer);
+    if (!res.ok) { console.warn('Buchungen HTTP Fehler:', res.status); return; }
+    const data = await res.json();
+    booked       = {1: new Set(), 2: new Set()};
+    blockedSlots = {1: {}, 2: {}};
+    for (const b of (data || [])) {
+      for (let i = 0; i < b.duration; i++) {
+        const key = `${b.date}-${b.hour_start + i}`;
+        booked[b.court].add(key);
+        if (b.customer_type === 'internal') {
+          blockedSlots[b.court][key] = b.full_name || 'Gesperrt';
+        }
+      }
+    }
+    console.log('Buchungen geladen:', data.length, 'Einträge');
+  } catch(e) {
+    console.warn('Buchungen Fehler:', e.message);
+    booked = {1: new Set(), 2: new Set()};
+    blockedSlots = {1: {}, 2: {}};
+  }
+}
+
+// Keep-alive: alle 4 Minuten
+setInterval(() => {
+  fetch(`${SUPABASE_URL}/rest/v1/prices?select=hour&limit=1`,
+    { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+  );
+}, 4 * 60 * 1000);
+
+async function loadAboBookings(weekday) {
+  try {
+    const { data, error } = await sb
+      .from('subscriptions')
+      .select('court, weekday, hour_start, duration')
+      .eq('weekday', weekday)
+      .eq('status', 'active');
+
+    if (error) { console.warn('Abos laden fehlgeschlagen', error); return; }
+
+    aboBooked = {1: new Set(), 2: new Set()};
+    for (const s of (data || [])) {
+      for (let i = 0; i < s.duration; i++) {
+        aboBooked[s.court].add(`${s.weekday}-${s.hour_start + i}`);
+      }
+    }
+  } catch(e) {
+    console.warn('Abos: Netzwerkfehler', e);
+  }
+}
+
+// ============================================================
+//  HILFSFUNKTIONEN
+// ============================================================
+const WDNAMES = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const MONTHS  = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+const DAYS    = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+
+let selDate = null, selDur = 1, selSlot = null, member = null;
+let aboWd = null, aboDur = 1, aboSlot = null, curMode = 'book';
+let doorLog = [];
+
+function fmt(n) { return n.toLocaleString('de-DE') + ' €'; }
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function isWE(d) { const x = new Date(d+'T12:00:00'); return x.getDay()===0||x.getDay()===6; }
+function prices(d) { return isWE(d) ? PE : PW; }
+function rawP(h, d) { return (prices(d)[h] || 0) * selDur; }
+function mP(p) { return member ? Math.round(p * (1 - member.discount)) : p; }
+function showLoader(on) { document.getElementById('loadingBar').classList.toggle('active', on); }
+
+// ============================================================
+//  INIT
+// ============================================================
+async function init() {
+  PW = {...PW_FB};
+  PE = {...PE_FB};
+  buildDates();
+  selDate = todayStr();
+  document.querySelectorAll(".date-chip").forEach(c => c.classList.toggle("selected", c.dataset.date===selDate));
+  document.getElementById("priceTxt").textContent = isWE(selDate) ? "Wochenend-Preise (Sa+So)" : "Wochentag-Preise (Mo–Fr)";
+  updDurPrices();
+  renderSlots();
+
+  // Freibad-Config parallel laden
+  loadFreibadConfig();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('booking') === 'success') {
+    window.history.replaceState({}, '', '/');
+    showToast('🎾 Buchung erfolgreich! Bestätigung kommt per E-Mail.');
+    await loadBookings(selDate);
+    renderSlots();
+  } else if (params.get('booking') === 'cancelled') {
+    window.history.replaceState({}, '', '/');
+    showToast('Buchung abgebrochen.');
+    loadBookings(selDate).then(() => renderSlots());
+  } else {
+    loadBookings(selDate).then(() => renderSlots());
+  }
+  loadPrices().then(() => { updDurPrices(); renderSlots(); });
+}
+
+// ============================================================
+//  MODE
+// ============================================================
+function setMode(m) {
+  curMode = m;
+  document.getElementById('modeBook').style.display  = m==='book'  ? 'block' : 'none';
+  document.getElementById('modeAbo').style.display   = m==='abo'   ? 'block' : 'none';
+  document.getElementById('modePlay').style.display  = m==='play'  ? 'block' : 'none';
+  document.getElementById('modeAdmin').style.display = m==='admin' ? 'block' : 'none';
+  document.getElementById('tabBook').classList.toggle('active',  m==='book');
+  document.getElementById('tabAbo').classList.toggle('active',   m==='abo');
+  document.getElementById('tabPlay').classList.toggle('active',  m==='play');
+  const adminFooter = document.getElementById('adminFooterBtn');
+  if (adminFooter) adminFooter.style.fontWeight = m==='admin' ? '900' : '700';
+  if (m==='abo')  { aboWd=null; aboSlot=null; renderAboWeekdays(); renderAboSlots(); updateAboSummary(); }
+  if (m==='play') { renderPlaySection(); }
+  if (m==='admin') {
+    document.getElementById('mainTabs').style.display = 'none';
+    document.getElementById('heroHeader').style.cursor = 'pointer';
+    document.getElementById('heroHeader').title = '← Zurück zur Buchungsübersicht';
+    document.getElementById('adminFooterBtn').textContent = '← Home';
+    initAdmin();
+  } else {
+    document.getElementById('mainTabs').style.display = 'grid';
+    document.getElementById('heroHeader').style.cursor = 'default';
+    document.getElementById('heroHeader').title = '';
+    document.getElementById('adminFooterBtn').textContent = '⚙ Admin';
+  }
+}
+
+// ============================================================
+//  DATUMS-SCROLL
+// ============================================================
+function buildDates() {
+  const sc = document.getElementById("dateScroll");
+  sc.innerHTML = "";
+  const t = new Date();
+  for (let i = 0; i < 60; i++) {
+    const d = new Date(t);
+    d.setDate(t.getDate() + i);
+    const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const c = document.createElement("div");
+    c.className = "date-chip";
+    c.dataset.date = str;
+    c.innerHTML = `<div class="dname">${DAYS[d.getDay()]}</div><div class="dnum">${d.getDate()}</div><div class="dmon">${MONTHS[d.getMonth()]}</div>`;
+    c.onclick = () => selectDate(str);
+    sc.appendChild(c);
+  }
+}
+
+async function selectDate(s) {
+  selDate = s;
+  selSlot = null;
+  document.querySelectorAll(".date-chip").forEach(c => c.classList.toggle("selected", c.dataset.date===s));
+  document.getElementById("priceTxt").textContent = isWE(s) ? "Wochenend-Preise (Sa+So)" : "Wochentag-Preise (Mo–Fr)";
+  await loadBookings(s);
+  updDurPrices();
+  renderSlots();
+  updateSummary();
+}
+
+// ============================================================
+//  DAUER
+// ============================================================
+function updDurPrices() {
+  if (!selDate) return;
+  const p = isWE(selDate) ? PE : PW;
+  const mn = Math.min(...Object.values(p));
+  document.getElementById("dp1").textContent = `ab ${mP(mn)} €`;
+  document.getElementById("dp2").textContent = `ab ${mP(mn*2)} €`;
+}
+
+function setDur(d) {
+  selDur = d;
+  selSlot = null;
+  document.getElementById("dur1").classList.toggle("selected", d===1);
+  document.getElementById("dur2").classList.toggle("selected", d===2);
+  renderSlots();
+  updateSummary();
+}
+
+// ============================================================
+//  SLOTS RENDERN
+// ============================================================
+function renderSlots() {
+  if (!selDate) return;
+  [1, 2].forEach(ct => {
+    const c = document.getElementById("slots" + ct);
+    c.innerHTML = "";
+    Object.keys(PW).map(Number).forEach(h => {
+      const k  = `${selDate}-${h}`;
+      const k2 = `${selDate}-${h+1}`;
+      const bk = booked[ct].has(k) || (selDur===2 && booked[ct].has(k2));
+      const isSel = selSlot?.court===ct && selSlot?.hour===h;
+      const isSec = selSlot?.court===ct && selSlot?.hour===h-1 && selDur===2;
+      const rp = rawP(h, selDate), p = mP(rp), isMp = member && p < rp;
+      const h1 = `${String(h).padStart(2,"0")}:00`;
+      const h2 = `${String(h+1).padStart(2,"0")}:00`;
+      const sl = document.createElement("div");
+      sl.className = "slot " + (bk ? "booked" : isSel ? "selected" : isSec ? "selected-second" : "free");
+      const isBlocked = !!blockedSlots[ct][k];
+      const blockReason = blockedSlots[ct][k] || '';
+      if (bk) {
+        if (isBlocked) {
+          sl.innerHTML = `<span class="slot-time">${h1}</span><span class="bkd-lbl" style="color:#c97316;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${blockReason}">${blockReason}</span>`;
+        } else {
+          sl.innerHTML = `<span class="slot-time">${h1}</span><span class="bkd-lbl">Belegt</span>`;
+        }
+      } else if(isSec){ sl.innerHTML = `<span class="slot-time">${h1} – ${h2}</span>`; }
+      else {
+        sl.innerHTML = `<span class="slot-time">${h1} – ${h2}</span><span class="slot-price${isMp?' mprice':''}">${p} €</span>`;
+        sl.onclick = () => pickSlot(ct, h);
+      }
+      c.appendChild(sl);
+    });
+  });
+}
+
+function pickSlot(ct, h) {
+  selSlot = (selSlot?.court===ct && selSlot?.hour===h) ? null : {court:ct, hour:h};
+  renderSlots();
+  updateSummary();
+}
+
+// ============================================================
+//  SUMMARY
+// ============================================================
+function updateSummary() {
+  const card = document.getElementById("sumCard");
+  const btn  = document.getElementById("bookBtn");
+  if (!selSlot) { card.classList.remove("visible"); btn.classList.remove("visible"); return; }
+  const {court:ct, hour:h} = selSlot, end = h + selDur;
+  const rp = rawP(h, selDate), p = mP(rp), disc = rp - p;
+  const ds = new Date(selDate+'T12:00:00').toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("sDate").textContent  = ds;
+  document.getElementById("sCourt").textContent = `Court #${ct}`;
+  document.getElementById("sTime").textContent  = `${String(h).padStart(2,"0")}:00 – ${String(end).padStart(2,"0")}:00 Uhr`;
+  document.getElementById("sDur").textContent   = `${selDur} Stunde${selDur>1?'n':''}`;
+  document.getElementById("sTotal").textContent = `${p} €`;
+  const dr = document.getElementById("discRow");
+  if (member && disc > 0) {
+    dr.style.display = "flex";
+    document.getElementById("discBadge").textContent = `${Math.round(member.discount*100)}% Mitgliederrabatt`;
+    document.getElementById("sDisc").textContent = `−${disc} €`;
+  } else { dr.style.display = "none"; }
+  card.classList.add("visible");
+  btn.classList.add("visible");
+}
+
+// ============================================================
+//  AUTH STATE
+// ============================================================
+let currentUser = null;      // Supabase Auth User
+let currentProfile = null;   // users-Tabelle Eintrag
+let pendingAction = null;    // 'book' | 'abo' — was nach Login passieren soll
+
+// Auth-State beim Laden prüfen — init() läuft unabhängig davon
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session?.user) {
+    currentUser = session.user;
+    loadProfile(session.user.id).then(() => updateUserBar());
+  }
+});
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    await loadProfile(session.user.id);
+    updateUserBar();
+  } else {
+    currentUser = null;
+    currentProfile = null;
+    member = null;
+    updateUserBar();
+  }
+});
+
+async function loadProfile(authId) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?auth_id=eq.${authId}&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.length > 0) {
+      currentProfile = data[0];
+      if (currentProfile.customer_type === 'member' && currentProfile.discount_pct > 0) {
+        member = { discount: parseFloat(currentProfile.discount_pct) };
+      } else {
+        member = null;
+      }
+    }
+  } catch(e) { console.warn('Profil laden fehlgeschlagen', e.message); }
+}
+
+function updateUserBar() {
+  const loggedIn  = document.getElementById('userBarLoggedIn');
+  const loggedOut = document.getElementById('userBarLoggedOut');
+  if (currentUser) {
+    loggedIn.style.display  = 'flex';
+    loggedOut.style.display = 'none';
+    const name = currentProfile?.full_name || currentUser.email;
+    document.getElementById('userBarName').textContent = name;
+    updDurPrices();
+    if (selDate) renderSlots();
+    checkHasAbo();
+    // Admin-Link in Fußzeile zeigen/verstecken
+    const adminBtn = document.getElementById('adminFooterBtn');
+    if (adminBtn) adminBtn.style.display = isAdmin() ? 'inline' : 'none';
+    renderPlaySection();
+  } else {
+    loggedIn.style.display  = 'none';
+    loggedOut.style.display = 'flex';
+    document.getElementById('portalBtn').style.display = 'none';
+    const adminBtn = document.getElementById('adminFooterBtn');
+    if (adminBtn) adminBtn.style.display = 'none';
+    renderPlaySection();
+  }
+}
+
+async function checkHasAbo() {
+  if (!currentUser) return;
+  const email = currentProfile?.email || currentUser.email;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/subscriptions?email=eq.${encodeURIComponent(email)}&status=eq.active&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = await res.json();
+    document.getElementById('portalBtn').style.display = (data && data.length > 0) ? 'inline-block' : 'none';
+  } catch(e) {
+    console.warn('Abo-Check fehlgeschlagen', e);
+  }
+}
+
+async function openPortal() {
+  showToast('Weiter zum Abo-Portal …');
+  const email = currentProfile?.email || currentUser?.email;
+  try {
+    const res = await fetch(
+      'https://hioaqcwqzeqcvvikollq.supabase.co/functions/v1/create-portal-session',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+    }
+  } catch(e) {
+    showToast('Netzwerkfehler – bitte erneut versuchen.');
+  }
+}
+
+// ============================================================
+//  MODAL STEUERUNG
+// ============================================================
+function openModal(action) {
+  pendingAction = (action === 'book' || action === 'abo') ? action : null;
+  const startTab = (action === 'register') ? 'register' : 'login';
+  switchAuthTab(startTab);
+  clearAuthMessages();
+  document.getElementById('authModal').classList.add('open');
+  setTimeout(() => {
+    const focusEl = startTab === 'register'
+      ? document.getElementById('regName')
+      : document.getElementById('loginEmail');
+    if (focusEl) focusEl.focus();
+  }, 100);
+}
+
+function closeModal() {
+  document.getElementById('authModal').classList.remove('open');
+  pendingAction = null;
+}
+
+// Klick außerhalb schließt Modal
+document.getElementById('authModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function switchAuthTab(tab) {
+  clearAuthMessages();
+  document.getElementById('formLogin').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('formRegister').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('formReset').style.display    = tab==='reset'    ? 'block' : 'none';
+  document.getElementById('authTabs').style.display     = tab==='reset'    ? 'none' : 'grid';
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+}
+
+
+
+
+function clearAuthMessages() {
+  document.getElementById('authErr').classList.remove('show');
+  document.getElementById('authOk').classList.remove('show');
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById('authOk').classList.remove('show');
+}
+
+function showAuthOk(msg) {
+  const el = document.getElementById('authOk');
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById('authErr').classList.remove('show');
+}
+
+// ============================================================
+//  LOGIN
+// ============================================================
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  if (!email || !pw) { showAuthErr('Bitte E-Mail und Passwort eingeben.'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = '…';
+  clearAuthMessages();
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) { showAuthErr(translateAuthError(error.message)); return; }
+    closeModal();
+    showToast('Willkommen zurück! 🎾');
+    if (pendingAction === 'book') confirmBooking(true);
+    if (pendingAction === 'abo')  submitAbo(true);
+  } catch(e) {
+    showAuthErr('Netzwerkfehler – bitte versuche es erneut.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Anmelden →';
+  }
+}
+
+// Enter-Taste im Login-Formular
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ============================================================
+//  REGISTRIERUNG
+// ============================================================
+async function doRegister() {
+  const name   = document.getElementById('regName').value.trim();
+  const email  = document.getElementById('regEmail').value.trim();
+  const pw     = document.getElementById('regPw').value;
+  const year   = parseInt(document.getElementById('regYear').value);
+  const member_number = document.getElementById('regMember').value.trim().toUpperCase() || null;
+
+  if (!name)            { showAuthErr('Bitte Name eingeben.'); return; }
+  if (!email)           { showAuthErr('Bitte E-Mail eingeben.'); return; }
+  if (pw.length < 8)    { showAuthErr('Passwort mindestens 8 Zeichen.'); return; }
+  if (!year || year < 1920 || year > 2015) { showAuthErr('Bitte gültiges Geburtsjahr eingeben.'); return; }
+
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = '…';
+  clearAuthMessages();
+
+  try {
+    // 1. Supabase Auth Account anlegen
+    const { data: authData, error: authErr } = await sb.auth.signUp({ email, password: pw });
+    if (authErr) { showAuthErr(translateAuthError(authErr.message)); return; }
+
+    // 2. users-Tabelle befüllen via upsert
+    const customer_type = member_number ? 'member' : 'account';
+    const discount_pct  = member_number ? 0.10 : 0;
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal,resolution=merge-duplicates',
+      },
+      body: JSON.stringify({
+        auth_id:       authData.user.id,
+        email,
+        full_name:     name,
+        customer_type,
+        member_number: member_number || null,
+        discount_pct,
+        birth_year:    year,
+      }),
+    });
+    if (!insertRes.ok) {
+      const err = await insertRes.text();
+      console.warn('Users insert Fehler:', err);
+    }
+
+    showAuthOk('Fast fertig! Bitte bestätige deine E-Mail-Adresse – dann kannst du dich anmelden.');
+  } catch(e) {
+    showAuthErr('Fehler beim Anlegen des Kontos – bitte versuche es erneut.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Konto erstellen →';
+  }
+}
+
+// ============================================================
+//  PASSWORT RESET
+// ============================================================
+async function doReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showAuthErr('Bitte E-Mail eingeben.'); return; }
+  clearAuthMessages();
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://padel-bielstein.de'
+  });
+  if (error) { showAuthErr(translateAuthError(error.message)); return; }
+  showAuthOk('Link gesendet! Bitte prüfe dein Postfach.');
+}
+
+// ============================================================
+//  JETZT SPIELEN – Türzugang
+// ============================================================
+
+// ============================================================
+//  ADMIN-EMAILS (hardcoded)
+// ============================================================
+const ADMIN_EMAILS = ['joern.kaemper@gmail.com', 'calvinjohncamp@gmail.com', 'calvinjohncamp@aol.com'];
+
+function isAdmin() {
+  return currentUser && ADMIN_EMAILS.includes((currentProfile?.email || currentUser.email || '').toLowerCase());
+}
+
+// ============================================================
+//  FREIBAD-KONFIGURATION (aus Supabase, Fallback auf Defaults)
+// ============================================================
+// Defaults: 01.05–30.09, 08–20 Uhr
+let freibadConfig = {
+  season_start_md: '05-01',   // MM-DD
+  season_end_md:   '09-30',
+  open_hour:       8,
+  close_hour:      20,
+  season_active:   true,      // manueller Override
+};
+let freibadClosures   = [];   // [{date:'2027-07-04', note:'Wartung'}]
+let freibadExceptions = [];   // [{date:'2027-06-15', open_hour:10, close_hour:18}]
+
+async function loadFreibadConfig() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/freibad_config?select=*&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.length > 0) {
+      const d = data[0];
+      freibadConfig = {
+        season_start_md: d.season_start_md || '05-01',
+        season_end_md:   d.season_end_md   || '09-30',
+        open_hour:       d.open_hour  ?? 8,
+        close_hour:      d.close_hour ?? 20,
+        season_active:   d.season_active !== false,
+      };
+    }
+  } catch(e) { console.warn('freibad_config Fallback aktiv:', e.message); }
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/freibad_closures?select=*&order=date.asc`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (res.ok) freibadClosures = await res.json() || [];
+  } catch(e) { freibadClosures = []; }
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/freibad_exceptions?select=*&order=date.asc`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (res.ok) freibadExceptions = await res.json() || [];
+  } catch(e) { freibadExceptions = []; }
+}
+
+function isFreibadOpen(dateStr, hourOverride) {
+  const d    = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
+  const dStr = dateStr || todayStr();
+  const h    = hourOverride !== undefined ? hourOverride : new Date().getHours();
+
+  // Schließtag?
+  if (freibadClosures.some(c => c.date === dStr)) return false;
+
+  // Manuelle Override — Saison deaktiviert?
+  if (!freibadConfig.season_active) return false;
+
+  // Ist es Saison? (Vergleich via MM-DD)
+  const mdStr = dStr.slice(5); // "MM-DD"
+  if (mdStr < freibadConfig.season_start_md || mdStr > freibadConfig.season_end_md) return false;
+
+  // Datumsspezifische Öffnungszeiten?
+  const exc = freibadExceptions.find(e => e.date === dStr);
+  const openH  = exc ? exc.open_hour  : freibadConfig.open_hour;
+  const closeH = exc ? exc.close_hour : freibadConfig.close_hour;
+
+  return h >= openH && h < closeH;
+}
+
+function getFreibadHours(dateStr) {
+  const dStr = dateStr || todayStr();
+  const exc = freibadExceptions.find(e => e.date === dStr);
+  return {
+    open:  exc ? exc.open_hour  : freibadConfig.open_hour,
+    close: exc ? exc.close_hour : freibadConfig.close_hour,
+  };
+}
+
+async function loadTodayBookings() {
+  if (!currentUser) return [];
+  const today = todayStr();
+  const email = currentProfile?.email || currentUser.email;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?select=court,date,hour_start,duration&date=eq.${today}&status=eq.paid&email=eq.${encodeURIComponent(email)}`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch(e) { return []; }
+}
+
+async function loadTodayAboSlot() {
+  if (!currentUser) return null;
+  const today = new Date();
+  const weekday = today.getDay();
+  const email = currentProfile?.email || currentUser.email;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/subscriptions?select=court,weekday,hour_start,duration&weekday=eq.${weekday}&status=eq.active&email=eq.${encodeURIComponent(email)}&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || data.length === 0) return null;
+    // Als Buchungsobjekt zurückgeben (mit heutigem Datum)
+    const s = data[0];
+    return { court: s.court, date: todayStr(), hour_start: s.hour_start, duration: s.duration, isAbo: true };
+  } catch(e) { return null; }
+}
+
+// Prüft ob eine Buchung gerade aktiv ist (±15 Min)
+function getActiveBooking(bookings) {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  for (const b of bookings) {
+    const startMin = b.hour_start * 60;
+    const endMin   = (b.hour_start + b.duration) * 60;
+    if (nowMin >= startMin - 15 && nowMin < endMin) return b;
+  }
+  return null;
+}
+
+function getBookingStatus(b) {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const startMin = b.hour_start * 60;
+  const endMin   = (b.hour_start + b.duration) * 60;
+  if (nowMin < startMin - 15) return 'soon';
+  if (nowMin >= endMin) return 'past';
+  return 'now';
+}
+
+// Demo-Status: 'soon' → 'now' (beim Türöffnen) → 'done' (nach Schließen)
+let demoPlayStatus = 'soon';
+
+function getDemoBookings() {
+  const now = new Date();
+  const h = now.getHours();
+  return [
+    { court: 1, date: todayStr(), hour_start: h, duration: 1, isDemo: true },
+  ];
+}
+
+async function renderPlaySection() {
+  const notLoggedIn = document.getElementById('playNotLoggedIn');
+  const loggedIn    = document.getElementById('playLoggedIn');
+
+  // Auch ohne Login: Demo-Modus zeigen
+  notLoggedIn.style.display = 'none';
+  loggedIn.style.display    = 'block';
+
+  // Buchungen laden (echte haben Vorrang)
+  let allBookings = [];
+  let isDemo = false;
+
+  if (currentUser) {
+    const [regularBookings, aboSlot] = await Promise.all([loadTodayBookings(), loadTodayAboSlot()]);
+    allBookings = [...regularBookings];
+    if (aboSlot) {
+      const exists = allBookings.some(b => b.hour_start === aboSlot.hour_start && b.court === aboSlot.court);
+      if (!exists) allBookings.push(aboSlot);
+    }
+  }
+
+  // Keine echten Buchungen → Demo-Daten
+  if (allBookings.length === 0) {
+    allBookings = getDemoBookings();
+    isDemo = true;
+  }
+
+  allBookings.sort((a,b) => a.hour_start - b.hour_start);
+
+  const listEl = document.getElementById('playBookingsList');
+
+  // Demo-Badge über der Liste
+  const demoBanner = isDemo
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:7px 12px;background:rgba(230,234,24,0.07);border:1px solid rgba(230,234,24,0.25);border-radius:8px;">
+        <span style="font-size:0.7rem;color:var(--gold);font-family:'Arial Narrow','Impact',sans-serif;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;">◉ Demo-Ansicht</span>
+        <span style="font-size:0.72rem;color:#666;">Echte Buchungen erscheinen hier automatisch</span>
+       </div>`
+    : '';
+
+  listEl.innerHTML = demoBanner + allBookings.map(b => {
+    const status = isDemo ? demoPlayStatus : getBookingStatus(b);
+    const h1 = `${String(b.hour_start).padStart(2,'0')}:00`;
+    const h2 = `${String(b.hour_start + b.duration).padStart(2,'0')}:00`;
+    const aboTag  = b.isAbo  ? ' <span style="font-size:0.65rem;color:#888;font-weight:400;">(Abo)</span>'  : '';
+    const demoTag = b.isDemo ? ' <span style="font-size:0.65rem;color:#555;font-weight:400;">(Demo)</span>' : '';
+    const badgeCls = status === 'now'  ? 'play-badge-now'  :
+                     status === 'done' ? 'play-badge-past' :
+                     status === 'soon' ? 'play-badge-soon' : 'play-badge-past';
+    const badgeTxt = status === 'now'  ? '● Läuft jetzt'     :
+                     status === 'done' ? '✓ Spielzeit beendet' :
+                     status === 'soon' ? '⏱ Bald'            : '✓ Beendet';
+    return `
+      <div class="play-booking-item">
+        <div class="play-booking-info">
+          <div class="play-booking-court">Court #${b.court}${aboTag}${demoTag}</div>
+          <div class="play-booking-time">${h1} – ${h2} Uhr</div>
+        </div>
+        <span class="${badgeCls}">${badgeTxt}</span>
+      </div>`;
+  }).join('');
+
+  // Aktive Buchung für Türbuttons
+  const active = getActiveBooking(allBookings);
+  const doorInfoEl = document.getElementById('doorAccessInfo');
+  const doorBtns   = document.getElementById('doorButtons');
+  const accessBtn  = document.getElementById('btnAccessDoor');
+  const courtBtn   = document.getElementById('btnCourtDoor');
+  const accessLbl  = document.getElementById('btnAccessLabel');
+  const courtLbl   = document.getElementById('btnCourtLabel');
+
+  doorInfoEl.style.display = 'block';
+
+  if (active) {
+    const freibadOffen = isFreibadOpen();
+    const zugangTuer  = freibadOffen ? 'Tür B (Freibadseite)' : 'Tür A (Parkplatzseite)';
+    const courtTueren = active.court === 1 ? 'Türen 3 + 4 (Court #1)' : 'Türen 1 + 2 (Court #2)';
+
+    doorInfoEl.innerHTML = freibadOffen
+      ? `<strong>Freibad geöffnet</strong> — Zugang heute ausschließlich über <strong>Tür B</strong> (Freibad/Liegewiese). Ausgang über Tür A möglich.`
+      : `<strong>Freibad geschlossen</strong> — Zugang und Ausgang ausschließlich über <strong>Tür A</strong> (Parkplatz/Tennis).`;
+
+    accessLbl.textContent = zugangTuer + ' öffnen';
+    courtLbl.textContent  = courtTueren + ' öffnen';
+    // Im Demo-Modus: Buttons sichtbar aber visuell als Demo markiert
+    accessBtn.disabled = false;
+    courtBtn.disabled  = false;
+    accessBtn.dataset.court = active.court;
+    courtBtn.dataset.court  = active.court;
+    if (isDemo) {
+      accessBtn.title = 'Demo – kein echtes Signal';
+      courtBtn.title  = 'Demo – kein echtes Signal';
+    }
+    doorBtns.style.display = 'block';
+  } else {
+    const next = allBookings.find(b => getBookingStatus(b) === 'soon');
+    if (next) {
+      const h1 = `${String(next.hour_start).padStart(2,'0')}:00`;
+      doorInfoEl.innerHTML = `Deine nächste Buchung startet um <strong>${h1} Uhr</strong>. Die Türen öffnen sich 15 Minuten vorher.`;
+    } else {
+      doorInfoEl.innerHTML = `Keine aktive Buchung. Türöffnung ist nur während der gebuchten Spielzeit (±15 Min.) möglich.`;
+    }
+    accessBtn.disabled = true;
+    courtBtn.disabled  = true;
+    doorBtns.style.display = 'block';
+  }
+
+  // Hinweistext
+  let hintEl = document.getElementById('playHint');
+  if (!hintEl) {
+    hintEl = document.createElement('div');
+    hintEl.id = 'playHint';
+    hintEl.style.cssText = 'font-size:0.75rem;color:#555;line-height:1.6;text-align:center;margin-top:4px;margin-bottom:16px;padding:0 4px;';
+    doorBtns.parentNode.insertBefore(hintEl, doorBtns.nextSibling);
+  }
+  hintEl.textContent = 'Beide Türen des gebuchten Courts sind bis spätestens 5 Minuten nach Spielende von außen zu schließen.';
+
+  renderDoorLog();
+}
+
+function logDoorEvent(icon, text) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  doorLog.unshift({ icon, text, time: timeStr });
+  renderDoorLog();
+}
+
+function renderDoorLog() {
+  const logCard = document.getElementById('doorLogCard');
+  const logList = document.getElementById('doorLogList');
+  if (doorLog.length === 0) { logCard.style.display = 'none'; return; }
+  logCard.style.display = 'block';
+  logList.innerHTML = doorLog.map(e => `
+    <div class="door-log-entry">
+      <span class="door-log-icon">${e.icon}</span>
+      <span class="door-log-text">${e.text}</span>
+      <span class="door-log-time">${e.time}</span>
+    </div>`).join('');
+}
+
+async function openAccessDoor() {
+  const btn = document.getElementById('btnAccessDoor');
+  btn.disabled = true;
+  const freibadOffen = isFreibadOpen();
+  const doorName = freibadOffen ? 'Tür B (Freibadseite)' : 'Tür A (Parkplatzseite)';
+  const doorId   = freibadOffen ? 'door_B' : 'door_A';
+
+  showToast(`${doorName} wird geöffnet …`);
+  await logDoorToSupabase(doorId, 'opened');
+
+  setTimeout(async () => {
+    logDoorEvent('🚪', `${doorName} geöffnet`);
+    showToast(`✅ ${doorName} ist offen – bitte schließen nach Eintritt!`);
+    btn.disabled = false;
+    // Demo-Status auf "Läuft jetzt" switchen
+    if (demoPlayStatus === 'soon') {
+      demoPlayStatus = 'now';
+      await renderPlaySection();
+    }
+  }, 800);
+}
+
+async function openCourtDoors() {
+  const btn = document.getElementById('btnCourtDoor');
+  btn.disabled = true;
+  const court = parseInt(btn.dataset.court || '1');
+  const doorNames = court === 1 ? 'Türen 3 + 4 (Court #1)' : 'Türen 1 + 2 (Court #2)';
+  const doorIds   = court === 1 ? ['door_3','door_4'] : ['door_1','door_2'];
+
+  showToast(`${doorNames} werden geöffnet …`);
+  await Promise.all(doorIds.map(id => logDoorToSupabase(id, 'opened')));
+
+  setTimeout(async () => {
+    logDoorEvent('🎾', `${doorNames} geöffnet`);
+    showToast(`✅ ${doorNames} sind offen – viel Spaß beim Spielen!`);
+    btn.disabled = false;
+    // Demo: wenn Zugang schon geöffnet wurde (status=now) → nach Court-Türen = Spielzeit beendet simulieren
+    if (demoPlayStatus === 'now') {
+      setTimeout(async () => {
+        demoPlayStatus = 'done';
+        await renderPlaySection();
+      }, 4000); // 4 Sek. Verzögerung für Demo-Zwecke
+    }
+  }, 800);
+}
+
+async function logDoorToSupabase(doorId, eventType) {
+  const email = currentProfile?.email || currentUser?.email;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/door_events`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        door_id:    doorId,
+        event_type: eventType,
+        email,
+        user_id:    currentUser?.id || null,
+        ts:         new Date().toISOString(),
+      }),
+    });
+  } catch(e) { console.warn('Door log fehlgeschlagen:', e.message); }
+}
+
+// ============================================================
+//  LOGOUT
+// ============================================================
+async function doLogout() {
+  await sb.auth.signOut();
+  showToast('Erfolgreich abgemeldet.');
+}
+
+// ============================================================
+//  FEHLERMELDUNGEN ÜBERSETZEN
+// ============================================================
+function translateAuthError(msg) {
+  if (msg.includes('Invalid login'))      return 'E-Mail oder Passwort falsch.';
+  if (msg.includes('Email not confirmed')) return 'Bitte erst E-Mail bestätigen.';
+  if (msg.includes('already registered')) return 'Diese E-Mail ist bereits registriert.';
+  if (msg.includes('Password should'))    return 'Passwort mindestens 8 Zeichen.';
+  if (msg.includes('rate limit'))         return 'Zu viele Versuche – bitte kurz warten.';
+  return 'Fehler: ' + msg;
+}
+
+// ============================================================
+//  BUCHUNG BESTÄTIGEN — Stripe Checkout
+// ============================================================
+async function confirmBooking(skipAuthCheck) {
+  if (!selSlot) return;
+  if (!skipAuthCheck && !currentUser) {
+    openModal('book');
+    return;
+  }
+
+  const {court, hour} = selSlot;
+  const priceRaw = rawP(hour, selDate);
+  const price = mP(priceRaw);
+  const price_cents = Math.round(price * 100);
+
+  const email    = currentProfile?.email || currentUser?.email;
+  const fullName = currentProfile?.full_name || '';
+  const birthYear = currentProfile?.birth_year || null;
+  const custType = currentProfile?.customer_type || 'account';
+
+  showToast('Weiter zu Stripe …');
+
+  try {
+    const res = await fetch(
+      'https://hioaqcwqzeqcvvikollq.supabase.co/functions/v1/create-checkout',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer sb_publishable_hPdHQmbez9NKPtA9m9Izmg_DPcrLzv7`,
+          'apikey': 'sb_publishable_hPdHQmbez9NKPtA9m9Izmg_DPcrLzv7'
+        },
+        body: JSON.stringify({
+          court,
+          date: selDate,
+          hour_start: hour,
+          duration: selDur,
+          price_cents,
+          user_id: currentUser?.id || null,
+          customer_type: custType,
+          email,
+          full_name: fullName,
+          birth_year: birthYear,
+        }),
+      }
+    );
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+    }
+  } catch(e) {
+    showToast('Netzwerkfehler – bitte erneut versuchen.');
+  }
+}
+
+function submitAbo(skipAuthCheck) {
+  if (!aboSlot || aboWd===null) { showToast('Bitte Wochentag und Slot wählen'); return; }
+  if (!skipAuthCheck && !currentUser) {
+    openModal('abo');
+    return;
+  }
+  // TODO: Stripe Checkout aufrufen (nächster Schritt)
+  showToast('Abo-Anfrage gesendet! Weiter zur Zahlung …');
+}
+
+
+
+// ============================================================
+//  ABO
+// ============================================================
+function renderAboWeekdays() {
+  [0,1,2,3,4,5,6].forEach(d => document.getElementById("wd"+d).classList.toggle("selected", d===aboWd));
+}
+
+async function setWd(d) {
+  aboWd = d;
+  aboSlot = null;
+  renderAboWeekdays();
+  await loadAboBookings(d);
+  renderAboSlots();
+  updateAboSummary();
+}
+
+function setAboDur(d) {
+  aboDur = d;
+  aboSlot = null;
+  document.getElementById("adur1").classList.toggle("selected", d===1);
+  document.getElementById("adur2").classList.toggle("selected", d===2);
+  renderAboSlots();
+  updateAboSummary();
+}
+
+function renderAboSlots() {
+  [1, 2].forEach(ct => {
+    const c = document.getElementById("aboSlots" + ct);
+    c.innerHTML = "";
+    const priceMap = (aboWd===0||aboWd===6) ? PE : PW;
+    Object.keys(PW).map(Number).forEach(h => {
+      const abKey  = `${aboWd}-${h}`;
+      const abKey2 = `${aboWd}-${h+1}`;
+      const isAboBk = aboBooked[ct].has(abKey) || (aboDur===2 && aboBooked[ct].has(abKey2));
+      const isSel = aboSlot?.court===ct && aboSlot?.hour===h;
+      const isSec = aboSlot?.court===ct && aboSlot?.hour===h-1 && aboDur===2;
+      const p = (priceMap[h] || 0) * aboDur;
+      const h1 = `${String(h).padStart(2,"0")}:00`;
+      const h2 = `${String(h+1).padStart(2,"0")}:00`;
+      const sl = document.createElement("div");
+      if (isAboBk) {
+        sl.className = "slot abo-booked";
+        sl.innerHTML = `<span class="slot-time">${h1}</span><span class="abo-lbl">Abo vergeben</span>`;
+      } else if (isSel) {
+        sl.className = "slot selected";
+        sl.innerHTML = `<span class="slot-time">${h1} – ${h2}</span><span class="slot-price">${p} €/Wo</span>`;
+      } else if (isSec) {
+        sl.className = "slot selected-second";
+        sl.innerHTML = `<span class="slot-time">${h1} – ${h2}</span>`;
+      } else {
+        sl.className = "slot free";
+        sl.innerHTML = `<span class="slot-time">${h1} – ${h2}</span><span class="slot-price">${p} €/Wo</span>`;
+        sl.onclick = () => pickAboSlot(ct, h);
+      }
+      c.appendChild(sl);
+    });
+  });
+}
+
+function pickAboSlot(ct, h) {
+  aboSlot = (aboSlot?.court===ct && aboSlot?.hour===h) ? null : {court:ct, hour:h};
+  renderAboSlots();
+  updateAboSummary();
+}
+
+function updateAboSummary() {
+  const card = document.getElementById("aboSummary");
+  if (!aboSlot || aboWd===null) { card.classList.remove("visible"); return; }
+  const {court:ct, hour:h} = aboSlot;
+  const priceMap = (aboWd===0||aboWd===6) ? PE : PW;
+  const pricePerWeek = (priceMap[h] || 0) * aboDur;
+  const totalReg = pricePerWeek * 52, totalAbo = pricePerWeek * 30, saved = totalReg - totalAbo;
+  document.getElementById("as-court").textContent = `Court #${ct}`;
+  document.getElementById("as-day").textContent   = WDNAMES[aboWd];
+  document.getElementById("as-time").textContent  = `${String(h).padStart(2,"0")}:00 – ${String(h+aboDur).padStart(2,"0")}:00 Uhr`;
+  document.getElementById("as-dur").textContent   = `${aboDur} Stunde${aboDur>1?'n':''}`;
+  document.getElementById("as-reg").textContent   = `Einzelbuchung: 52 × ${fmt(pricePerWeek)} = ${fmt(totalReg)}`;
+  document.getElementById("as-total").textContent = fmt(totalAbo);
+  document.getElementById("as-save").textContent  = `Du sparst ${fmt(saved)}`;
+  document.getElementById("as-perperson").textContent = fmt(Math.round(totalAbo/4));
+  card.classList.add("visible");
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+// ============================================================
+//  ADMIN – Initialisierung & Tab-Steuerung
+// ============================================================
+let adminTabLoaded = { freibad: false, prices: false, internal: false, bookings: false, mis: false, users: false };
+
+function setAdminTab(tab) {
+  document.getElementById('adminFreibad').style.display   = tab==='freibad'  ? 'block' : 'none';
+  document.getElementById('adminPrices').style.display    = tab==='prices'   ? 'block' : 'none';
+  document.getElementById('adminInternal').style.display  = tab==='internal' ? 'block' : 'none';
+  document.getElementById('adminBookings').style.display  = tab==='bookings' ? 'block' : 'none';
+  document.getElementById('adminMis').style.display       = tab==='mis'      ? 'block' : 'none';
+  document.getElementById('adminUsers').style.display     = tab==='users'    ? 'block' : 'none';
+  ['freibad','prices','internal','bookings','mis','users'].forEach(t =>
+    document.getElementById('atab-'+t).classList.toggle('active', t===tab)
+  );
+  if (tab==='freibad'  && !adminTabLoaded.freibad)  { loadAdminFreibad();  adminTabLoaded.freibad=true; }
+  if (tab==='prices'   && !adminTabLoaded.prices)   { loadAdminPrices();   adminTabLoaded.prices=true; }
+  if (tab==='internal' && !adminTabLoaded.internal) { loadInternalBookings(); adminTabLoaded.internal=true; }
+  if (tab==='bookings' && !adminTabLoaded.bookings) { loadAdminBookings(); loadAdminAbos(); loadAdminStats(); adminTabLoaded.bookings=true; }
+  if (tab==='users'    && !adminTabLoaded.users)    { loadAdminUsers();   adminTabLoaded.users=true; }
+}
+
+// Korrekte Anzeige beim ersten Öffnen
+document.getElementById('adminFreibad').style.display   = 'block';
+document.getElementById('adminPrices').style.display    = 'none';
+document.getElementById('adminInternal').style.display  = 'none';
+document.getElementById('adminBookings').style.display  = 'none';
+document.getElementById('adminMis').style.display       = 'none';
+document.getElementById('adminUsers').style.display     = 'none';
+
+async function initAdmin() {
+  if (!adminTabLoaded.freibad) { loadAdminFreibad(); adminTabLoaded.freibad = true; }
+}
+
+// ============================================================
+//  ADMIN – Freibad-Config lesen & anzeigen
+// ============================================================
+async function loadAdminFreibad() {
+  await loadFreibadConfig();
+  const y = new Date().getFullYear();
+  document.getElementById('cfgSeasonStart').value = `${y}-${freibadConfig.season_start_md}`;
+  document.getElementById('cfgSeasonEnd').value   = `${y}-${freibadConfig.season_end_md}`;
+  document.getElementById('cfgOpenH').value  = freibadConfig.open_hour;
+  document.getElementById('cfgCloseH').value = freibadConfig.close_hour;
+  loadClosureList(); // lädt aus bookings + freibad_closures
+  renderExceptionList();
+}
+
+async function saveFreibadConfig() {
+  const startVal = document.getElementById('cfgSeasonStart').value;
+  const endVal   = document.getElementById('cfgSeasonEnd').value;
+  const openH    = parseInt(document.getElementById('cfgOpenH').value);
+  const closeH   = parseInt(document.getElementById('cfgCloseH').value);
+
+  if (!startVal || !endVal || isNaN(openH) || isNaN(closeH)) {
+    showAdminMsg('cfgSeasonErr', 'Bitte alle Felder ausfüllen.'); return;
+  }
+  if (closeH <= openH) {
+    showAdminMsg('cfgSeasonErr', 'Schließzeit muss nach Öffnungszeit liegen.'); return;
+  }
+  const payload = {
+    id: 1,
+    season_start_md: startVal.slice(5),
+    season_end_md:   endVal.slice(5),
+    open_hour:  openH,
+    close_hour: closeH,
+    season_active: true,
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/freibad_config`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    freibadConfig = { ...freibadConfig, ...payload };
+    showAdminMsg('cfgSeasonOk', '✓ Gespeichert');
+  } catch(e) {
+    showAdminMsg('cfgSeasonErr', 'Fehler: ' + e.message);
+  }
+}
+
+// ============================================================
+//  ADMIN – Schließtage
+// ============================================================
+// ============================================================
+//  ADMIN – Anlage gesperrt (schreibt in bookings, nicht freibad_closures)
+// ============================================================
+// Sperrungen in bookings: status=blocked, customer_type=internal, full_name=Grund
+// freibad_closures bleibt nur für Tür-B-Logik (target=freibad)
+
+async function addClosure() {
+  const date    = document.getElementById('newClosureDate').value;
+  const target  = document.getElementById('newClosureTarget').value;
+  const note    = document.getElementById('newClosureNote').value.trim();
+  const useTime = document.getElementById('closureTimeCheck').checked;
+  const fromH   = useTime ? parseInt(document.getElementById('newClosureFrom').value) : 8;
+  const toH     = useTime ? parseInt(document.getElementById('newClosureTo').value)   : 22;
+
+  if (!date) { showAdminMsg('closureErr', 'Bitte Datum wählen.'); return; }
+  if (!note) { showAdminMsg('closureErr', 'Bitte Grund angeben.'); return; }
+  if (isNaN(fromH) || isNaN(toH)) { showAdminMsg('closureErr', 'Bitte Von und Bis Uhrzeit angeben.'); return; }
+  if (toH <= fromH) { showAdminMsg('closureErr', 'Bis-Zeit muss nach Von-Zeit liegen.'); return; }
+
+  const duration = toH - fromH;
+  // Welche Courts sperren?
+  let courts = [];
+  if (target === 'court1') courts = [1];
+  else if (target === 'court2') courts = [2];
+  else if (target === 'both') courts = [1, 2];
+  // target === 'freibad' → nur freibad_closures, keine Court-Sperrung
+
+  try {
+    // 1. Freibad-Türlogik: immer in freibad_closures eintragen (für Tür B)
+    if (target === 'freibad' || target === 'both') {
+      const fcPayload = { date, target, note };
+      if (useTime) { fcPayload.from_hour = fromH; fcPayload.to_hour = toH; }
+      await fetch(`${SUPABASE_URL}/rest/v1/freibad_closures`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(fcPayload),
+      });
+    }
+
+    // 2. Court-Slots in bookings sperren
+    if (courts.length > 0) {
+      const rows = courts.map(c => ({
+        court: c, date, hour_start: fromH, duration,
+        status: 'blocked', customer_type: 'internal',
+        full_name: note,
+        price_cents: 0,
+        recur_group: null, recurring: false,
+      }));
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify(rows),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    // Formular zurücksetzen
+    document.getElementById('newClosureDate').value = '';
+    document.getElementById('newClosureNote').value = '';
+    document.getElementById('newClosureFrom').value = '';
+    document.getElementById('newClosureTo').value   = '';
+    document.getElementById('closureTimeCheck').checked = false;
+    document.getElementById('closureTimeFields').style.display = 'none';
+    showAdminMsg('closureOk', `✓ Gesperrt${courts.length ? ' — Slots blockiert' : ' — nur Freibad-Tür'}`);
+    await loadClosureList();
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+  } catch(e) { showAdminMsg('closureErr', 'Fehler: ' + e.message); }
+}
+
+// Sperrungen laden: kombiniert aus bookings (Courts) und freibad_closures (Freibad)
+let closureBookings = []; // [{id, date, court, hour_start, duration, full_name}]
+
+async function loadClosureList() {
+  const today = todayStr();
+  try {
+    // Court-Sperrungen aus bookings
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?select=id,date,court,hour_start,duration,full_name&customer_type=eq.internal&status=eq.blocked&recur_group=is.null&recurring=eq.false&date=gte.${today}&order=date.asc,hour_start.asc&limit=200`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    closureBookings = res.ok ? await res.json() : [];
+  } catch(e) { closureBookings = []; }
+
+  try {
+    // Freibad-Closures (Tür B)
+    const res2 = await fetch(
+      `${SUPABASE_URL}/rest/v1/freibad_closures?select=*&order=date.asc`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    freibadClosures = res2.ok ? await res2.json() : [];
+  } catch(e) { freibadClosures = []; }
+
+  renderClosureList();
+}
+
+function renderClosureList() {
+  const el = document.getElementById('closureList');
+  const allEmpty = closureBookings.length === 0 && freibadClosures.length === 0;
+  if (allEmpty) {
+    el.innerHTML = '<div style="color:#555;font-size:0.78rem;padding:8px 0;">Keine Sperrungen eingetragen</div>';
+    return;
+  }
+
+  let html = '';
+
+  // Court-Sperrungen aus bookings (gruppiert nach Datum+Grund, falls gleich)
+  // Zeige je einen Eintrag pro bookings-Zeile
+  if (closureBookings.length > 0) {
+    html += `<div style="font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin:8px 0 4px;">🎾 Court-Sperrungen</div>`;
+    // Gruppiere nach date+full_name+hour_start (same-target entries)
+    const grouped = {};
+    for (const b of closureBookings) {
+      const key = `${b.date}|${b.hour_start}|${b.duration}|${b.full_name}`;
+      if (!grouped[key]) grouped[key] = { ...b, courts: [] };
+      grouped[key].courts.push(b.court);
+      // keep all ids
+      if (!grouped[key].ids) grouped[key].ids = [];
+      grouped[key].ids.push(b.id);
+    }
+    for (const g of Object.values(grouped)) {
+      const timeStr = `${String(g.hour_start).padStart(2,'0')}:00 – ${String(g.hour_start+g.duration).padStart(2,'0')}:00 Uhr`;
+      const courtStr = g.courts.map(c=>`Court #${c}`).join(' + ');
+      const idsStr = g.ids.join(',');
+      html += `
+      <div class="closure-item">
+        <div style="flex:1;">
+          <div class="closure-item-date">${formatDateDE(g.date)} · ${timeStr} &nbsp;<span style="color:#888;font-size:0.72rem;">🎾 ${courtStr}</span></div>
+          <div class="closure-item-note">${g.full_name || ''}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="admin-save-btn" style="height:28px;font-size:0.65rem;padding:0 10px;" onclick="openClosureEdit('${idsStr}','${(g.full_name||'').replace(/'/g,"\\'")}',${g.hour_start},${g.hour_start+g.duration})">✏ Bearbeiten</button>
+          <button class="closure-remove" onclick="removeClosure(null,'${idsStr}')" title="Entfernen">✕</button>
+        </div>
+      </div>`;
+    }
+  }
+
+  // Freibad-Closures (Tür B)
+  if (freibadClosures.length > 0) {
+    html += `<div style="font-size:0.7rem;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin:12px 0 4px;">🏊 Freibad / Tür B</div>`;
+    for (const c of freibadClosures) {
+      const timeStr = (c.from_hour != null && c.to_hour != null)
+        ? ` · ${String(c.from_hour).padStart(2,'0')}:00–${String(c.to_hour).padStart(2,'0')}:00 Uhr`
+        : ' · Ganzer Tag';
+      html += `
+      <div class="closure-item">
+        <div style="flex:1;">
+          <div class="closure-item-date">${formatDateDE(c.date)}${timeStr}</div>
+          <div class="closure-item-note">${c.note || ''}</div>
+        </div>
+        <button class="closure-remove" onclick="removeClosure('${c.date}',null)" title="Entfernen">✕</button>
+      </div>`;
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+async function removeClosure(fcDate, bookingIds) {
+  if (!confirm('Sperrung wirklich löschen?')) return;
+  try {
+    if (bookingIds) {
+      // Court-Sperrungen aus bookings löschen
+      const ids = bookingIds.split(',');
+      for (const id of ids) {
+        await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+        });
+      }
+    }
+    if (fcDate) {
+      // freibad_closures löschen
+      await fetch(`${SUPABASE_URL}/rest/v1/freibad_closures?date=eq.${fcDate}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+      });
+    }
+    await loadClosureList();
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+    showToast('✓ Sperrung gelöscht');
+  } catch(e) { showToast('Fehler beim Löschen: ' + e.message); }
+}
+
+function openClosureEdit(idsStr, note, fromH, toH) {
+  document.getElementById('editClosureIds').value  = idsStr;
+  document.getElementById('editClosureNote').value = note;
+  document.getElementById('editClosureFrom').value = fromH;
+  document.getElementById('editClosureTo').value   = toH;
+  document.getElementById('closureEditOverlay').style.display = 'flex';
+}
+
+function closeClosureEdit() {
+  document.getElementById('closureEditOverlay').style.display = 'none';
+}
+
+async function saveClosureEdit() {
+  const idsStr = document.getElementById('editClosureIds').value;
+  const note   = document.getElementById('editClosureNote').value.trim();
+  const fromH  = parseInt(document.getElementById('editClosureFrom').value);
+  const toH    = parseInt(document.getElementById('editClosureTo').value);
+
+  if (!note) { showAdminMsg('editClosureErr', 'Bitte Grund angeben.'); return; }
+  if (isNaN(fromH) || isNaN(toH) || toH <= fromH) { showAdminMsg('editClosureErr', 'Ungültige Zeiten.'); return; }
+
+  const duration = toH - fromH;
+  const ids = idsStr.split(',');
+  try {
+    for (const id of ids) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ full_name: note, hour_start: fromH, duration }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+    showAdminMsg('editClosureOk', '✓ Gespeichert');
+    await loadClosureList();
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+    setTimeout(closeClosureEdit, 1200);
+  } catch(e) { showAdminMsg('editClosureErr', 'Fehler: ' + e.message); }
+}
+
+// ============================================================
+//  ADMIN – Datumsausnahmen (abweichende Öffnungszeiten)
+// ============================================================
+async function addException(type) {
+  const dateId  = type === 'freibad' ? 'excDateFB' : 'excDatePD';
+  const openId  = type === 'freibad' ? 'excOpenFB' : 'excOpenPD';
+  const closeId = type === 'freibad' ? 'excCloseFB': 'excClosePD';
+  const date  = document.getElementById(dateId).value;
+  const openH  = parseInt(document.getElementById(openId).value);
+  const closeH = parseInt(document.getElementById(closeId).value);
+  if (!date || isNaN(openH) || isNaN(closeH)) { showAdminMsg('excErr', 'Bitte alle Felder ausfüllen.'); return; }
+  if (closeH <= openH) { showAdminMsg('excErr', 'Schließzeit muss nach Öffnungszeit liegen.'); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/freibad_exceptions`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify({ date, type, open_hour: openH, close_hour: closeH }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    freibadExceptions = freibadExceptions.filter(e => !(e.date === date && e.type === type));
+    freibadExceptions.push({ date, type, open_hour: openH, close_hour: closeH });
+    freibadExceptions.sort((a,b) => a.date.localeCompare(b.date));
+    document.getElementById(dateId).value  = '';
+    document.getElementById(openId).value  = '';
+    document.getElementById(closeId).value = '';
+    showAdminMsg('excOk', '✓ Ausnahme gespeichert');
+    renderExceptionList();
+  } catch(e) { showAdminMsg('excErr', 'Fehler: ' + e.message); }
+}
+
+async function removeException(date, type) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/freibad_exceptions?date=eq.${date}&type=eq.${type}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+    });
+    freibadExceptions = freibadExceptions.filter(e => !(e.date === date && e.type === type));
+    renderExceptionList();
+  } catch(e) { showToast('Fehler beim Löschen'); }
+}
+
+function renderExceptionList() {
+  const el = document.getElementById('excList');
+  if (freibadExceptions.length === 0) {
+    el.innerHTML = '<div style="color:#555;font-size:0.78rem;padding:8px 0;">Keine Ausnahmen eingetragen</div>';
+    return;
+  }
+  el.innerHTML = freibadExceptions.map(e => `
+    <div class="closure-item">
+      <div>
+        <div class="closure-item-date">${formatDateDE(e.date)} &nbsp;<span style="color:#888;font-size:0.72rem;">${e.type==='freibad'?'🏊 Freibad':'🎾 Padel'}</span></div>
+        <div class="closure-item-note">${e.open_hour}:00 – ${e.close_hour}:00 Uhr</div>
+      </div>
+      <button class="closure-remove" onclick="removeException('${e.date}','${e.type}')" title="Entfernen">✕</button>
+    </div>`).join('');
+}
+
+// ============================================================
+//  ADMIN – Buchungsübersicht
+// ============================================================
+async function loadAdminStats() {
+  const today = todayStr();
+  try {
+    const [bRes, aRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/bookings?select=price_cents&status=eq.paid&date=gte.${today}`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }),
+      fetch(`${SUPABASE_URL}/rest/v1/subscriptions?select=price_total_cents&status=eq.active`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }),
+    ]);
+    const bookings = bRes.ok ? await bRes.json() : [];
+    const abos     = aRes.ok ? await aRes.json() : [];
+    const revenue  = bookings.reduce((s,b) => s + (b.price_cents||0), 0)
+                   + abos.reduce((s,a) => s + (a.price_total_cents||0), 0);
+    document.getElementById('statBookings').textContent = bookings.length;
+    document.getElementById('statRevenue').textContent  = (revenue/100).toLocaleString('de-DE');
+    document.getElementById('statAbos').textContent     = abos.length;
+  } catch(e) { console.warn('Stats Fehler:', e); }
+}
+
+async function loadAdminBookings() {
+  const today = todayStr();
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?select=*&status=eq.paid&date=gte.${today}&order=date.asc,hour_start.asc&limit=200`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+    const tbody = document.getElementById('bookingsTbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center;padding:24px;">Keine kommenden Buchungen</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(b => `
+      <tr>
+        <td>${formatDateDE(b.date)}</td>
+        <td>${String(b.hour_start).padStart(2,'0')}:00 – ${String(b.hour_start+b.duration).padStart(2,'0')}:00</td>
+        <td>Court #${b.court}</td>
+        <td style="color:#e0e0e0;">${b.full_name || '—'}</td>
+        <td style="color:var(--gold);">${b.price_cents ? (b.price_cents/100).toFixed(2)+' €' : '—'}</td>
+      </tr>`).join('');
+  } catch(e) { console.warn('Buchungen Admin Fehler:', e); }
+}
+
+async function loadAdminAbos() {
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/subscriptions?select=*&status=eq.active&order=created_at.desc`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+    const wdNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    const tbody = document.getElementById('abosTbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:#555;text-align:center;padding:24px;">Keine aktiven Abos</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td style="color:#e0e0e0;">${a.full_name || '—'}</td>
+        <td>Court #${a.court}</td>
+        <td>${wdNames[a.weekday] || '—'}</td>
+        <td>${String(a.hour_start).padStart(2,'0')}:00 – ${String(a.hour_start+a.duration).padStart(2,'0')}:00</td>
+        <td style="color:var(--gold);">${a.price_per_week_cents ? (a.price_per_week_cents/100).toFixed(2)+' €' : '—'}</td>
+        <td>${a.ends_on ? formatDateDE(a.ends_on) : '—'}</td>
+      </tr>`).join('');
+  } catch(e) { console.warn('Abos Admin Fehler:', e); }
+}
+
+// ============================================================
+//  ADMIN – Nutzerverwaltung
+// ============================================================
+async function createUserByAdmin() {
+  const name       = document.getElementById('newUserName').value.trim();
+  const email      = document.getElementById('newUserEmail').value.trim();
+  const type       = document.getElementById('newUserType').value;
+  const memberNum  = document.getElementById('newUserMember').value.trim().toUpperCase() || null;
+  const birthYear  = parseInt(document.getElementById('newUserYear').value) || null;
+
+  if (!name)  { showAdminMsg('newUserErr', 'Bitte Name eingeben.'); return; }
+  if (!email) { showAdminMsg('newUserErr', 'Bitte E-Mail eingeben.'); return; }
+
+  try {
+    // Supabase Auth: Einladungs-E-Mail senden (Magic Link / Invite)
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/invite`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    const authData = res.ok ? await res.json() : null;
+
+    // users-Tabelle direkt befüllen
+    await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify({
+        auth_id:       authData?.id || null,
+        email,
+        full_name:     name,
+        customer_type: type,
+        member_number: type === 'member' ? memberNum : null,
+        discount_pct:  type === 'member' ? 0.10 : 0,
+        birth_year:    birthYear,
+      }),
+    });
+
+    showAdminMsg('newUserOk', `✓ ${name} angelegt – Einladungs-E-Mail an ${email} gesendet`);
+    document.getElementById('newUserName').value   = '';
+    document.getElementById('newUserEmail').value  = '';
+    document.getElementById('newUserMember').value = '';
+    document.getElementById('newUserYear').value   = '';
+    adminTabLoaded.users = false;
+    loadAdminUsers();
+  } catch(e) { showAdminMsg('newUserErr', 'Fehler: ' + e.message); }
+}
+
+async function loadAdminUsers() {
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?select=*&order=created_at.desc&limit=500`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+    const tbody = document.getElementById('usersTbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:#555;text-align:center;padding:24px;">Keine Nutzer gefunden</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td style="color:#e0e0e0;">${u.full_name || '—'}</td>
+        <td style="color:#888;">${u.email || '—'}</td>
+        <td><span class="admin-badge ${u.customer_type || 'account'}">${u.customer_type || 'account'}</span></td>
+        <td style="color:#888;">${u.member_number || '—'}</td>
+        <td>${u.birth_year || '—'}</td>
+        <td style="color:#555;">${u.created_at ? formatDateDE(u.created_at.slice(0,10)) : '—'}</td>
+      </tr>`).join('');
+  } catch(e) { console.warn('Users Admin Fehler:', e); }
+}
+
+// ============================================================
+//  ADMIN – Preise
+// ============================================================
+const HOURS = [8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+
+async function loadAdminPrices() {
+  // Mitgliederrabatt aus users-Tabelle (discount_pct vom Typ 'member')
+  // Wir nutzen einen eigenen config-Eintrag — Fallback auf 10%
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/prices?select=hour,day_type,price_cents&order=day_type,hour`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+
+    // Preise in Maps aufbauen
+    const dbPW = {}, dbPE = {};
+    for (const r of data) {
+      if (r.day_type === 'weekday') dbPW[r.hour] = r.price_cents / 100;
+      else                          dbPE[r.hour] = r.price_cents / 100;
+    }
+
+    renderPriceGrid('priceGridWeekday', 'weekday', dbPW);
+    renderPriceGrid('priceGridWeekend', 'weekend',  dbPE);
+  } catch(e) {
+    renderPriceGrid('priceGridWeekday', 'weekday', {});
+    renderPriceGrid('priceGridWeekend', 'weekend',  {});
+  }
+
+  // Mitgliederrabatt laden
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_config?key=eq.member_discount&select=value&limit=1`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+    if (data.length > 0) {
+      document.getElementById('priceDiscount').value = parseFloat(data[0].value) * 100;
+    }
+  } catch(e) { /* Fallback 10% bleibt */ }
+}
+
+function renderPriceGrid(containerId, dayType, prices) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = HOURS.map(h => {
+    const val = prices[h] ?? PW_FB[h] ?? 0;
+    return `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:0.78rem;color:#888;min-width:52px;">${String(h).padStart(2,'0')}:00</span>
+        <input class="admin-input" type="number" min="0" step="0.50"
+          id="price_${dayType}_${h}" value="${val}"
+          style="max-width:80px;padding:5px 8px;font-size:0.88rem;">
+        <span style="font-size:0.75rem;color:#555;">€ / Std.</span>
+      </div>`;
+  }).join('');
+}
+
+async function savePrices() {
+  const rows = [];
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const dayType of ['weekday','weekend']) {
+    for (const h of HOURS) {
+      const val = parseFloat(document.getElementById(`price_${dayType}_${h}`)?.value);
+      if (isNaN(val) || val < 0) { showAdminMsg('pricesErr', `Ungültiger Preis für ${h}:00 Uhr`); return; }
+      rows.push({ hour: h, day_type: dayType, price_cents: Math.round(val * 100), valid_from: today });
+    }
+  }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/prices`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(rows),
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    // Lokale Preise sofort aktualisieren
+    for (const r of rows) {
+      if (r.day_type === 'weekday') PW[r.hour] = r.price_cents / 100;
+      else                          PE[r.hour] = r.price_cents / 100;
+    }
+    updDurPrices();
+    renderSlots();
+    showAdminMsg('pricesOk', '✓ Preise gespeichert — sofort live');
+  } catch(e) {
+    showAdminMsg('pricesErr', 'Fehler: ' + e.message);
+  }
+}
+
+async function saveDiscount() {
+  const pct = parseFloat(document.getElementById('priceDiscount').value);
+  if (isNaN(pct) || pct < 0 || pct > 50) {
+    showAdminMsg('discountErr', 'Bitte Wert zwischen 0 und 50 eingeben.'); return;
+  }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify({ key: 'member_discount', value: String(pct / 100) }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    // Lokalen member-Rabatt aktualisieren falls eingeloggt
+    if (member) { member.discount = pct / 100; updDurPrices(); renderSlots(); }
+    showAdminMsg('discountOk', `✓ Mitgliederrabatt auf ${pct} % gesetzt`);
+  } catch(e) {
+    showAdminMsg('discountErr', 'Fehler: ' + e.message);
+  }
+}
+
+// ============================================================
+//  ADMIN – Interne Buchungen / Blockierungen
+// ============================================================
+let intType = 'once';
+
+function setIntType(t) {
+  intType = t;
+  document.getElementById('intTypeOnce').classList.toggle('active', t==='once');
+  document.getElementById('intTypeRecurring').classList.toggle('active', t==='recurring');
+  document.getElementById('intRecurringOpts').style.display = t==='recurring' ? 'block' : 'none';
+}
+
+async function saveInternalBooking() {
+  const date    = document.getElementById('intDate').value;
+  const court   = document.getElementById('intCourt').value;
+  const from    = parseInt(document.getElementById('intFrom').value);
+  const to      = parseInt(document.getElementById('intTo').value);
+  const reason  = document.getElementById('intReason').value.trim();
+  const pricePerH = parseFloat(document.getElementById('intPrice').value) || 0;
+
+  if (!date || isNaN(from) || isNaN(to) || !reason) {
+    showAdminMsg('intErr', 'Bitte alle Felder ausfüllen.'); return;
+  }
+  if (to <= from) { showAdminMsg('intErr', 'Endzeit muss nach Startzeit liegen.'); return; }
+
+  const duration = to - from;
+  const courts   = court === '0' ? [1, 2] : [parseInt(court)];
+  const recurUntil = intType === 'recurring' ? document.getElementById('intRecurUntil').value : null;
+
+  // Alle zu buchenden Daten ermitteln (immer wöchentlich)
+  const dates = [date];
+  if (intType === 'recurring' && recurUntil) {
+    let cur = new Date(date + 'T12:00:00');
+    const end = new Date(recurUntil + 'T12:00:00');
+    cur.setDate(cur.getDate() + 7);
+    while (cur <= end) {
+      dates.push(cur.toISOString().slice(0,10));
+      cur.setDate(cur.getDate() + 7);
+    }
+  }
+
+  try {
+    const rows = [];
+    for (const d of dates) {
+      for (const c of courts) {
+        rows.push({
+          court: c, date: d, hour_start: from, duration,
+          status: 'blocked',
+          price_cents: Math.round(pricePerH * duration * 100),
+          full_name: reason,
+          customer_type: 'internal',
+          recurring: intType === 'recurring',
+          recur_group: intType === 'recurring' ? `${date}_${court}_${from}` : null,
+        });
+      }
+    }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(rows),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const msg = intType === 'recurring'
+      ? `✓ ${rows.length} Blockierungen gespeichert (${dates.length} Termine)`
+      : `✓ Blockierung gespeichert`;
+    showAdminMsg('intOk', msg);
+    document.getElementById('intDate').value   = '';
+    document.getElementById('intFrom').value   = '';
+    document.getElementById('intTo').value     = '';
+    document.getElementById('intReason').value = '';
+    adminTabLoaded.internal = false;
+    await loadInternalBookings();
+    // Slot-Anzeige aktualisieren
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+  } catch(e) { showAdminMsg('intErr', 'Fehler: ' + e.message); }
+}
+
+async function loadInternalBookings() {
+  const today = todayStr();
+  const WDNAMES = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?select=id,date,hour_start,duration,court,full_name,price_cents,recur_group,recurring&customer_type=eq.internal&status=in.(blocked)&date=gte.${today}&order=date.asc,hour_start.asc&limit=500`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = res.ok ? await res.json() : [];
+    const tbody = document.getElementById('internalTbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:#555;text-align:center;padding:24px;">Keine internen Blockierungen</td></tr>';
+      return;
+    }
+
+    // Gruppieren: wiederkehrende nach recur_group, Einzeltermine einzeln
+    const seen = new Set();
+    const rows = [];
+    for (const b of data) {
+      if (b.recur_group) {
+        if (seen.has(b.recur_group)) continue;
+        seen.add(b.recur_group);
+        const group = data.filter(x => x.recur_group === b.recur_group);
+        const lastDate = group[group.length - 1].date;
+        const wd = new Date(b.date + 'T12:00:00').getDay();
+        rows.push({ ...b, isRecurring: true, lastDate, wd });
+      } else {
+        const wd = new Date(b.date + 'T12:00:00').getDay();
+        rows.push({ ...b, isRecurring: false, wd });
+      }
+    }
+
+    tbody.innerHTML = rows.map(b => {
+      const pricePerH = b.duration > 0 ? (b.price_cents / 100) / b.duration : 0;
+      const safeReason = (b.full_name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      return `
+      <tr>
+        <td>${b.isRecurring ? WDNAMES[b.wd] : formatDateDE(b.date)}</td>
+        <td>${String(b.hour_start).padStart(2,'0')}:00 – ${String(b.hour_start+b.duration).padStart(2,'0')}:00</td>
+        <td>Court #${b.court}</td>
+        <td style="color:#e0e0e0;">${b.full_name || '—'}</td>
+        <td style="color:${b.price_cents>0?'var(--gold)':'#555'};">${b.price_cents>0?(b.price_cents/100).toFixed(2)+' €':'0 €'}</td>
+        <td style="color:#888;">${b.isRecurring ? formatDateDE(b.lastDate) : '<span style="color:#555;">Einzeltermin</span>'}</td>
+        <td style="display:flex;gap:5px;">
+          <button class="admin-save-btn" style="height:26px;font-size:0.63rem;padding:0 7px;" onclick="openIntEdit(${b.id},'${b.recur_group||''}','${safeReason}',${b.hour_start},${b.hour_start+b.duration},${pricePerH},${b.isRecurring})">✏</button>
+          <button class="admin-save-btn danger" style="height:26px;font-size:0.63rem;padding:0 7px;" onclick="deleteInternalBooking(${b.id},'${(b.recur_group||'').replace(/'/g,'')}')">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.warn('Interne Buchungen Fehler:', e); }
+}
+
+function openIntEdit(id, recurGroup, reason, fromH, toH, pricePerH, isRecurring) {
+  document.getElementById('editIntId').value         = id;
+  document.getElementById('editIntRecurGroup').value = recurGroup || '';
+  document.getElementById('editIntReason').value     = reason;
+  document.getElementById('editIntFrom').value       = fromH;
+  document.getElementById('editIntTo').value         = toH;
+  document.getElementById('editIntPrice').value      = pricePerH;
+  document.getElementById('editIntRecurNote').style.display = isRecurring ? 'block' : 'none';
+  document.getElementById('intEditOverlay').style.display = 'flex';
+}
+
+function closeIntEdit() {
+  document.getElementById('intEditOverlay').style.display = 'none';
+}
+
+async function saveIntEdit() {
+  const id         = parseInt(document.getElementById('editIntId').value);
+  const recurGroup = document.getElementById('editIntRecurGroup').value;
+  const reason     = document.getElementById('editIntReason').value.trim();
+  const fromH      = parseInt(document.getElementById('editIntFrom').value);
+  const toH        = parseInt(document.getElementById('editIntTo').value);
+  const pricePerH  = parseFloat(document.getElementById('editIntPrice').value) || 0;
+
+  if (!reason) { showAdminMsg('editIntErr', 'Bitte Grund angeben.'); return; }
+  if (isNaN(fromH) || isNaN(toH) || toH <= fromH) { showAdminMsg('editIntErr', 'Ungültige Zeiten.'); return; }
+
+  const duration = toH - fromH;
+
+  try {
+    const patch = {
+      full_name: reason,
+      hour_start: fromH,
+      duration,
+      price_cents: Math.round(pricePerH * duration * 100),
+    };
+
+    if (recurGroup) {
+      // Alle zukünftigen Einträge der Reihe aktualisieren
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?recur_group=eq.${recurGroup}&customer_type=eq.internal&date=gte.${todayStr()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify(patch),
+        }
+      );
+      if (!res.ok) throw new Error(await res.text());
+    } else {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    showAdminMsg('editIntOk', '✓ Gespeichert');
+    adminTabLoaded.internal = false;
+    await loadInternalBookings();
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+    setTimeout(closeIntEdit, 1200);
+  } catch(e) { showAdminMsg('editIntErr', 'Fehler: ' + e.message); }
+}
+
+async function deleteInternalBooking(id, recurGroup) {
+  const deleteAll = recurGroup && confirm('Alle Termine dieser Buchungsreihe löschen?');
+  try {
+    let url = deleteAll
+      ? `${SUPABASE_URL}/rest/v1/bookings?recur_group=eq.${recurGroup}&customer_type=eq.internal`
+      : `${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`;
+    await fetch(url, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+    });
+    loadInternalBookings();
+    if (selDate) { await loadBookings(selDate); renderSlots(); }
+  } catch(e) { showToast('Fehler beim Löschen'); }
+}
+
+// ============================================================
+//  ADMIN – Hilfsfunktionen
+// ============================================================
+function showAdminMsg(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function formatDateDE(dateStr) {
+  if (!dateStr) return '—';
+  const [y,m,d] = dateStr.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+init();
+</script>
 </body>
 </html>
