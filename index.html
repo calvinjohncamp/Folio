@@ -741,32 +741,6 @@ main { max-width: 960px; margin: 0 auto; padding: 2px 16px 80px; }
         </div>
       </div>
 
-      <!-- Edit-Modal für Closure -->
-      <div id="closureEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
-        <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
-          <button onclick="closeClosureEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
-          <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Sperrung bearbeiten</div>
-          <input type="hidden" id="editClosureIds">
-          <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-            <span class="admin-label">Grund</span>
-            <input class="admin-input" type="text" id="editClosureNote" style="flex:1;min-width:160px;">
-          </div>
-          <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-            <span class="admin-label">Von Uhr</span>
-            <input class="admin-input" type="number" id="editClosureFrom" min="8" max="21" style="max-width:80px;">
-            <span class="admin-label">Bis Uhr</span>
-            <input class="admin-input" type="number" id="editClosureTo" min="9" max="22" style="max-width:80px;">
-          </div>
-          <div style="font-size:0.72rem;color:#666;margin-bottom:16px;">Datum und Court können nicht geändert werden — bitte löschen und neu anlegen.</div>
-          <div class="admin-ok"  id="editClosureOk"></div>
-          <div class="admin-err" id="editClosureErr"></div>
-          <div style="display:flex;gap:10px;">
-            <button class="admin-save-btn gold" style="flex:1;" onclick="saveClosureEdit()">Änderung speichern</button>
-            <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeClosureEdit()">Abbrechen</button>
-          </div>
-        </div>
-      </div>
-
     </div><!-- /adminFreibad -->
 
     <!-- ── PREISE ── -->
@@ -884,36 +858,7 @@ main { max-width: 960px; margin: 0 auto; padding: 2px 16px 80px; }
         </div>
       </div>
 
-      <!-- Edit-Modal für interne Buchungen -->
-      <div id="intEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
-        <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
-          <button onclick="closeIntEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
-          <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Blockierung bearbeiten</div>
-          <input type="hidden" id="editIntId">
-          <input type="hidden" id="editIntRecurGroup">
-          <div class="admin-row" style="margin-bottom:12px;">
-            <span class="admin-label">Grund</span>
-            <input class="admin-input" type="text" id="editIntReason" style="flex:1;">
-          </div>
-          <div class="admin-row" style="margin-bottom:12px;">
-            <span class="admin-label">Von Uhr</span>
-            <input class="admin-input" type="number" id="editIntFrom" min="8" max="21" style="max-width:80px;">
-            <span class="admin-label">Bis Uhr</span>
-            <input class="admin-input" type="number" id="editIntTo" min="9" max="22" style="max-width:80px;">
-          </div>
-          <div class="admin-row" style="margin-bottom:12px;">
-            <span class="admin-label">Preis</span>
-            <input class="admin-input" type="number" id="editIntPrice" min="0" step="0.5" style="max-width:90px;"> €/Std.
-          </div>
-          <div id="editIntRecurNote" style="display:none;font-size:0.72rem;color:#888;margin-bottom:12px;">Diese Buchung ist Teil einer Reihe. Änderungen gelten für alle zukünftigen Termine.</div>
-          <div class="admin-ok"  id="editIntOk"></div>
-          <div class="admin-err" id="editIntErr"></div>
-          <div style="display:flex;gap:10px;">
-            <button class="admin-save-btn gold" style="flex:1;" onclick="saveIntEdit()">Änderung speichern</button>
-            <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeIntEdit()">Abbrechen</button>
-          </div>
-        </div>
-      </div>
+    </div><!-- /adminInternal -->
 
     <!-- ── BUCHUNGSÜBERSICHT ── -->
     <div id="adminBookings" style="display:none;">
@@ -1011,6 +956,62 @@ main { max-width: 960px; margin: 0 auto; padding: 2px 16px 80px; }
     </div><!-- /adminUsers -->
 
   </div><!-- /modeAdmin -->
+
+  <!-- ■■ EDIT-MODALS (außerhalb aller Sektionen, position:fixed) ■■ -->
+  <div id="closureEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
+      <button onclick="closeClosureEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
+      <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Sperrung bearbeiten</div>
+      <input type="hidden" id="editClosureIds">
+      <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <span class="admin-label">Grund</span>
+        <input class="admin-input" type="text" id="editClosureNote" style="flex:1;min-width:160px;">
+      </div>
+      <div class="admin-row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <span class="admin-label">Von Uhr</span>
+        <input class="admin-input" type="number" id="editClosureFrom" min="8" max="21" style="max-width:80px;">
+        <span class="admin-label">Bis Uhr</span>
+        <input class="admin-input" type="number" id="editClosureTo" min="9" max="22" style="max-width:80px;">
+      </div>
+      <div style="font-size:0.72rem;color:#666;margin-bottom:16px;">Datum und Court können nicht geändert werden — bitte löschen und neu anlegen.</div>
+      <div class="admin-ok"  id="editClosureOk"></div>
+      <div class="admin-err" id="editClosureErr"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="admin-save-btn gold" style="flex:1;" onclick="saveClosureEdit()">Änderung speichern</button>
+        <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeClosureEdit()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="intEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:28px 24px;width:100%;max-width:480px;position:relative;">
+      <button onclick="closeIntEdit()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;">✕</button>
+      <div style="font-family:'Arial Narrow','Impact',sans-serif;font-weight:900;font-size:1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Blockierung bearbeiten</div>
+      <input type="hidden" id="editIntId">
+      <input type="hidden" id="editIntRecurGroup">
+      <div class="admin-row" style="margin-bottom:12px;">
+        <span class="admin-label">Grund</span>
+        <input class="admin-input" type="text" id="editIntReason" style="flex:1;">
+      </div>
+      <div class="admin-row" style="margin-bottom:12px;">
+        <span class="admin-label">Von Uhr</span>
+        <input class="admin-input" type="number" id="editIntFrom" min="8" max="21" style="max-width:80px;">
+        <span class="admin-label">Bis Uhr</span>
+        <input class="admin-input" type="number" id="editIntTo" min="9" max="22" style="max-width:80px;">
+      </div>
+      <div class="admin-row" style="margin-bottom:12px;">
+        <span class="admin-label">Preis</span>
+        <input class="admin-input" type="number" id="editIntPrice" min="0" step="0.5" style="max-width:90px;"> €/Std.
+      </div>
+      <div id="editIntRecurNote" style="display:none;font-size:0.72rem;color:#888;margin-bottom:12px;">Diese Buchung ist Teil einer Reihe. Änderungen gelten für alle zukünftigen Termine.</div>
+      <div class="admin-ok"  id="editIntOk"></div>
+      <div class="admin-err" id="editIntErr"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="admin-save-btn gold" style="flex:1;" onclick="saveIntEdit()">Änderung speichern</button>
+        <button class="admin-save-btn" style="flex:1;background:#1a1a1a;border:1px solid #444;color:#aaa;" onclick="closeIntEdit()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="site-footer-left">
