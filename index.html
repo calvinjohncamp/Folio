@@ -632,7 +632,7 @@ main { max-width: 960px; margin: 0 auto; padding: 2px 16px 80px; }
     </div>
 
     <!-- ── FREIBAD & ANLAGE ── -->
-    <div id="adminFreibad">
+    <div id="adminFreibad" style="display:none;">
 
       <!-- Saison -->
       <div class="admin-section">
@@ -2209,16 +2209,10 @@ function setAdminTab(tab) {
   if (tab==='users'    && !adminTabLoaded.users)    { loadAdminUsers();   adminTabLoaded.users=true; }
 }
 
-// Korrekte Anzeige beim ersten Öffnen
-document.getElementById('adminFreibad').style.display   = 'block';
-document.getElementById('adminPrices').style.display    = 'none';
-document.getElementById('adminInternal').style.display  = 'none';
-document.getElementById('adminBookings').style.display  = 'none';
-document.getElementById('adminMis').style.display       = 'none';
-document.getElementById('adminUsers').style.display     = 'none';
+// Alle Admin-Tabs beim Seitenload versteckt lassen — werden erst bei setMode('admin') eingeblendet
 
 async function initAdmin() {
-  if (!adminTabLoaded.freibad) { loadAdminFreibad(); adminTabLoaded.freibad = true; }
+  setAdminTab('freibad');
 }
 
 // ============================================================
