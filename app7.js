@@ -676,7 +676,7 @@ function newDoc(){
 // ── Save / Load ───────────────────────────────────────────────────
 function getState(){
   const raw = isA4Mode ? savedEndlessHTML : (pagesEl.querySelector('.pg-ed') ? pagesEl.querySelector('.pg-ed').innerHTML : '');
-  const content = flattenHTML(raw);
+  const content = flattenHTML(raw, !isNormalDoc);
   return { title:dtEl.value, content, font:curFont, size:curSize, lh:curLH, isNormalDoc, savedAt:new Date().toISOString() };
 }
 function showSaved(msg){
@@ -791,7 +791,7 @@ window.addEventListener('afterprint', function(){
 
 // ── Open file ─────────────────────────────────────────────────────
 // ── Verschachtelte Divs aufflachen ───────────────────────────────
-function flattenHTML(html){
+function flattenHTML(html, allowDoubleBlanks){
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const result = [];
@@ -805,9 +805,12 @@ function flattenHTML(html){
     const tag = node.tagName.toLowerCase();
     if(tag === 'br'){ result.push('<div><br></div>'); return; }
 
-    // Brief-Header und Spacer-Divs (height-only) immer unverändert lassen
-    if(node.hasAttribute && (node.hasAttribute('data-brief-header') ||
-       (node.style && node.style.height && !node.textContent.trim() && !node.querySelector('img')))){
+    // Brief-Header, Spacer-Divs und Flex-Container (Betreff+Datum) immer unverändert lassen
+    if(node.hasAttribute && (
+       node.hasAttribute('data-brief-header') ||
+       (node.style && node.style.height && !node.textContent.trim() && !node.querySelector('img')) ||
+       (node.style && node.style.display === 'flex')
+    )){
       result.push(node.outerHTML);
       return;
     }
@@ -829,7 +832,8 @@ function flattenHTML(html){
     }
   }
   Array.from(tmp.childNodes).forEach(walk);
-  const deduped = result.filter((r,i) =>
+  // Nur bei normalen Docs doppelte Leerzeilen entfernen — bei Briefen bleiben sie erhalten
+  const deduped = allowDoubleBlanks ? result : result.filter((r,i) =>
     !(r === '<div><br></div>' && result[i-1] === '<div><br></div>')
   );
   return deduped.join('') || '<div><br></div>';
@@ -850,7 +854,7 @@ function loadFile(input){
     pagesEl.innerHTML = '';
     const pg = buildEndlessPage();
     pagesEl.appendChild(pg);
-    pg.querySelector('.pg-ed').innerHTML = flattenHTML(html);
+    pg.querySelector('.pg-ed').innerHTML = flattenHTML(html, !normalDoc);
     document.getElementById('pgc').textContent = '—';
     stats(); saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
   }
