@@ -567,7 +567,7 @@ const TEMPLATES = [
 <div style="font-size:12pt;line-height:1.5">[Straße]</div>
 <div style="font-size:12pt;line-height:1.5">[PLZ Ort]</div>
 <div style="height:70px"></div>
-<div style="display:flex;align-items:baseline;margin-bottom:8px;font-size:12pt;line-height:1.5"><span class="betreff-line" style="flex:1">[Betreff]</span><span style="width:33%;text-align:left;flex-shrink:0;padding-left:3px">${today}</span></div>
+<div class="betreff-datum"><span class="betreff-line">[Betreff]</span><span class="datum-span">${today}</span></div>
 <div><br></div>
 <div><br></div>
 <div style="font-size:12pt;line-height:1.25">Sehr geehrte Damen und Herren,</div>
@@ -805,10 +805,11 @@ function flattenHTML(html, allowDoubleBlanks){
     const tag = node.tagName.toLowerCase();
     if(tag === 'br'){ result.push('<div><br></div>'); return; }
 
-    // Brief-Header, Spacer-Divs und Flex-Container (Betreff+Datum) immer unverändert lassen
+    // Brief-Header, Spacer-Divs und Betreff+Datum-Block immer unverändert lassen
     if(node.hasAttribute && (
        node.hasAttribute('data-brief-header') ||
        (node.style && node.style.height && !node.textContent.trim() && !node.querySelector('img')) ||
+       (node.classList && node.classList.contains('betreff-datum')) ||
        (node.style && node.style.display === 'flex')
     )){
       result.push(node.outerHTML);
@@ -864,10 +865,12 @@ function loadFile(input){
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
 
-    // Wenn Header bereits korrekt → nichts tun
-    const firstDiv = tmp.firstElementChild;
-    if(firstDiv && firstDiv.hasAttribute('data-brief-header') &&
-       firstDiv.style.display === 'flex') return html;
+    // Nur abbrechen wenn BEIDE korrekt sind: Bild-Header UND Betreff-Zeile
+    const subjectLine = tmp.querySelector('.betreff-line, .betreff-datum');
+    const subjectParent = subjectLine ? subjectLine.closest('.betreff-datum') || subjectLine.parentElement : null;
+    const headerOK = firstDiv && firstDiv.hasAttribute('data-brief-header') && firstDiv.style.display === 'flex';
+    const subjectOK = subjectParent && (subjectParent.classList.contains('betreff-datum') || subjectParent.style.display === 'flex');
+    if(headerOK && subjectOK) return html;
 
     const nodes = Array.from(tmp.children);
     let idx = 0;
@@ -923,7 +926,7 @@ function loadFile(input){
 <div style="height:33px"></div>
 ${empfaengerHTML}
 <div style="height:70px"></div>
-<div style="display:flex;align-items:baseline;margin-bottom:8px;font-size:12pt;line-height:1.5"><span class="betreff-line" style="flex:1">${betreff}</span><span style="width:33%;text-align:left;flex-shrink:0;padding-left:3px">${datum}</span></div>
+<div class="betreff-datum"><span class="betreff-line">${betreff}</span><span class="datum-span">${datum}</span></div>
 <div><br></div>
 <div><br></div>
 ${restHTML}`;

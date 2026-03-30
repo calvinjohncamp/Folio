@@ -176,6 +176,10 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .betreff-line{font-size:15pt!important;font-weight:bold!important;line-height:1.6!important}
 .betreff-line *{font-size:15pt!important;font-weight:bold!important}
 
+.betreff-datum{display:flex!important;align-items:baseline;font-size:12pt;line-height:1.5;margin-bottom:8px}
+.betreff-datum .betreff-line{flex:1}
+.betreff-datum .datum-span{width:33%;text-align:left;flex-shrink:0;padding-left:3px;font-size:12pt!important;font-weight:normal!important}
+
 /* ── Footer ── */
 .pg-ftr{
   flex-shrink:0;height:38px;padding:6px var(--mg) 0;
