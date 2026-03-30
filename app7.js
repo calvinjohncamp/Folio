@@ -129,7 +129,8 @@ function buildEndlessPage(){
 }
 
 // ── Build A4 preview page ────────────────────────────────────────
-function buildA4PreviewPage(idx, html, briefPage1Fixed){
+// noFooter: true → Fußzeile weglassen (nur für Brief-Rendering, NICHT für Paginierungs-Messung)
+function buildA4PreviewPage(idx, html, briefPage1Fixed, noFooter){
   const pg = document.createElement('div');
   pg.className = 'pg pg--a4';
 
@@ -178,8 +179,8 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
   body.appendChild(ed);
   pg.appendChild(body);
 
-  // Footer: nur bei normalen Dokumenten, nicht bei Briefen
-  if(isNormalDoc){
+  // Footer: bei normalen Dokumenten immer; bei Briefen nur wenn noFooter nicht gesetzt
+  if(isNormalDoc || !noFooter){
     const ftr = document.createElement('div');
     ftr.className = 'pg-ftr';
     const fn = document.createElement('span'); fn.className = 'pg-fname';
@@ -224,7 +225,11 @@ function measurePage1FlowSpace(fixedHTML){
   body.appendChild(ed);
   pg.appendChild(hdr);
   pg.appendChild(body);
-  // Kein Footer bei Brief-Seite 1
+  // Footer bleibt im Mess-DOM damit die Höhe korrekt berechnet wird
+  const ftrM = document.createElement('div');
+  ftrM.className = 'pg-ftr';
+  ftrM.innerHTML = '<span class="pg-fname">Brief</span><span class="pg-num">1</span>';
+  pg.appendChild(ftrM);
   tempWrap.appendChild(pg);
   document.body.appendChild(tempWrap);
 
@@ -410,7 +415,7 @@ function setA4Mode(on){
       for(let i = 1; i < flowChunks.length; i++){
         const isLast = (i === flowChunks.length - 1);
         const chunkHTML = isLast ? flowChunks[i] + trailingHTML : flowChunks[i];
-        pagesEl.appendChild(buildA4PreviewPage(i, chunkHTML, false));
+        pagesEl.appendChild(buildA4PreviewPage(i, chunkHTML, false, true)); // noFooter=true für Briefe
       }
 
     } else {
