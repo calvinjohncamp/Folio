@@ -855,25 +855,95 @@ function loadFile(input){
     stats(); saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
   }
 
-  // Repariert beschädigte Brief-Header: einfacher <div><img/><img/></div> → korrekter Flex-Container
+  // Rekonstruiert den kompletten Brief-Kopf aus einer beschädigten .folio-Datei.
+  // Extrahiert Empfänger, Betreff, Datum und Fließtext und baut alles neu auf.
   function repairBriefHeader(html){
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
+
+    // Wenn Header bereits korrekt (hat data-brief-header mit flex) → nichts tun
     const firstDiv = tmp.firstElementChild;
-    if(!firstDiv) return html;
-    const imgs = Array.from(firstDiv.querySelectorAll('img'));
-    const hasImg1 = imgs.some(img => img.getAttribute('src') && img.getAttribute('src').includes('image1'));
-    const hasImg2 = imgs.some(img => img.getAttribute('src') && img.getAttribute('src').includes('image2'));
-    const alreadyFixed = firstDiv.hasAttribute('data-brief-header') ||
-      firstDiv.style.display === 'flex';
-    if(hasImg1 && hasImg2 && !alreadyFixed){
-      const correctHeader = document.createElement('div');
-      correctHeader.setAttribute('data-brief-header', '1');
-      correctHeader.style.cssText = 'display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box';
-      correctHeader.innerHTML = '<img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" /><img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />';
-      tmp.replaceChild(correctHeader, firstDiv);
+    if(firstDiv && firstDiv.hasAttribute('data-brief-header') &&
+       firstDiv.style.display === 'flex') return html;
+
+    // Alle direkten Kind-Divs sammeln
+    const nodes = Array.from(tmp.children);
+
+    // 1. Bilder-Block überspringen (erste Div mit img-Tags)
+    let idx = 0;
+    if(nodes[idx] && nodes[idx].querySelector('img')) idx++;
+
+    // 2. Empfänger-Zeilen sammeln (bis zum ersten height-only Spacer oder Betreff)
+    const empfaengerLines = [];
+    while(idx < nodes.length){
+      const n = nodes[idx];
+      const txt = (n.textContent || '').trim();
+      const inner = (n.innerHTML || '').trim();
+      // Spacer oder Betreff-Zeile erreicht → stop
+      if((n.style && n.style.height && !txt) || inner === '<br>' || !txt) break;
+      // Betreff-Zeile (hat betreff-line span oder display:flex) → stop
+      if(n.querySelector('.betreff-line') || n.style.display === 'flex') break;
+      empfaengerLines.push(txt);
+      idx++;
     }
-    return tmp.innerHTML;
+
+    // 3. Spacer und Leerzeilen überspringen bis Betreff
+    while(idx < nodes.length){
+      const n = nodes[idx];
+      const txt = (n.textContent || '').trim();
+      const inner = (n.innerHTML || '').trim();
+      if(n.querySelector('.betreff-line') || n.style.display === 'flex') break;
+      if(inner === '<br>' || !txt || (n.style && n.style.height && !txt)){ idx++; continue; }
+      break;
+    }
+
+    // 4. Betreff + Datum extrahieren
+    let betreff = '[Betreff]';
+    let datum = getTodayDE();
+    if(idx < nodes.length){
+      const betreffNode = nodes[idx];
+      const betreffSpan = betreffNode.querySelector('.betreff-line');
+      if(betreffSpan) betreff = betreffSpan.textContent.trim() || '[Betreff]';
+      else {
+        // Fallback: ganzer Text ohne Datum-Teil
+        const spans = betreffNode.querySelectorAll('span');
+        if(spans.length >= 2){
+          betreff = spans[0].textContent.trim() || '[Betreff]';
+          datum = spans[1].textContent.trim() || getTodayDE();
+        } else {
+          betreff = betreffNode.textContent.trim() || '[Betreff]';
+        }
+      }
+      // Datum aus zweitem Span
+      const datumSpan = betreffNode.querySelector('span:not(.betreff-line)');
+      if(datumSpan) datum = datumSpan.textContent.trim() || getTodayDE();
+      idx++;
+    }
+
+    // 5. Restlichen Fließtext (ab Leerzeile nach Betreff) sammeln
+    // Leerzeilen nach Betreff überspringen
+    while(idx < nodes.length){
+      const inner = (nodes[idx].innerHTML || '').trim();
+      if(inner === '<br>' || !(nodes[idx].textContent || '').trim()) idx++;
+      else break;
+    }
+    const restHTML = nodes.slice(idx).map(n => n.outerHTML).join('');
+
+    // 6. Korrekte Empfänger-HTML bauen
+    const empfaengerHTML = empfaengerLines.length
+      ? empfaengerLines.map(l => `<div style="font-size:12pt;line-height:1.5">${l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`).join('')
+      : '<div style="font-size:12pt;line-height:1.5">[Empfänger]</div><div style="font-size:12pt;line-height:1.5">[Straße]</div><div style="font-size:12pt;line-height:1.5">[PLZ Ort]</div>';
+
+    // 7. Vollständigen rekonstruierten Brief-HTML zusammenbauen
+    const safeBetreff = betreff.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div data-brief-header="1" style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box"><img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" /><img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" /></div>
+<div style="height:33px"></div>
+${empfaengerHTML}
+<div style="height:70px"></div>
+<div style="display:flex;align-items:baseline;margin-bottom:8px;font-size:12pt;line-height:1.5"><span class="betreff-line" style="flex:1">${safeBetreff}</span><span style="width:33%;text-align:left;flex-shrink:0;padding-left:3px">${datum}</span></div>
+<div><br></div>
+<div><br></div>
+${restHTML}`;
   }
 
   if(ext === 'folio'){
