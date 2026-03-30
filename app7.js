@@ -340,11 +340,7 @@ function setA4Mode(on){
       }
       const trailingNodes = allNodes.slice(endIdx);
       const trailingHTML = trailingNodes.length ?
-        '<div><br></div>' + trailingNodes.filter(n => {
-          const txt = (n.textContent || '').trim();
-          const inner = n.nodeType === 1 ? (n.innerHTML || '').trim() : '';
-          return txt !== '' && inner !== '<br>';
-        }).map(n => n.outerHTML || n.textContent || '').join('') : '';
+        '<div><br></div>' + trailingNodes.map(n => n.outerHTML || n.textContent || '').join('') : '';
 
       // Fließtext: alles nach Split-Node
       const flowNodes = allNodes.slice(flowStart, endIdx);
