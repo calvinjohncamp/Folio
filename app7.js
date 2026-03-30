@@ -866,6 +866,7 @@ function loadFile(input){
     tmp.innerHTML = html;
 
     // Nur abbrechen wenn BEIDE korrekt sind: Bild-Header UND Betreff-Zeile
+    const firstDiv = tmp.firstElementChild;
     const subjectLine = tmp.querySelector('.betreff-line, .betreff-datum');
     const subjectParent = subjectLine ? subjectLine.closest('.betreff-datum') || subjectLine.parentElement : null;
     const headerOK = firstDiv && firstDiv.hasAttribute('data-brief-header') && firstDiv.style.display === 'flex';
