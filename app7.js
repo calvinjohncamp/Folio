@@ -178,14 +178,17 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed){
   body.appendChild(ed);
   pg.appendChild(body);
 
-  const ftr = document.createElement('div');
-  ftr.className = 'pg-ftr';
-  const fn = document.createElement('span'); fn.className = 'pg-fname';
-  fn.textContent = dtEl.value || 'Unbenanntes Dokument';
-  const pn = document.createElement('span'); pn.className = 'pg-num';
-  pn.textContent = idx + 1;
-  ftr.appendChild(fn); ftr.appendChild(pn);
-  pg.appendChild(ftr);
+  // Footer: nur bei normalen Dokumenten, nicht bei Briefen
+  if(isNormalDoc){
+    const ftr = document.createElement('div');
+    ftr.className = 'pg-ftr';
+    const fn = document.createElement('span'); fn.className = 'pg-fname';
+    fn.textContent = dtEl.value || 'Unbenanntes Dokument';
+    const pn = document.createElement('span'); pn.className = 'pg-num';
+    pn.textContent = idx + 1;
+    ftr.appendChild(fn); ftr.appendChild(pn);
+    pg.appendChild(ftr);
+  }
 
   return pg;
 }
@@ -218,14 +221,10 @@ function measurePage1FlowSpace(fixedHTML){
   ed.style.lineHeight = curLH;
   ed.innerHTML = fixedHTML;
 
-  const ftr = document.createElement('div');
-  ftr.className = 'pg-ftr';
-  ftr.innerHTML = '<span class="pg-fname">Brief</span><span class="pg-num">1</span>';
-
   body.appendChild(ed);
   pg.appendChild(hdr);
   pg.appendChild(body);
-  pg.appendChild(ftr);
+  // Kein Footer bei Brief-Seite 1
   tempWrap.appendChild(pg);
   document.body.appendChild(tempWrap);
 
@@ -404,15 +403,7 @@ function setA4Mode(on){
       ed1.style.lineHeight = curLH;
       body1.appendChild(ed1);
       pg1.appendChild(body1);
-      // Footer
-      const ftr1 = document.createElement('div');
-      ftr1.className = 'pg-ftr';
-      const fn1 = document.createElement('span'); fn1.className = 'pg-fname';
-      fn1.textContent = dtEl.value || 'Unbenanntes Dokument';
-      const pn1 = document.createElement('span'); pn1.className = 'pg-num';
-      pn1.textContent = '1';
-      ftr1.appendChild(fn1); ftr1.appendChild(pn1);
-      pg1.appendChild(ftr1);
+      // Kein Footer auf Brief-Seite 1
       pagesEl.appendChild(pg1);
 
       // Weitere Seiten — letzten Chunk mit Abschluss-Teil ergänzen
@@ -784,6 +775,9 @@ function doPDF(){
     setTimeout(doprint, 200);
   }));
 }
+
+// doPrint: identisch mit doPDF — Browser-Dialog erlaubt Auswahl des Druckers (inkl. WLAN-Drucker)
+function doPrint(){ doPDF(); }
 
 // Unlock toolbar after print dialog closes
 window.addEventListener('afterprint', function(){
