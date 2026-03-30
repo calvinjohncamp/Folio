@@ -855,6 +855,27 @@ function loadFile(input){
     stats(); saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
   }
 
+  // Repariert beschädigte Brief-Header: einfacher <div><img/><img/></div> → korrekter Flex-Container
+  function repairBriefHeader(html){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const firstDiv = tmp.firstElementChild;
+    if(!firstDiv) return html;
+    const imgs = Array.from(firstDiv.querySelectorAll('img'));
+    const hasImg1 = imgs.some(img => img.getAttribute('src') && img.getAttribute('src').includes('image1'));
+    const hasImg2 = imgs.some(img => img.getAttribute('src') && img.getAttribute('src').includes('image2'));
+    const alreadyFixed = firstDiv.hasAttribute('data-brief-header') ||
+      firstDiv.style.display === 'flex';
+    if(hasImg1 && hasImg2 && !alreadyFixed){
+      const correctHeader = document.createElement('div');
+      correctHeader.setAttribute('data-brief-header', '1');
+      correctHeader.style.cssText = 'display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:87px;box-sizing:border-box';
+      correctHeader.innerHTML = '<img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" /><img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />';
+      tmp.replaceChild(correctHeader, firstDiv);
+    }
+    return tmp.innerHTML;
+  }
+
   if(ext === 'folio'){
     const reader = new FileReader();
     reader.onload = function(e){
@@ -864,7 +885,10 @@ function loadFile(input){
         if(s.size){ curSize=s.size; document.getElementById('fsz').value=s.size; }
         if(s.lh)  { curLH=s.lh;   document.getElementById('flh').value=s.lh; }
         syncRuler();
-        applyContent(s.content||'', s.title||'', s.isNormalDoc !== false);
+        const isNormal = s.isNormalDoc !== false;
+        let content = s.content || '';
+        if(!isNormal) content = repairBriefHeader(content);
+        applyContent(content, s.title||'', isNormal);
       } catch(err){ alert('Fehler beim Laden: ' + err.message); }
       input.value = '';
     };
