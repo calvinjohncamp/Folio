@@ -271,7 +271,10 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   .snew{font-size:10px;margin:6px 7px 0;padding:5px}
 }
 
-/* ── Print ── */
+/* ── Leerzeilen im Druck sichtbar ── */
+@media print {
+  .pg-ed br { display: block; margin-bottom: 1.25em; }
+}
 @media print{
   @page { size:A4; margin:0; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
