@@ -170,7 +170,15 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed, noFooter){
   ed.contentEditable = 'false';
 
   // For brief page 1: header is already stripped before paginating
-  ed.innerHTML = html;
+  // Leerzeilen (<div><br></div>) bekommen explizite Mindesthöhe für den Druck
+  const tmpEl = document.createElement('div');
+  tmpEl.innerHTML = html;
+  tmpEl.querySelectorAll('div').forEach(d => {
+    if(d.children.length === 1 && d.children[0].tagName === 'BR' && !d.style.minHeight){
+      d.style.minHeight = curLH + 'em';
+    }
+  });
+  ed.innerHTML = tmpEl.innerHTML;
 
   ed.style.fontFamily = curFont;
   ed.style.fontSize   = '12pt';
