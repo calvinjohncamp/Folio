@@ -887,18 +887,31 @@ function loadFile(input){
     // 2. Leerzeilen überspringen
     while(idx < nodes.length && (nodes[idx].innerHTML||'').trim() === '<br>') idx++;
 
-    // 3. Empfänger-Zeilen sammeln — bis zur Betreff-Zeile oder Leerzeile gefolgt von Betreff
+    // Hilfsfunktion: erkennt Betreff-Node in altem und neuem Format
+    function isSubjectNode(n){
+      if(!n) return false;
+      return !!(
+        n.querySelector('.betreff-line') ||
+        n.classList?.contains('betreff-datum') ||
+        (n.children.length === 2 && n.children[0]?.classList?.contains('betreff-line'))
+      );
+    }
+
+    // 3. Empfänger-Zeilen sammeln — bis zur Betreff-Zeile
     const empfaengerLines = [];
     while(idx < nodes.length){
       const n = nodes[idx];
       const inner = (n.innerHTML||'').trim();
       const txt = (n.textContent||'').trim();
-      // Betreff-Zeile erkannt → stop
-      if(n.querySelector('.betreff-line') || n.querySelector('span[style*="flex"]')) break;
-      // Leerzeile: schaue ob nächste Node Betreff ist → dann stop, sonst überspringen
+
+      if(isSubjectNode(n)) break;
+
       if(inner === '<br>' || !txt){
         const next = nodes[idx+1];
-        if(next && (next.querySelector('.betreff-line') || next.querySelector('span[style*="flex"]'))) break;
+        if(next && isSubjectNode(next)){
+          idx++; // auf die echte Betreff-Zeile vorrücken
+          break;
+        }
         idx++; continue;
       }
       empfaengerLines.push(n.innerHTML.trim());
