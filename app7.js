@@ -406,7 +406,15 @@ function setA4Mode(on){
       const ed1 = document.createElement('div');
       ed1.className = 'pg-ed';
       ed1.contentEditable = 'false';
-      ed1.innerHTML = page1HTML;
+      // Leerzeilen explizite Mindesthöhe geben
+      const tmp1 = document.createElement('div');
+      tmp1.innerHTML = page1HTML;
+      tmp1.querySelectorAll('div').forEach(d => {
+        if(d.children.length === 1 && d.children[0].tagName === 'BR' && !d.style.minHeight){
+          d.style.minHeight = curLH + 'em';
+        }
+      });
+      ed1.innerHTML = tmp1.innerHTML;
       ed1.style.fontFamily = curFont;
       ed1.style.fontSize = '12pt';
       ed1.style.lineHeight = curLH;
