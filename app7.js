@@ -804,6 +804,14 @@ function flattenHTML(html){
     if(node.nodeType !== 1) return;
     const tag = node.tagName.toLowerCase();
     if(tag === 'br'){ result.push('<div><br></div>'); return; }
+
+    // Brief-Header und Spacer-Divs (height-only) immer unverändert lassen
+    if(node.hasAttribute && (node.hasAttribute('data-brief-header') ||
+       (node.style && node.style.height && !node.textContent.trim() && !node.querySelector('img')))){
+      result.push(node.outerHTML);
+      return;
+    }
+
     const isBlock = ['div','p','h1','h2','h3','h4','h5','li'].includes(tag);
     if(isBlock){
       const hasBlockChildren = Array.from(node.childNodes).some(c =>
