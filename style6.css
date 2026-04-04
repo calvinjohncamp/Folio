@@ -4,7 +4,7 @@ html,body{height:100%;overflow:hidden}
 :root{
   --ink:#1a1814;--cream:#f0ede4;--accent:#c8441a;--muted:#8a8478;
   --border:#e0dbd0;--shadow:0 4px 32px rgba(26,24,20,.13);
-  --a4w:794px;--mg:70px;--a4h:1123px;
+  --a4w:794px;--mg:63px;--a4h:1123px;
 }
 
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
@@ -61,7 +61,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   left:0;
   top:0;
   bottom:0;
-  width:88px;
+  width:79px;
   cursor:url('/cursor2.png') 2 1, default;
   z-index:10;
   user-select:none;
@@ -82,7 +82,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg--endless .pg-body{
   flex:1;
   padding:0 var(--mg) 40px;
-  padding-left:88px;
+  padding-left:79px;
   position:relative;
 }
 .pg--endless .pg-body--normal{
@@ -123,14 +123,14 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 }
 .pg--a4 .pg-body--normal{
   padding-top:68px;
-  padding-left:88px;
+  padding-left:79px;
 }
 .pg--a4 .pg-body--brief-p1{
   padding-top:8px;
 }
 .pg--a4 .pg-body--cont{
   padding-top:20px;
-  padding-left:88px;
+  padding-left:79px;
 }
 /* Brief-Folgeseiten: original 70px linker Rand */
 .pg--a4 .pg-body--brief-cont{
@@ -326,13 +326,13 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* ── Normale Seite (Seite 1): padding-top 25mm ── */
   .pg--a4 .pg-body--normal {
     padding-top:25mm!important;
-    padding-left:25mm!important;
+    padding-left:22.5mm!important;
   }
 
   /* ── Folgeseiten normal: padding-top 15mm ── */
   .pg--a4 .pg-body--cont {
     padding-top:15mm!important;
-    padding-left:25mm!important;
+    padding-left:22.5mm!important;
   }
 
   /* ── Brief-Folgeseiten: original 20mm linker Rand ── */
@@ -344,7 +344,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* normal: width: 210 - 30 (left) - 20 (right) = 160mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
-    width:165mm!important;
+    width:167.5mm!important;
     height:238mm!important;
     overflow:hidden!important;
   }
@@ -352,7 +352,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* cont: width: 160mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
-    width:165mm!important;
+    width:167.5mm!important;
     height:248mm!important;
     overflow:hidden!important;
   }
@@ -371,9 +371,9 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
     position:static!important;
     float:none!important;
     flex-shrink:unset!important;
-    width:165mm!important;
+    width:167.5mm!important;
     margin:10mm 20mm 0!important;
-    margin-left:25mm!important;
+    margin-left:22.5mm!important;
     padding:3mm 0 0!important;
     height:auto!important;
     font-size:8pt!important;
