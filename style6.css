@@ -323,15 +323,15 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
     overflow:hidden!important;
   }
 
-  /* ── Normale Seite (Seite 1): padding-top 10mm ── */
+  /* ── Normale Seite (Seite 1): padding-top 14mm ── */
   .pg--a4 .pg-body--normal {
-    padding-top:10mm!important;
+    padding-top:14mm!important;
     padding-left:15mm!important;
   }
 
-  /* ── Folgeseiten normal: padding-top 8mm ── */
+  /* ── Folgeseiten normal: padding-top 10mm ── */
   .pg--a4 .pg-body--cont {
-    padding-top:8mm!important;
+    padding-top:10mm!important;
     padding-left:15mm!important;
   }
 
@@ -341,19 +341,19 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   }
 
   /* ── Editor: feste Höhe, kein flex ── */
-  /* normal: 297 - 10 (top) - 18 (footer) = 269mm */
+  /* normal: 297 - 14 (top) - 18 (footer) = 265mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
     width:175mm!important;
-    height:269mm!important;
+    height:265mm!important;
     overflow:hidden!important;
   }
 
-  /* cont: 297 - 8 (top) - 18 (footer) = 271mm */
+  /* cont: 297 - 10 (top) - 18 (footer) = 269mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
     width:175mm!important;
-    height:271mm!important;
+    height:269mm!important;
     overflow:hidden!important;
   }
 
