@@ -326,13 +326,13 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* ── Normale Seite (Seite 1): padding-top 25mm ── */
   .pg--a4 .pg-body--normal {
     padding-top:25mm!important;
-    padding-left:21mm!important;
+    padding-left:20mm!important;
   }
 
   /* ── Folgeseiten normal: padding-top 15mm ── */
   .pg--a4 .pg-body--cont {
     padding-top:15mm!important;
-    padding-left:21mm!important;
+    padding-left:20mm!important;
   }
 
   /* ── Brief-Folgeseiten: original 20mm linker Rand ── */
@@ -344,7 +344,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* normal: width: 210 - 30 (left) - 20 (right) = 160mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
-    width:169mm!important;
+    width:170mm!important;
     height:238mm!important;
     overflow:hidden!important;
   }
@@ -352,7 +352,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* cont: width: 160mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
-    width:169mm!important;
+    width:170mm!important;
     height:248mm!important;
     overflow:hidden!important;
   }
@@ -371,9 +371,9 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
     position:static!important;
     float:none!important;
     flex-shrink:unset!important;
-    width:169mm!important;
+    width:170mm!important;
     margin:10mm 20mm 0!important;
-    margin-left:21mm!important;
+    margin-left:20mm!important;
     padding:3mm 0 0!important;
     height:auto!important;
     font-size:8pt!important;
