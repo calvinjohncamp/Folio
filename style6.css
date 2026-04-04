@@ -190,7 +190,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 
 /* ── Footer ── */
 .pg-ftr{
-  flex-shrink:0;height:38px;padding:6px var(--mg) 0;
+  flex-shrink:0;height:38px;padding:6px var(--mg) 0;padding-left:79px;
   display:flex;align-items:flex-start;justify-content:space-between;
   border-top:1px solid var(--border);
   font-size:9px;color:var(--ink);font-family:'DM Sans',sans-serif;
