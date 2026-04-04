@@ -61,7 +61,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   left:0;
   top:0;
   bottom:0;
-  width:105px;
+  width:88px;
   cursor:url('/cursor2.png') 2 1, default;
   z-index:10;
   user-select:none;
@@ -82,7 +82,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg--endless .pg-body{
   flex:1;
   padding:0 var(--mg) 40px;
-  padding-left:105px;
+  padding-left:88px;
   position:relative;
 }
 .pg--endless .pg-body--normal{
@@ -123,14 +123,18 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 }
 .pg--a4 .pg-body--normal{
   padding-top:68px;
-  padding-left:105px;
+  padding-left:88px;
 }
 .pg--a4 .pg-body--brief-p1{
   padding-top:8px;
 }
 .pg--a4 .pg-body--cont{
   padding-top:20px;
-  padding-left:105px;
+  padding-left:88px;
+}
+/* Brief-Folgeseiten: original 70px linker Rand */
+.pg--a4 .pg-body--brief-cont{
+  padding-top:20px;
 }
 .pg--a4 .pg-ed{
   width:100%;
@@ -322,20 +326,25 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* ── Normale Seite (Seite 1): padding-top 25mm ── */
   .pg--a4 .pg-body--normal {
     padding-top:25mm!important;
-    padding-left:30mm!important;
+    padding-left:25mm!important;
   }
 
-  /* ── Folgeseiten: padding-top 15mm ── */
+  /* ── Folgeseiten normal: padding-top 15mm ── */
   .pg--a4 .pg-body--cont {
     padding-top:15mm!important;
-    padding-left:30mm!important;
+    padding-left:25mm!important;
+  }
+
+  /* ── Brief-Folgeseiten: original 20mm linker Rand ── */
+  .pg--a4 .pg-body--brief-cont {
+    padding-top:15mm!important;
   }
 
   /* ── Editor: feste Höhe, kein flex ── */
   /* normal: width: 210 - 30 (left) - 20 (right) = 160mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
-    width:160mm!important;
+    width:165mm!important;
     height:238mm!important;
     overflow:hidden!important;
   }
@@ -343,20 +352,28 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* cont: width: 160mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
-    width:160mm!important;
+    width:165mm!important;
     height:248mm!important;
     overflow:hidden!important;
   }
 
-  /* ── Footer: im normalen Fluss nach dem Editor ── */
+  /* brief-cont: original 170mm */
+  .pg--a4 .pg-body--brief-cont .pg-ed {
+    display:block!important;
+    width:170mm!important;
+    height:248mm!important;
+    overflow:hidden!important;
+  }
+
+  /* ── Footer (nur bei normalen Dokumenten, Briefe haben keinen) ── */
   .pg-ftr {
     display:block!important;
     position:static!important;
     float:none!important;
     flex-shrink:unset!important;
-    width:160mm!important;
+    width:165mm!important;
     margin:10mm 20mm 0!important;
-    margin-left:30mm!important;
+    margin-left:25mm!important;
     padding:3mm 0 0!important;
     height:auto!important;
     font-size:8pt!important;

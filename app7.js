@@ -67,7 +67,7 @@ function paginate(html, firstPageH){
     if(isNormalDoc){
       body.className = 'pg-body pg-body--normal';
     } else {
-      body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--cont';
+      body.className = isFirstPage ? 'pg-body pg-body--brief-p1' : 'pg-body pg-body--brief-cont';
     }
     ed.innerHTML = getBucketHTML(arr);
     ed.style.fontFamily = curFont;
@@ -163,7 +163,7 @@ function buildA4PreviewPage(idx, html, briefPage1Fixed, noFooter){
   body.className = 'pg-body' +
     (isNormalDoc ? ' pg-body--normal' : '') +
     (!isNormalDoc && idx === 0 ? ' pg-body--brief-p1' : '') +
-    (!isNormalDoc && idx > 0 ? ' pg-body--cont' : '');
+    (!isNormalDoc && idx > 0 ? ' pg-body--brief-cont' : '');
 
   const ed = document.createElement('div');
   ed.className = 'pg-ed';
