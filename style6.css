@@ -61,7 +61,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   left:0;
   top:0;
   bottom:0;
-  width:var(--mg);
+  width:105px;
   cursor:url('/cursor2.png') 2 1, default;
   z-index:10;
   user-select:none;
@@ -82,6 +82,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg--endless .pg-body{
   flex:1;
   padding:0 var(--mg) 40px;
+  padding-left:105px;
   position:relative;
 }
 .pg--endless .pg-body--normal{
@@ -122,12 +123,14 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 }
 .pg--a4 .pg-body--normal{
   padding-top:68px;
+  padding-left:105px;
 }
 .pg--a4 .pg-body--brief-p1{
   padding-top:8px;
 }
 .pg--a4 .pg-body--cont{
   padding-top:20px;
+  padding-left:105px;
 }
 .pg--a4 .pg-ed{
   width:100%;
@@ -319,26 +322,28 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   /* ── Normale Seite (Seite 1): padding-top 25mm ── */
   .pg--a4 .pg-body--normal {
     padding-top:25mm!important;
+    padding-left:30mm!important;
   }
 
   /* ── Folgeseiten: padding-top 15mm ── */
   .pg--a4 .pg-body--cont {
     padding-top:15mm!important;
+    padding-left:30mm!important;
   }
 
   /* ── Editor: feste Höhe, kein flex ── */
-  /* normal: 297 - 25 (top) - 30 (footer+Puffer) = 242mm */
+  /* normal: width: 210 - 30 (left) - 20 (right) = 160mm */
   .pg--a4 .pg-body--normal .pg-ed {
     display:block!important;
-    width:170mm!important;
+    width:160mm!important;
     height:238mm!important;
     overflow:hidden!important;
   }
 
-  /* cont: 297 - 15 (top) - 30 (footer+Puffer) = 252mm */
+  /* cont: width: 160mm */
   .pg--a4 .pg-body--cont .pg-ed {
     display:block!important;
-    width:170mm!important;
+    width:160mm!important;
     height:248mm!important;
     overflow:hidden!important;
   }
@@ -349,8 +354,9 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
     position:static!important;
     float:none!important;
     flex-shrink:unset!important;
-    width:170mm!important;
+    width:160mm!important;
     margin:10mm 20mm 0!important;
+    margin-left:30mm!important;
     padding:3mm 0 0!important;
     height:auto!important;
     font-size:8pt!important;
