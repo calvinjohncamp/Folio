@@ -146,6 +146,7 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   color:var(--ink);
   word-wrap:break-word;
   overflow:hidden;
+  padding-bottom:28px;
 }
 
 /* ── Brief page-1 header: Logo links + Kontakt rechts ── */
