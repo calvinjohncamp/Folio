@@ -19,6 +19,7 @@ function syncRuler(){
   ruler.style.fontFamily = curFont;
   ruler.style.fontSize   = curSize + 'pt';
   ruler.style.lineHeight = curLH;
+  invalidatePageHCache(); // Seitenhöhe bei Schriftänderung neu messen
 }
 
 // ── Collect content ──────────────────────────────────────────────
@@ -27,6 +28,26 @@ function collect(){
   return Array.from(eds).map(e => e.innerHTML).join('');
 }
 
+// ── Page height cache (invalidated on mode/font change) ───────────
+let _cachedPageH = null;
+function getCachedPageH(){
+  if(_cachedPageH !== null) return _cachedPageH;
+  const measureWrap = document.createElement('div');
+  measureWrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
+  const measurePage = buildA4PreviewPage(0, '<div>X</div>', isNormalDoc);
+  measureWrap.appendChild(measurePage);
+  document.body.appendChild(measureWrap);
+  const measureBody = measurePage.querySelector('.pg-body');
+  const measureStyle = window.getComputedStyle(measureBody);
+  const h = measureBody.clientHeight
+    - (parseFloat(measureStyle.paddingTop) || 0)
+    - (parseFloat(measureStyle.paddingBottom) || 0);
+  document.body.removeChild(measureWrap);
+  _cachedPageH = h;
+  return h;
+}
+function invalidatePageHCache(){ _cachedPageH = null; }
+
 // ── Paginate ─────────────────────────────────────────────────────
 function paginate(html, firstPageH){
   const tmp = document.createElement('div');
@@ -34,19 +55,8 @@ function paginate(html, firstPageH){
   const nodes = Array.from(tmp.childNodes);
   if(!nodes.length) return [''];
 
-  // Echte verfügbare Texthöhe dynamisch messen
-  const measureWrap = document.createElement('div');
-  measureWrap.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden';
-  const measurePage = buildA4PreviewPage(0, '<div>X</div>', isNormalDoc);
-  measureWrap.appendChild(measurePage);
-  document.body.appendChild(measureWrap);
-  const measureBody = measurePage.querySelector('.pg-body');
-  const measureStyle = window.getComputedStyle(measureBody);
-  const realPageH = measureBody.clientHeight
-    - (parseFloat(measureStyle.paddingTop) || 0)
-    - (parseFloat(measureStyle.paddingBottom) || 0);
-  document.body.removeChild(measureWrap);
-  console.log('[v109] realPageH:', realPageH);
+  // Gecachte Seitenhöhe — einmal messen, nicht bei jedem Knoten
+  const realPageH = getCachedPageH();
 
   const availH = firstPageH !== undefined ? Math.min(firstPageH, realPageH) : realPageH;
 
@@ -120,7 +130,7 @@ function buildEndlessPage(){
   ed.addEventListener('focus', () => { activePage = 0; syncTb(); });
   ed.addEventListener('keyup',   syncTb);
   ed.addEventListener('mouseup', syncTb);
-  ed.addEventListener('input', () => { autoSave(); stats(); });
+  ed.addEventListener('input', () => { scheduleAutoSave(); stats(); });
 
   body.appendChild(gutter);
   body.appendChild(ed);
@@ -253,6 +263,7 @@ let savedEndlessHTML = ''; // Content saved before A4 switch
 
 function setA4Mode(on){
   isA4Mode = on;
+  invalidatePageHCache(); // Layout hat sich geändert
   updateModeButtons();
   document.body.classList.toggle('a4-locked', on);
 
@@ -554,7 +565,7 @@ function saveCurrentDoc(){
   if(!currentDocId) currentDocId = 'folio_doc_' + Date.now();
   localStorage.setItem(currentDocId, JSON.stringify(getState()));
   localStorage.setItem(STORE, JSON.stringify({lastDocId: currentDocId}));
-  renderSidebar();
+  // renderSidebar() wird NICHT hier aufgerufen — nur bei expliziten User-Aktionen
 }
 
 function getTodayDE(){
@@ -696,6 +707,11 @@ function showSaved(msg){
   el.textContent = '✓ ' + msg; el.classList.add('ok');
   clearTimeout(window._st);
   window._st = setTimeout(() => { el.textContent = 'Folio 1.0'; el.classList.remove('ok'); }, 2200);
+}
+let _autoSaveTimer = null;
+function scheduleAutoSave(){
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(() => { autoSave(); }, 800);
 }
 function autoSave(){
   try{ saveCurrentDoc(); showSaved('Autosave'); } catch(e){}
@@ -1071,11 +1087,14 @@ ${restHTML}`;
 }
 
 // ── Title ────────────────────────────────────────────────────────
+let _titleTimer = null;
 dtEl.addEventListener('input', () => {
   if(currentDocId){
     try{ const s=JSON.parse(localStorage.getItem(currentDocId)||'{}'); s.title=dtEl.value; localStorage.setItem(currentDocId,JSON.stringify(s)); } catch(e){}
   }
-  renderSidebar(); autoSave();
+  clearTimeout(_titleTimer);
+  _titleTimer = setTimeout(() => { renderSidebar(); }, 400);
+  scheduleAutoSave();
 });
 
 // ── Clipboard helpers ─────────────────────────────────────────────
