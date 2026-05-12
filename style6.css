@@ -180,6 +180,13 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .pg-ed table{border-collapse:collapse;width:100%;font-size:10.5px}
 .pg-ed td,.pg-ed th{border:1px solid var(--border);padding:4px 8px}
 .pg-ed th{background:var(--cream);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600}
+/* iOS: contenteditable braucht explizites -webkit-user-select:text und touch-action:manipulation */
+/* touch-action:manipulation verhindert 300ms Double-Tap-Delay auf iOS Chrome */
+[contenteditable="true"]{
+  -webkit-user-select:text;
+  user-select:text;
+  touch-action:manipulation;
+}
 
 .betreff-line{font-size:15pt!important;font-weight:bold!important;line-height:1.6!important}
 .betreff-line *{font-size:15pt!important;font-weight:bold!important}

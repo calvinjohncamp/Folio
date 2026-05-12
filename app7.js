@@ -132,6 +132,25 @@ function buildEndlessPage(){
   ed.addEventListener('mouseup', syncTb);
   ed.addEventListener('input', () => { scheduleAutoSave(); stats(); });
 
+  // iOS: Falls focus() beim Aufbau ohne User-Gesture fehlgeschlagen ist,
+  // wird der erste Tap auf den Editor benutzt um focus() sicher nachzuholen.
+  // touchend ist ein User-Gesture → Tastatur öffnet sich zuverlässig.
+  ed.addEventListener('touchend', function iosFirstTap(e){
+    if(document.activeElement !== ed){
+      e.preventDefault();
+      ed.focus();
+      // Cursor ans Ende setzen
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(ed);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch(err){}
+    }
+  }, { passive: false });
+
   body.appendChild(gutter);
   body.appendChild(ed);
   pg.appendChild(body);
@@ -465,7 +484,10 @@ function setA4Mode(on){
     ed.innerHTML = savedEndlessHTML || '';
     document.getElementById('pgc').textContent = '—';
     stats();
-    setTimeout(() => ed.focus(), 50);
+    // iOS: focus() muss synchron im User-Gesture-Handler laufen.
+    // setA4Mode(false) wird von onclick="setA4Mode(false)" aufgerufen → wir sind noch im Gesture.
+    // requestAnimationFrame bewahrt den Gesture-Kontext besser als setTimeout.
+    requestAnimationFrame(() => { try { ed.focus(); } catch(e) {} });
     showSaved('Bearbeiten');
   }
 }
@@ -691,7 +713,7 @@ function newDoc(){
   pagesEl.innerHTML = '';
   const pg = buildEndlessPage();
   pagesEl.appendChild(pg);
-  pg.querySelector('.pg-ed').focus();
+  requestAnimationFrame(() => { try { pg.querySelector('.pg-ed').focus(); } catch(e) {} });
   document.getElementById('pgc').textContent = '—';
   stats(); renderSidebar();
 }
@@ -1336,7 +1358,11 @@ function init(){
   pagesEl.innerHTML='';
   const pg=buildEndlessPage();
   pagesEl.appendChild(pg);
-  pg.querySelector('.pg-ed').focus();
+  // iOS Safari/Chrome: programmatic focus() ohne User-Gesture öffnet keine Tastatur.
+  // Wir versuchen es trotzdem (funktioniert auf Mac/Desktop), und zeigen auf Touch-Geräten
+  // einen sanften "Tippen zum Schreiben"-Hinweis als Fallback.
+  const ed = pg.querySelector('.pg-ed');
+  try { ed.focus(); } catch(e) {}
   document.getElementById('pgc').textContent='—';
   updateModeButtons();
   renderSidebar();
@@ -1349,7 +1375,20 @@ if ('serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.register('/sw.js', {
         updateViaCache: 'none'
       });
+      // Sofort nach Update aktivieren (kein Warten auf Tab-Schließen)
       reg.update();
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });
