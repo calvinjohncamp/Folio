@@ -19,7 +19,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 .hd-left{display:flex;align-items:flex-end;flex:1;min-width:0}
 .logo{display:flex;align-items:center;flex-shrink:0}
 .logo img{height:64px;width:auto;display:block;object-fit:contain}
-#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px;margin-left:34px;margin-bottom:8px;transition:.2s}
+#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px;margin-left:34px;margin-bottom:12px;transition:.2s}
 #dtitle::placeholder{color:#faf9f6;opacity:.45}
 #dtitle:focus{opacity:1;border-bottom-color:var(--accent)}
 .hbtns{display:flex;gap:8px;flex:1;justify-content:flex-end;align-items:center}
