@@ -19,17 +19,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);d
 .hd-left{display:flex;align-items:flex-end;flex:1;min-width:0}
 .logo{display:flex;align-items:center;flex-shrink:0}
 .logo img{height:64px;width:auto;display:block;object-fit:contain}
-#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px;margin-left:34px;margin-bottom:12px;transition:.2s}
+#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px;margin-left:34px;margin-bottom:10px;transition:.2s}
 #dtitle::placeholder{color:#faf9f6;opacity:.45}
 #dtitle:focus{opacity:1;border-bottom-color:var(--accent)}
-.hbtns{display:flex;gap:8px;flex:1;justify-content:flex-end;align-items:center}
+.hbtns{display:flex;gap:8px;flex:1;justify-content:flex-end;align-items:center;position:relative;top:4px}
 .hbtn{background:rgba(246,246,246,.04);border:1px solid rgba(246,246,246,.16);color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;padding:7px 14px;border-radius:999px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;justify-content:center;line-height:1}
 .hbtn:hover{background:rgba(246,246,246,.10);border-color:rgba(246,246,246,.30)}
 .hbtn.p{background:var(--accent);border-color:var(--accent);color:#fff}
 .hbtn.p:hover{background:var(--accent-d);border-color:var(--accent-d)}
 
 /* ── Mode toggle buttons — centered in header ── */
-.mode-btns{flex-shrink:0;display:flex;gap:4px;background:rgba(246,246,246,.06);border:1px solid rgba(246,246,246,.10);border-radius:999px;padding:3px}
+.mode-btns{flex-shrink:0;display:flex;gap:4px;background:rgba(246,246,246,.06);border:1px solid rgba(246,246,246,.10);border-radius:999px;padding:3px;position:relative;top:4px}
 .mode-btn{background:transparent;border:none;color:rgba(250,249,246,.55);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;cursor:pointer;transition:all .2s;letter-spacing:.06em;display:inline-flex;align-items:center;justify-content:center;line-height:1}
 .mode-btn:hover{color:#faf9f6}
 .mode-btn.mode-active{background:var(--accent);color:#fff}
