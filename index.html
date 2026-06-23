@@ -6,17 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Folio">
-<meta name="theme-color" content="#1a1814">
+<meta name="theme-color" content="#161616">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Folio</title>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style6.css?v=116"><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<link rel="stylesheet" href="style6.css?v=118"><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 <input type="file" id="fileInput" accept=".folio,.txt,.docx,.doc,application/octet-stream,*/*" style="display:none" onchange="loadFile(this)">
 <div id="hdr">
-  <div class="logo">Folio<em>.</em></div>
-  <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
+  <div class="hd-left">
+    <div class="logo"><img src="Folio.png" alt="Folio"></div>
+    <input id="dtitle" type="text" placeholder="Dateiname" spellcheck="false">
+  </div>
   <!-- Mode toggle: centered in header -->
   <div class="mode-btns" id="modebtnswrap">
     <button class="mode-btn" id="endlessbtn" onclick="setA4Mode(false)" title="Endlos schreiben">∞</button>
@@ -84,6 +86,7 @@
   <div id="cv"><div id="pages"></div></div>
 </div>
 <div id="sb">
+  <span class="sdot"></span>
   <span>Wörter: <span class="sv" id="wc">0</span></span>
   <span>Zeichen: <span class="sv" id="cc">0</span></span>
   <span>Seiten: <span class="sv" id="pgc">—</span></span>
@@ -121,8 +124,8 @@
     <input id="rename-input" type="text" spellcheck="false"
       style="width:100%;box-sizing:border-box;border:1px solid #e0dbd0;border-radius:6px;padding:10px 12px;font-size:15px;font-family:'DM Sans',sans-serif;color:#1a1814;outline:none;margin-bottom:16px">
     <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="closeRename()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
-      <button onclick="confirmRename()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">OK</button>
+      <button onclick="closeRename()" style="background:transparent;border:1px solid #e0dbd0;border-radius:999px;padding:8px 18px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
+      <button onclick="confirmRename()" style="background:#DF5735;border:none;border-radius:999px;padding:8px 18px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">OK</button>
     </div>
   </div>
 </div>
@@ -132,12 +135,12 @@
   <div style="background:#faf9f6;border-radius:12px;padding:24px;width:80%;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
     <div style="font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1814;margin-bottom:16px">Gesamten Inhalt löschen?</div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="clearAllCancel()" style="background:transparent;border:1px solid #e0dbd0;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
-      <button onclick="clearAllConfirm()" style="background:#c8441a;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">Löschen</button>
+      <button onclick="clearAllCancel()" style="background:transparent;border:1px solid #e0dbd0;border-radius:999px;padding:8px 18px;font-size:13px;cursor:pointer;color:#8a8478">Abbrechen</button>
+      <button onclick="clearAllConfirm()" style="background:#DF5735;border:none;border-radius:999px;padding:8px 18px;font-size:13px;cursor:pointer;color:#fff;font-weight:bold">Löschen</button>
     </div>
   </div>
 </div>
 
-<script src="app7.js?v=116"></script>
+<script src="app7.js?v=118"></script>
 </body>
 </html>
