@@ -15,11 +15,11 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
 
 /* ── Header (Glas-Look der Folio-Familie) ── */
-#hdr{background:var(--hd-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#faf9f6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;height:72px;flex-shrink:0;position:relative;border-bottom:1px solid rgba(246,246,246,.10)}
-.hd-left{display:flex;align-items:flex-end;flex:1;min-width:0;align-self:stretch;padding-bottom:11px}
-.logo{display:flex;align-items:flex-end;flex-shrink:0}
-.logo img{height:56px;width:auto;display:block;object-fit:contain}
-#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px 5px;margin-left:34px;transition:.2s}
+#hdr{background:var(--hd-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#faf9f6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;height:78px;flex-shrink:0;position:relative;border-bottom:1px solid rgba(246,246,246,.10)}
+.hd-left{display:flex;align-items:flex-end;flex:1;min-width:0}
+.logo{display:flex;align-items:center;flex-shrink:0}
+.logo img{height:64px;width:auto;display:block;object-fit:contain}
+#dtitle{background:transparent;border:none;border-bottom:1px solid transparent;color:#faf9f6;font-family:'DM Sans',sans-serif;font-size:14px;opacity:.7;outline:none;width:220px;max-width:100%;padding:0 4px;margin-left:34px;margin-bottom:12px;transition:.2s}
 #dtitle::placeholder{color:#faf9f6;opacity:.45}
 #dtitle:focus{opacity:1;border-bottom-color:var(--accent)}
 .hbtns{display:flex;gap:8px;flex:1;justify-content:flex-end;align-items:center}
