@@ -1,4 +1,4 @@
-const CACHE = 'folio-v111';
+const CACHE = 'folio-v112';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
