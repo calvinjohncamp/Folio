@@ -1,6 +1,6 @@
 
 const STORE = 'folio_v5_r2';
-const PAGE_H = 973;   // A4(1123) - top-pad(72) - footer(38) - bottom-gap(40)
+const PAGE_H = 1013;  // A4(1123) - top-pad(72) - footer(38)
 const RULER_W = 654;  // A4w(794) - 2*margin(70)
 
 const ruler   = document.getElementById('ruler');
@@ -13,7 +13,6 @@ let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
 let rendering  = false;
-let isNormalDoc = true;  // false for letter templates that manage their own top margin
 
 // ── Sync ruler font ──────────────────────────────────────────────
 function syncRuler(){
@@ -132,12 +131,7 @@ function checkOverflow(){
   const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
   const chunks  = paginate(allHTML || '');
   const n       = chunks.length;
-  const isNormal = isNormalDoc;
-  while(pagesEl.children.length < n) {
-    const newPg = buildPage(pagesEl.children.length);
-    if(isNormal) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
-    pagesEl.appendChild(newPg);
-  }
+  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
     const ed = pg.querySelector('.pg-ed');
@@ -165,12 +159,7 @@ function render(rawHTML, presavedCursor){
   const n      = chunks.length;
   document.getElementById('pgc').textContent = n;
 
-  const isNormalRender = isNormalDoc;
-  while(pagesEl.children.length < n) {
-    const newPg = buildPage(pagesEl.children.length);
-    if(isNormalRender) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
-    pagesEl.appendChild(newPg);
-  }
+  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
 
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
@@ -413,8 +402,8 @@ const TEMPLATES = [
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:87px;box-sizing:border-box">
-  <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:77px;box-sizing:border-box">
+  <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
 
@@ -477,7 +466,6 @@ function newFromTemplate(tpl){
     s.title = tpl.title;
     localStorage.setItem(currentDocId, JSON.stringify(s));
   }
-  isNormalDoc = false;
   setTimeout(() => render(collect()), 200);
   renderSidebar();
   showSaved('Vorlage geladen');
@@ -533,7 +521,6 @@ function switchDoc(key){
     pagesEl.innerHTML='';
     pagesEl.appendChild(buildPage(0));
     pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-    isNormalDoc = true;
     render(s.content||'');
     renderSidebar();
   } catch(e){}
@@ -556,8 +543,10 @@ function newDoc(){
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-  isNormalDoc = true;
   activeEd().focus();
+  stats();
+  document.getElementById('pgc').textContent = 1;
+  renderSidebar();
 }
 
 // ── Save / Load ───────────────────────────────────────────────────
@@ -597,13 +586,31 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
-  const reader = new FileReader();
-  reader.onload = function(){
-    const a = document.createElement('a');
-    a.href = reader.result; a.download = name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  };
-  reader.readAsDataURL(blob);
+  // iOS/iPadOS lädt data:-URLs nicht herunter, sondern öffnet eine
+  // verwirrende Vorschau und hängt .json an. Daher: native Teilen-Funktion
+  // ("In Dateien sichern"), mit klassischem Download als Fallback.
+  try {
+    const file = new File([blob], name, { type: 'application/octet-stream' });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      navigator.share({ files: [file], title: name })
+        .catch(err => {
+          if(err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
+          dlAnchor(blob, name);
+        });
+      return;
+    }
+  } catch(e){ /* fällt unten auf Anker-Download zurück */ }
+  dlAnchor(blob, name);
+}
+function dlAnchor(blob, name){
+  // Neutralen Blob-Typ erzwingen — sonst hängt iOS .json/.html an,
+  // egal was im download-Attribut steht.
+  const clean = new Blob([blob], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(clean);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
@@ -632,31 +639,7 @@ function buildHTML(title){
 </div>
 </body></html>`;
 }
-function doPDF(){
-  const name = dtEl.value.trim() || 'Dokument';
-  const titleEl = document.querySelector('title');
-  const prev = titleEl ? titleEl.textContent : 'Folio';
-  if(titleEl) titleEl.textContent = name;
-  document.title = name;
-
-  // Remove trailing empty pages before print
-  const pages = Array.from(pagesEl.querySelectorAll('.pg'));
-  pages.forEach((pg, i) => {
-    if(i === 0) return; // never remove first page
-    const ed = pg.querySelector('.pg-ed');
-    if(ed && ed.innerText.trim() === '') pg.remove();
-  });
-
-  setTimeout(() => {
-    window.print();
-    setTimeout(() => {
-      if(titleEl) titleEl.textContent = prev;
-      document.title = prev;
-      // Re-render to restore pages if needed
-      render(collect());
-    }, 3000);
-  }, 100);
-}
+function doPDF(){ window.print(); }
 
 // ── Open file (.folio / .txt / .docx / .doc) ─────────────────────
 function openFile(){ document.getElementById('fileInput').click(); }
@@ -664,18 +647,14 @@ function loadFile(input){
   const file = input.files[0];
   if(!file){ return; }
   const name = file.name || '';
-  const cleanName = name.split('?')[0].split('#')[0]; // strip query strings
-  const ext  = cleanName.split('.').pop().toLowerCase();
+  const ext  = name.split('.').pop().toLowerCase();
 
   if(ext === 'folio'){
     // ── .folio JSON ──
     const reader = new FileReader();
     reader.onload = function(e){
-      const raw = (e.target.result || '').trim();
-      if(!raw){ alert('Die Datei konnte nicht gelesen werden (0 Bytes).\n\nWenn die Datei in Dropbox liegt: Bitte zuerst in der Dropbox-App herunterladen, dann hier öffnen.'); input.value = ''; return; }
       try{
-        const s = JSON.parse(raw);
-        isNormalDoc = (s.isNormalDoc !== false); // default true unless explicitly false
+        const s = JSON.parse(e.target.result);
         if(s.title){ dtEl.value = s.title; currentDocId = currentDocId || 'folio_doc_' + Date.now(); }
         if(s.font){ curFont = s.font; document.getElementById('fnt').value = s.font; }
         if(s.size){ curSize = s.size; document.getElementById('fsz').value = s.size; }
@@ -683,14 +662,12 @@ function loadFile(input){
         syncRuler();
         pagesEl.innerHTML = '';
         pagesEl.appendChild(buildPage(0));
-        if(isNormalDoc) pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-        console.log('LOAD: isNormalDoc=', isNormalDoc, 'pg-body classes=', pagesEl.querySelector('.pg-body').className);
         render(s.content || '');
         saveCurrentDoc(); renderSidebar(); showSaved('Geladen');
-      } catch(err){ alert('Fehler beim Laden: ' + err.message + '\n\nDateigröße: ' + raw.length + ' Zeichen'); }
+      } catch(err){ alert('Fehler beim Laden: ' + err.message); }
       input.value = '';
     };
-    reader.readAsText(file, 'UTF-8');
+    reader.readAsText(file);
 
   } else if(ext === 'txt'){
     // ── .txt plain text ──
@@ -861,7 +838,6 @@ function init(){
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-  isNormalDoc = true;
   activeEd().focus();
   renderSidebar();
 }
@@ -939,24 +915,40 @@ function selectAll(){
 }
 
 function copyAll(){
-  const parts = Array.from(pagesEl.querySelectorAll('.pg-ed'))
-    .map(ed => (ed.innerText || '').replace(/^\n+|\n+$/g, ''));
-  let text = parts.join('\n');
-  text = text.replace(/\n{3,}/g, '\n\n').trim();
-  const plain = text.replace(/\n/g, '\r\n');
-  navigator.clipboard.writeText(plain)
-    .then(() => showSaved('Alles kopiert'))
-    .catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = plain;
-      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
-      document.body.appendChild(ta);
-      ta.select();
-      try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
-      catch(e){ showSaved('Kopieren fehlgeschlagen'); }
-      document.body.removeChild(ta);
+  // Extract plain text: each <div> = one line, <div><br></div> = empty line
+  function edToText(ed){
+    const lines = [];
+    ed.childNodes.forEach(node => {
+      if(node.nodeType === 3){
+        // bare text node
+        lines.push(node.textContent);
+      } else if(node.nodeType === 1){
+        const tag = node.tagName.toLowerCase();
+        if(tag === 'br'){ lines.push(''); return; }
+        // Check if this is an empty block <div><br></div>
+        const isEmptyBlock = node.childNodes.length === 1
+          && node.firstChild.nodeType === 1
+          && node.firstChild.tagName.toLowerCase() === 'br';
+        if(isEmptyBlock){ lines.push(''); return; }
+        // Normal block: extract inner text
+        lines.push(node.innerText || node.textContent || '');
+      }
     });
+    return lines.join('\n');
+  }
+  const NL = String.fromCharCode(10);
+  const text = Array.from(pagesEl.querySelectorAll('.pg-ed'))
+    .map(edToText).join(NL);
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); showSaved('Alles kopiert'); }
+  catch(e){ showSaved('Kopieren fehlgeschlagen'); }
+  document.body.removeChild(ta);
 }
+
 function copySelection(){
   const sel = window.getSelection();
   if(!sel || sel.isCollapsed){ showSaved('Nichts markiert'); return; }
@@ -982,10 +974,6 @@ document.addEventListener('paste', function(e){
 
   const html = (e.clipboardData || window.clipboardData).getData('text/html');
   const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-
-  // DEBUG: show what we received (remove after debugging)
-  console.log('PASTE html:', html ? html.substring(0,300) : '(none)');
-  console.log('PASTE text:', text ? text.substring(0,300) : '(none)');
 
   if(html){
     // Strip Word junk: comments, styles, meta
@@ -1046,29 +1034,20 @@ document.addEventListener('paste', function(e){
     Array.from(tmp.childNodes).forEach(c => walk(c, false, false, false));
     if(currentLine.length) flushLine();
 
-    // Remove consecutive empty lines (max 1)
-    const filteredLines = resultLines.filter((line, i) => {
-      if(line !== null) return true;
-      if(i === 0) return false; // no leading empty line
-      return resultLines[i-1] !== null; // only keep if prev was not also empty
-    });
-
     // Build final HTML - null = empty line
-    const finalHTML = filteredLines.map(d => {
+    const finalHTML = resultLines.map(d => {
       if(!d) return '<div><br></div>';
       return d.innerHTML.trim() ? d.outerHTML : '<div><br></div>';
     }).join('');
 
-    // Deduplicate: no more than 1 consecutive empty line
-    const cleaned = finalHTML.replace(/(<div><br><\/div>){2,}/g, '<div><br></div>');
+    // Deduplicate: no more than 2 consecutive empty lines
+    const cleaned = finalHTML.replace(/(<div><br><\/div>){3,}/g, '<div><br></div><div><br></div>');
     document.execCommand('insertHTML', false, cleaned);
   } else {
     // Fallback: plain text
     const lines = text.split('\n');
     const divs = lines.map(l => l.trim() ? '<div>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>' : '<div><br></div>').join('');
-    // Deduplicate: no more than 1 consecutive empty line
-    const cleanedText = divs.replace(/(<div><br><\/div>){2,}/g, '<div><br></div>');
-    document.execCommand('insertHTML', false, cleanedText);
+    document.execCommand('insertHTML', false, divs);
   }
 
   setTimeout(() => render(collect()), 100);
