@@ -1,6 +1,6 @@
 
 const STORE = 'folio_v5_r2';
-const PAGE_H = 973;   // A4(1123) - top-pad(72) - footer(38) - bottom-gap(40)
+const PAGE_H = 1013;  // A4(1123) - top-pad(72) - footer(38)
 const RULER_W = 654;  // A4w(794) - 2*margin(70)
 
 const ruler   = document.getElementById('ruler');
@@ -13,7 +13,6 @@ let curLH   = '1.25';
 let saveFmt = 'folio';
 let activePage = 0;
 let rendering  = false;
-let isNormalDoc = true;  // false for letter templates that manage their own top margin
 
 // ── Sync ruler font ──────────────────────────────────────────────
 function syncRuler(){
@@ -132,12 +131,7 @@ function checkOverflow(){
   const allHTML = Array.from(pagesEl.querySelectorAll('.pg-ed')).map(e => e.innerHTML).join('');
   const chunks  = paginate(allHTML || '');
   const n       = chunks.length;
-  const isNormal = isNormalDoc;
-  while(pagesEl.children.length < n) {
-    const newPg = buildPage(pagesEl.children.length);
-    if(isNormal) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
-    pagesEl.appendChild(newPg);
-  }
+  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
     const ed = pg.querySelector('.pg-ed');
@@ -165,12 +159,7 @@ function render(rawHTML, presavedCursor){
   const n      = chunks.length;
   document.getElementById('pgc').textContent = n;
 
-  const isNormalRender = isNormalDoc;
-  while(pagesEl.children.length < n) {
-    const newPg = buildPage(pagesEl.children.length);
-    if(isNormalRender) newPg.querySelector('.pg-body').classList.add('pg-body--normal');
-    pagesEl.appendChild(newPg);
-  }
+  while(pagesEl.children.length < n) pagesEl.appendChild(buildPage(pagesEl.children.length));
   while(pagesEl.children.length > n) pagesEl.removeChild(pagesEl.lastChild);
 
   pagesEl.querySelectorAll('.pg').forEach((pg, i) => {
@@ -413,8 +402,8 @@ const TEMPLATES = [
       const today = getTodayDE();
       return `<div style="font-family:'Helvetica Neue',Helvetica,sans-serif;font-size:12pt;line-height:1.6;color:#000">
 
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:87px;box-sizing:border-box">
-  <img src="image1.jpg" style="height:64px;width:auto;display:block;margin-left:-3px" />
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:0;margin-top:77px;box-sizing:border-box">
+  <img src="image1.jpg" style="height:58px;width:auto;display:block;margin-left:-3px" />
   <img src="image2.jpg" style="height:167px;width:auto;display:block;margin-right:-9px" />
 </div>
 
@@ -477,7 +466,6 @@ function newFromTemplate(tpl){
     s.title = tpl.title;
     localStorage.setItem(currentDocId, JSON.stringify(s));
   }
-  isNormalDoc = false;
   setTimeout(() => render(collect()), 200);
   renderSidebar();
   showSaved('Vorlage geladen');
@@ -533,7 +521,6 @@ function switchDoc(key){
     pagesEl.innerHTML='';
     pagesEl.appendChild(buildPage(0));
     pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-    isNormalDoc = true;
     render(s.content||'');
     renderSidebar();
   } catch(e){}
@@ -556,8 +543,10 @@ function newDoc(){
   pagesEl.innerHTML = '';
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-  isNormalDoc = true;
   activeEd().focus();
+  stats();
+  document.getElementById('pgc').textContent = 1;
+  renderSidebar();
 }
 
 // ── Save / Load ───────────────────────────────────────────────────
@@ -597,13 +586,28 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
-  const reader = new FileReader();
-  reader.onload = function(){
-    const a = document.createElement('a');
-    a.href = reader.result; a.download = name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  };
-  reader.readAsDataURL(blob);
+  // iOS/iPadOS lädt data:-URLs nicht herunter, sondern öffnet eine
+  // verwirrende Vorschau und hängt .json an. Daher: native Teilen-Funktion
+  // ("In Dateien sichern"), mit klassischem Download als Fallback.
+  try {
+    const file = new File([blob], name, { type: 'application/octet-stream' });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      navigator.share({ files: [file], title: name })
+        .catch(err => {
+          if(err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
+          dlAnchor(blob, name);
+        });
+      return;
+    }
+  } catch(e){ /* fällt unten auf Anker-Download zurück */ }
+  dlAnchor(blob, name);
+}
+function dlAnchor(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 function buildHTML(title){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>`
@@ -632,21 +636,7 @@ function buildHTML(title){
 </div>
 </body></html>`;
 }
-function doPDF(){
-  const name = dtEl.value.trim() || 'Dokument';
-  const titleEl = document.querySelector('title');
-  const prev = titleEl ? titleEl.textContent : 'Folio';
-  if(titleEl) titleEl.textContent = name;
-  document.title = name;
-  // Small delay to let iOS register the new title before print dialog opens
-  setTimeout(() => {
-    window.print();
-    setTimeout(() => {
-      if(titleEl) titleEl.textContent = prev;
-      document.title = prev;
-    }, 3000);
-  }, 100);
-}
+function doPDF(){ window.print(); }
 
 // ── Open file (.folio / .txt / .docx / .doc) ─────────────────────
 function openFile(){ document.getElementById('fileInput').click(); }
@@ -845,7 +835,6 @@ function init(){
   currentDocId = 'folio_doc_' + Date.now();
   pagesEl.appendChild(buildPage(0));
   pagesEl.querySelector('.pg-body').classList.add('pg-body--normal');
-  isNormalDoc = true;
   activeEd().focus();
   renderSidebar();
 }
