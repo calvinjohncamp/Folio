@@ -762,6 +762,21 @@ function doSaveAs(){
 }
 function san(s){ return (s||'Dokument').replace(/[^\w\s\-äöüÄÖÜß]/g,'').trim() || 'Dokument'; }
 function dl(blob, name){
+  // iOS/iPadOS (Safari + Home-Bildschirm-App) kann data:-URLs nicht herunterladen.
+  // Dort stattdessen das native Teilen-Menü ("In Dateien sichern" / Dropbox).
+  // Mac/Desktop: unveränderter klassischer Download.
+  if(isIOS()){
+    try {
+      const file = new File([blob], name, { type: 'application/octet-stream' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        navigator.share({ files: [file], title: name })
+          .catch(function(err){ if(!(err && err.name === 'AbortError')) dlAnchor(blob, name); });
+        return;
+      }
+    } catch(e){}
+    dlAnchor(blob, name);
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(){
     const a = document.createElement('a');
@@ -769,6 +784,18 @@ function dl(blob, name){
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
   reader.readAsDataURL(blob);
+}
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function dlAnchor(blob, name){
+  const clean = new Blob([blob], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(clean);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 function getPlainText(){
   // HTML zu Plaintext konvertieren — funktioniert auch ohne DOM-Rendering
