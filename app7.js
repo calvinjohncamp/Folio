@@ -769,7 +769,9 @@ function dl(blob, name){
     try {
       const file = new File([blob], name, { type: 'application/octet-stream' });
       if(navigator.canShare && navigator.canShare({ files: [file] })){
-        navigator.share({ files: [file], title: name })
+        // Nur die Datei teilen – KEIN title/text mitschicken!
+        // Sonst legt Dropbox (iOS) aus dem Titel zusätzlich eine .txt-Datei an.
+        navigator.share({ files: [file] })
           .catch(function(err){ if(!(err && err.name === 'AbortError')) dlAnchor(blob, name); });
         return;
       }
