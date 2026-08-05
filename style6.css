@@ -15,7 +15,7 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
 
 /* ── Header (Glas-Look der Folio-Familie) ── */
-#hdr{background:var(--hd-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#faf9f6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;height:78px;flex-shrink:0;position:relative;border-bottom:1px solid rgba(246,246,246,.10)}
+#hdr{background:var(--hd-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#faf9f6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;height:78px;flex-shrink:0;position:relative;border-bottom:1px solid rgba(246,246,246,.10);overflow:hidden}
 .hd-left{display:flex;align-items:flex-end;flex:1;min-width:0}
 .logo{display:flex;align-items:center;flex-shrink:0}
 .logo img{height:64px;width:auto;display:block;object-fit:contain}
@@ -305,6 +305,14 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   .mode-btn{font-size:10px;padding:3px 7px}
 }
 @media (min-width:601px) and (max-width:900px){
+  #hdr{height:64px;padding:0 14px;gap:8px;justify-content:flex-start}
+  .hd-left{flex:0 1 auto}
+  .logo img{height:46px}
+  #dtitle{width:clamp(120px,22vw,180px);margin-left:16px;margin-bottom:7px;font-size:12px}
+  .mode-btns{flex:0 0 auto;top:2px}
+  .mode-btn{font-size:10px;padding:5px 11px}
+  .hbtns{flex:0 0 auto;margin-left:auto;gap:6px;top:2px}
+  .hbtn{font-size:10px;padding:6px 10px;letter-spacing:.02em}
   #side{width:94px;padding:10px 0}
   .slbl{font-size:9px;margin:0 7px 5px}
   .sdoc{font-size:10px;padding:4px 6px;margin:0 4px}
