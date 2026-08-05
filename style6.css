@@ -57,10 +57,20 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 .snew{margin:10px 14px 0;background:rgba(250,249,246,.07);border:1px dashed rgba(250,249,246,.2);color:rgba(250,249,246,.5);border-radius:5px;padding:7px;font-size:12px;text-align:center;cursor:pointer;font-family:'DM Sans',sans-serif}
 .snew:hover{color:#faf9f6}
 
-#cv{flex:1;overflow-y:auto;background:var(--cream);padding:16px 24px 80px;display:flex;flex-direction:column;align-items:center}
+#cv{
+  flex:1;
+  min-width:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  background:var(--cream);
+  padding:16px 24px 80px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
 #cv::-webkit-scrollbar{width:5px}
 #cv::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-#pages{display:flex;flex-direction:column;align-items:center;gap:0}
+#pages{display:flex;flex-direction:column;align-items:flex-start;gap:0}
 
 /* ── Line selection gutter overlay ── */
 .pg-gutter{
@@ -271,7 +281,10 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
 /* ── Mobile ── */
 @media (max-width:600px){
   #dtitle{display:none}
-  #side{display:none!important}
+  #side{width:94px;padding:10px 0}
+  .slbl{font-size:9px;margin:0 7px 5px}
+  .sdoc{font-size:10px;padding:4px 6px;margin:0 4px}
+  .snew{font-size:10px;margin:6px 7px 0;padding:5px}
   #hdr{padding:0 12px;height:56px;justify-content:flex-start;gap:8px;overflow-x:auto;scrollbar-width:none}
   #hdr::-webkit-scrollbar{display:none}
   .hd-left,.mode-btns,.hbtns{flex:0 0 auto}
@@ -283,9 +296,9 @@ body.a4-locked #tb .sel{opacity:.3;pointer-events:none;cursor:default}
   .tbtn{min-width:24px;height:24px}
   #cv{padding:8px 0 60px}
   #pages{width:100%}
-  .pg--endless{width:100%!important;border-radius:0;box-shadow:none;border-bottom:1px solid var(--border)}
+  .pg--endless{width:var(--a4w)!important;border-radius:0;box-shadow:none;border-bottom:1px solid var(--border)}
   .pg--endless .pg-body{padding:20px 16px 40px}
-  .pg--a4{width:100%!important;border-radius:0;box-shadow:none}
+  .pg--a4{width:var(--a4w)!important;border-radius:0;box-shadow:none}
   .pg-ed{font-size:14px!important;line-height:1.6!important}
   .pg-ftr{padding:6px 16px 0}
   #sb{font-size:10px;padding:3px 10px;gap:10px}
